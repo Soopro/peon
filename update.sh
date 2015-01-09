@@ -9,7 +9,7 @@ install=true
 
 for arg in $@
 do
-  if [ $arg == "pass" -o $arg == '-p' ]
+  if [ $arg = "pass" -o $arg = '-p' ]
     then
       install=false
   fi
