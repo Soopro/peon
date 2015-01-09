@@ -15,7 +15,7 @@ do
   fi
 done
 
-if [ -f "$file" ] && [ "$install" = true ]
+if [ -f "$file" ] && [ "$install" == true ]
 then
   sh install.sh
 fi
