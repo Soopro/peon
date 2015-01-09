@@ -184,3 +184,5 @@ if __name__ == '__main__':
         
     if opts.rev:
         rev()
+    
+    print "peon: No more work ..."

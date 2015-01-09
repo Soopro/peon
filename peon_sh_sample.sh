@@ -12,13 +12,13 @@ do
       echo 'Install node modules'
       npm install
       echo 'Copy libs intro src'
-      python peon.py -c
+      peon.py -c
   fi
   if [ $arg == "release" ]
     then
       echo '---- release ----'
       grunt release
-      python peon.py -r
+      peon.py -r
   fi
 done
 
