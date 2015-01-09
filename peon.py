@@ -97,8 +97,8 @@ def rev():
     
     path_list = []
     for file in files:
-        file = saft_path(file)
-        file_path = saft_path(os.path.join(cwd,file))
+        file = safe_path(file)
+        file_path = safe_path(os.path.join(cwd,file))
         _path = glob.glob(file_path)
         for p in _path:
             if p not in path_list:
