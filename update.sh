@@ -1,6 +1,6 @@
 #!/bin/bash
 echo '---- Catching a Peon ----'
-# git pull
+git pull
 echo '---- The Peon is in cage ----'
 
 # installation
@@ -15,7 +15,7 @@ do
   fi
 done
 
-if [ -f "$file" ] && [ "$install" == true ]
+if [ -f "$file" ] && [ "$install" = true ]
 then
   sh install.sh
 fi
