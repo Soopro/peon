@@ -79,9 +79,13 @@ flatten: Those files will not keep their folder while copy to the dest.
 
 
 #### Global 
-`sudo sh install.sh` to install newest version as global.
+`sudo sh install.sh` to install as global.
 
 Please note, don't forget make a peon.json in your project root.
 
 #### Manually
 Just copy those file intro your project.
+
+
+## Update
+`sudo sh update.sh [-p] [pass]` will update to newest version and install as global. with [-p] or [pass] will pass the installation.
