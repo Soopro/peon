@@ -37,11 +37,11 @@ def copy_file(src, dest):
         shutil.copy2(src, dest)
     # eg. src and dest are the same file
     except shutil.Error as e:
-        print('Error: %s' % e)
+        print('peon: Error -> %s' % e)
         raise e
     # eg. source or destination doesn't exist
     except IOError as e:
-        print('Error: %s' % e.strerror)
+        print('peon: Error -> %s' % e.strerror)
         raise e
         
 def safe_path(*args):
@@ -60,11 +60,11 @@ def ensure_dir(path, isFile=False):
         dirname = os.path.dirname(path)
         if dirname:
             os.makedirs(dirname)
-            print('Create dir: %s' % dirname)
+            print('peon: Create dir -> %s' % dirname)
     
     if not os.path.isdir(path) and not isFile:
         os.makedirs(path)
-        print('Create dir: %s' % path)
+        print('peon: Create dir -> %s' % path)
 
 
 # main
@@ -106,7 +106,7 @@ def rev():
 
     for path in path_list:
         if not os.path.isfile(path):
-            print "Failed: " + path +" (not exist)"
+            print "peon: Failed -> " + path +" (not exist)"
             continue
         file = open(path)
         if os.path.isfile(temp_file):
@@ -120,7 +120,7 @@ def rev():
         file.close()
         try:
             os.rename(temp_file, path)
-            print "MD5ify: " + path
+            print "peon: MD5ify -> " + path
         except Exception as e:
             print('Error: %s' % e)
             raise e
@@ -156,7 +156,7 @@ def copy(force=True):
 
         for path in path_list:
             if not os.path.isfile(path):
-                print "Failed: " + path +" (not exist)"
+                print "peon: Failed -> " + path +" (not exist)"
                 continue
             if not is_flatten:
                 _path = safe_path(path.replace(cwd,""))
@@ -168,7 +168,7 @@ def copy(force=True):
 
             if force or not os.path.isfile(_dest):
                 copy_file(path, _dest)
-                print "Copied: " + path
+                print "peon: Copied -> " + path
             else:
                 continue
     
