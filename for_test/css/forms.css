@@ -1,0 +1,42 @@
+/*
+-----------------------------------------------
+mi2a Styles
+
+Style:    Forms
+Author:   redy
+Date:     3 Apr 2011
+----------------------------------------------- */
+
+/* MISC: =Inputs
+----------------------------------------------- */
+input
+{
+	font-family: Arial, Helvetica, sans-serif, Verdana;
+	font-size: 9pt;
+	color: #333;
+	border: 1px solid #333;
+}
+
+/* =Subscribe
+----------------------------------------------- */
+#in_subscribe{
+	padding:0;
+	height:18px;
+	width:135px;
+	line-height:18px;
+	vertical-align: top;
+	font-size: 8pt;
+	border:none;
+	background:none;
+}
+
+#btn_subscribe{
+	margin-left:5px;
+	padding:0;
+	width:18px;
+	height:18px;
+	vertical-align: top;
+	border:none;
+	cursor: pointer;
+	background:none;
+}

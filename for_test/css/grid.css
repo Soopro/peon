@@ -1,0 +1,48 @@
+/*
+-----------------------------------------------
+mi2a Styles
+
+Style:    Grid
+Author:   redy
+Date:     3 Apr 2011
+----------------------------------------------- */
+.clear{
+	clear:both;
+	padding:0;
+	margin:0;
+	height:0;
+	font-size:0;
+	background:none;
+	visibility:hidden;
+	overflow:hidden;
+}
+
+.clearfix:after{
+	content:"\0020";
+	display:block;
+	height:0;
+	clear:both;
+	visibility:hidden;
+	overflow:hidden;
+}
+
+
+/* Grids: =Base
+----------------------------------------------- */
+
+.span-0{
+	padding:10px;
+	margin-bottom:10px;
+	background: transparent url(../images/divider.png) no-repeat 0 bottom;
+}
+
+.span-end{
+	padding:10px;
+	margin-bottom:10px;
+}
+
+/* Grids: =Unit
+----------------------------------------------- */
+.unit-0{
+	padding-bottom:20px;
+}

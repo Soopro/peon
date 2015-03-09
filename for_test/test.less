@@ -1,0 +1,30 @@
+@brand-primary: "测试";
+@screen-sm-min: 775px;
+@screen-xs-max: (@screen-sm-min - 1);
+.brand{
+  width: 100%;
+  margin: 0 auto;
+  padding: 30px;
+  text-align: center;
+  & #logo{
+    display:inline-block;
+    font-size: 100px;
+    line-height:44px;
+    color: @brand-primary;
+    text-align: center;
+    height: 44px;
+    overflow: hidden;
+  }
+  @media (max-width: @screen-xs-max) {
+    /* brand */
+    &{
+      height: 50px;
+      padding: 0 15px;
+    }
+    & #logo{
+      height: 40px;
+      line-height:50px;
+      font-size:80px;
+    }
+  }
+}

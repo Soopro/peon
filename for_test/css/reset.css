@@ -1,0 +1,33 @@
+/*
+-----------------------------------------------
+mi2a Styles
+
+Style:    Reset
+Author:   redy
+Date:     3 Apr 2011
+----------------------------------------------- */
+
+*{
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+html,body,p,div,img,h1,h2,h3,h4,li,ul,ol,dl,dd,dt,form,table,td,tr {
+margin: 0;
+padding: 0;
+border: 0;
+border-collapse: separate;
+border-spacing: 0;
+}
+
+h1,h2,h3,h4,h5{
+	display:block;
+}
+
+table {border-collapse:separate;border-spacing:0;}
+table, th, td {vertical-align:middle;text-align:left;}
+blockquote:before, blockquote:after, q:before, q:after {content:'';}
+blockquote, q {quotes:"" "";}
+a img {border:none;}
+:focus {outline:0;}
