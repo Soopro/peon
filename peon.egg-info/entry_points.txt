@@ -1,0 +1,4 @@
+[console_scripts]
+peon = peon.peon_construct:construct
+peon_server = peon.peon_server:server
+

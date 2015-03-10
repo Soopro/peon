@@ -1,23 +1,6 @@
-#!/usr/bin/python
 #coding=utf-8
-
-# -----------------------------------------
-# Peon 1.0.1 
-# A front-end constructing helper
-# -----------------------------------------
-
-import os, sys, shutil, time, hashlib, json, glob
-from optparse import OptionParser
-
-# options
-opt = OptionParser()
-opt.add_option('-r', '--rev', help='start rev',
-               action='store_const', dest='rev', const=True, default=False)
-
-opt.add_option('-c', '--copy', help='start copy files',
-               action='store_const', dest='copy', const=True, default=False)
-
-opts, args = opt.parse_args()
+from __future__ import absolute_import
+import os, sys, shutil, time, hashlib, json, glob, argparse
 
 # variables
 CONFIG = {}
@@ -174,9 +157,30 @@ def copy(force=True):
     
     print "peon: Work work ..."
 
-    
 
-if __name__ == '__main__':
+def command_options():
+    # command line options
+    parser = argparse.ArgumentParser(
+                    description='Options of run Peon dev server.')
+
+    parser.add_argument('-r', '--rev', 
+                        dest='rev',
+                        action='store_const',
+                        const="REV",
+                        help='Run revsion with md5.')
+
+    parser.add_argument('-c', '--copy', 
+                        dest='copy',
+                        action='store_const',
+                        const="COPY",
+                        help='Run copy files.')
+    opts, unknown = parser.parse_known_args()
+    return opts
+
+
+def construct():
+    opts = command_options()
+    
     load_config()
     
     if opts.copy:
@@ -186,3 +190,7 @@ if __name__ == '__main__':
         rev()
     
     print "peon: No more work ..."
+
+
+if __name__ == '__main__':
+    construct()

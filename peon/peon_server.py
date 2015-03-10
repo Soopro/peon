@@ -1,6 +1,5 @@
-#!/usr/bin/python
 #coding=utf-8
-
+from __future__ import absolute_import
 import argparse, os, sys, traceback
 import SimpleHTTPServer, SocketServer
 import coffeescript, lesscpy, pyjade
@@ -60,7 +59,7 @@ class PeonServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         
         if not os.path.isfile(file_path):
             SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
-            return       
+            return
         
         with open(file_path, 'r') as f:
             file = f.read().strip('\n')
@@ -75,7 +74,7 @@ class PeonServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         
         if render_type == 'coffee':
             try:
-                content = coffeescript.compile(file).encode("utf-8")
+                content = coffeescript.compile(file)
             except Exception as e:
                 content = self.errorhandler(e, "Coffeescript Compiler Error:")
 
@@ -84,10 +83,12 @@ class PeonServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
                 content = lesscpy.compile(StringIO(file), minify=False)
             except Exception as e:
                 content = self.errorhandler(e, "Less Compiler Error:")
+
         
         elif render_type == 'jade':
             try:
                 content = pyjade.ext.html.process_jade(file)
+                print type(content)
             except Exception as e:
                 content = self.errorhandler(e, "Jade Compiler Error:")
         else:
@@ -96,8 +97,9 @@ class PeonServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         self.send_response(resp_code)
         self.send_header('Content-type', content_type+";charset=utf-8")
         self.end_headers()
-        # Send the html message
-        
+        # Send the html message; wfile is a StringIO in super class.
+        if isinstance(content, unicode):
+            content = content.encode("utf-8")
         self.wfile.write(content)
 
     def errorhandler(self, err, err_type):
@@ -108,7 +110,31 @@ class PeonServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         print traceback.format_exc()
         return err_msg
 
-def run():
+
+def command_options():
+    # command line options
+    parser = argparse.ArgumentParser(
+                    description='Options of run Peon dev server.')
+
+    parser.add_argument('-p', '--port', 
+                        dest='server_port',
+                        action='store',
+                        type=int,
+                        help='Setup port.')
+
+    opts, unknown = parser.parse_known_args()
+    return opts
+
+
+DEFAULT_PORT = 9527
+
+def server():
+    opts = command_options()
+    if opts.server_port:
+        PORT = opts.server_port
+    else:
+        PORT = DEFAULT_PORT
+    
     httpd = SocketServer.TCPServer(("", PORT), PeonServerHandler,False)
     httpd.allow_reuse_address = True
     httpd.server_bind()
@@ -123,24 +149,5 @@ def run():
     except (KeyboardInterrupt, SystemExit) as e:
         httpd.shutdown()
 
-      
-# command line options
-parser = argparse.ArgumentParser(
-                description='Options of run Peon dev server.')
-
-parser.add_argument('-p', '--port', 
-                    dest='server_port',
-                    action='store',
-                    type=int,
-                    help='Setup port.')
-
-args, unknown = parser.parse_known_args()
-
-if args.server_port:
-    PORT = args.server_port
-else:
-    PORT = 9527
-
-
 if __name__ == "__main__":
-    run()
+    server()

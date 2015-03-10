@@ -1,0 +1,3 @@
+CoffeeScript>=1.0.10
+lesscpy>=0.10.2
+pyjade>=3.0.0
