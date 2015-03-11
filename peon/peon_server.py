@@ -91,7 +91,8 @@ def has_parse_files(path):
         for f in files:
             filename, ext = os.path.splitext(f)
             if ext[1:] in PARSE_FILE_LIST:
-                print "File need to be parse or compile:", f
+                print "------------------------------------------"
+                print "*** File need to be parse or compile:", f
                 return True
     return False
 
