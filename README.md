@@ -5,19 +5,12 @@ Peon is much week than grunt, he can only set on task at once.
 He is better work with shell script.
 
 ==============
-We build peon is becuase we are python project team, sometime grunt or gulp have to do some tricky things to full fill our needs, that's too hard for us, but python is much more easier...
-
-## Files
-
-* peon.json: Config peon's tasks, see the example.
-* peon.py: Primary program.
-* peon.sh: A shell script to help your understand how work together with your project.
-* install.sh: install to global, mac and linux only, require 'sudo'.
+I build peon is becuase we are python project team, sometime grunt or gulp can't full fill our needs, custom nodejs scripts is too hard for my team, but python is much more easier...
 
 
 ## Usage
 You have to place a 'peon.json' intro the project root folder first.
-
+* peon.json: Config peon's tasks, see the example.
 
 `peon.py [-r] [-c] [--rev] [--copy]`
 
@@ -75,17 +68,14 @@ dest: Dest for copy files.
 
 flatten: Those files will not keep their folder while copy to the dest.
 
+## Server
+
+peon_server
+
+peon_server --harp, because I trid to find some python libs to compiler jade coffee and less, nothing but sucks. So leave me no choice, harp is most easy way to get it done. Maybe I will add a simple static server base on Flask in near future. Why Flask?
+
+Please make sure you have node npm harp kind stuff ...
+
 ## Installation
+python setup.py install
 
-
-#### Global 
-`sudo sh install.sh` to install as global.
-
-Please note, don't forget make a peon.json in your project root.
-
-#### Manually
-Just copy those file intro your project.
-
-
-## Update
-`sudo sh update.sh [-p] [pass]` will update to newest version and install as global. with [-p] or [pass] will pass the installation.

@@ -22,18 +22,12 @@ class PeonServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         print "==========================================="
         print "Client requested:", self.command, self.path
 
-        file_path, render_type = self.path_parse(self.path)
-        self.render(file_path, render_type)
+        self.path = self.path_parse(self.path)
+        self.render()
         return
 
 
     def path_parse(self, path):
-        cwd = os.getcwd()
-        path = os.path.join(cwd, path.lstrip('/'))
-
-        file_path = None
-        render_type = None
-
         filename, ext = os.path.splitext(path)
 
         if filename[-1:] is "/":
@@ -43,70 +37,15 @@ class PeonServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         if not ext:
             ext = self.REWRITE_EXT
 
-        return filename, ext
-
-
-    def render(self, filename, filetype):
-        file_path = "{}.{}".format(filename, filetype)
-        if filetype in self.PARSE_FILE_LIST:
-            file_parse = self.PARSE_FILE_LIST[filetype]
-        else:
-            file_parse = self.DEFAULT_PARSE_FILE
-
-        if not os.path.isfile(file_path):
-            filetype = file_parse['parse']
-            file_path = "{}.{}".format(filename, filetype)
+        path = "{}.{}".format(filename, ext)
         
-        if not os.path.isfile(file_path):
-            SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
-            return
-        
-        with open(file_path, 'r') as f:
-            file = f.read().strip('\n')
-        f.closed
-        
-            
-        resp_code = 200
-        content = None
-        content_type = file_parse['content_type']
-        
-        render_type = filetype
-        
-        if render_type == 'coffee':
-            try:
-                content = coffeescript.compile(file)
-            except Exception as e:
-                content = self.errorhandler(e, "Coffeescript Compiler Error:")
+        return path
 
-        elif render_type == 'less':
-            try:
-                content = lesscpy.compile(StringIO(file), minify=False)
-            except Exception as e:
-                content = self.errorhandler(e, "Less Compiler Error:")
 
-        elif render_type == 'jade':
-            try:
-                content = pyjade.ext.html.process_jade(file)
-            except Exception as e:
-                content = self.errorhandler(e, "Jade Compiler Error:")
-        else:
-            content = file
+    def render(self):
+        SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
+        return
 
-        self.send_response(resp_code)
-        self.send_header('Content-type', content_type+";charset=utf-8")
-        self.end_headers()
-        # Send the html message; wfile is a StringIO in super class.
-        if isinstance(content, unicode):
-            content = content.encode("utf-8")
-        self.wfile.write(content)
-
-    def errorhandler(self, err, err_type):
-        err_msg = "{}\n{}".format(err_type, repr(err))
-        print '----------- ERROR! --------------'
-        print err_msg
-        print '---------------------------------'
-        print traceback.format_exc()
-        return err_msg
 
 
 def command_options():
@@ -131,6 +70,7 @@ def command_options():
 
 
 DEFAULT_PORT = 9527
+PARSE_FILE_LIST = ['coffee','jade','less']
 
 def server():
     opts = command_options()
@@ -139,11 +79,22 @@ def server():
     else:
         port = DEFAULT_PORT
     
-    if opts.harp_server:
+    curr_path = os.getcwd()
+    if opts.harp_server or has_parse_files(curr_path):
         harp(port)
     else:
         simplehttp(port)
-    
+
+
+def has_parse_files(path):
+    for dirpath, dirs, files in os.walk(path):
+        for f in files:
+            filename, ext = os.path.splitext(f)
+            if ext[1:] in PARSE_FILE_LIST:
+                print "File need to be parse or compile:", f
+                return True
+    return False
+
 
 def simplehttp(port):
     httpd = SocketServer.TCPServer(("", port), PeonServerHandler,False)
@@ -166,6 +117,7 @@ def harp(port):
         subprocess.call("harp server -p "+str(port), shell=True)
     except Exception as e:
         raise e
+
 
 if __name__ == "__main__":
     server()
