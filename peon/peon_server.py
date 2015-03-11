@@ -103,9 +103,11 @@ def simplehttp(port):
     httpd.server_bind()
     httpd.server_activate()
 
-    print "/*----------------------------"
-    print "Peon serving at port:", port
-    print "/*----------------------------"
+    print "------------"
+    print "Peon server"
+    print "Start SimpleHTTPServer at http://localhost:"+str(port)+"/"
+    print "Press Ctl+C to stop the server"
+    print "------------"
 
     try:
         httpd.serve_forever()
@@ -115,8 +117,11 @@ def simplehttp(port):
     
 def harp(port):
     try:
-        subprocess.call("harp server -p "+str(port), shell=True)
+        subprocess.call(["harp","server","-p",str(port)])
     except Exception as e:
+        print "------------------------------------------"
+        print "*** Harp can not start."
+        print "------------------------------------------"
         raise e
 
 
