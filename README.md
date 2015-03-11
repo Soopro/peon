@@ -12,7 +12,7 @@ I build peon is becuase we are python project team, sometime grunt or gulp can't
 You have to place a 'peon.json' intro the project root folder first.
 * peon.json: Config peon's tasks, see the example.
 
-`peon.py [-r] [-c] [--rev] [--copy]`
+`peon [-r] [-c] [--rev] [--copy]`
 
 =======================
 -r or -rev: Revision to md5 by 'pattern' find in given files.
