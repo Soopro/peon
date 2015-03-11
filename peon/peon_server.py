@@ -4,7 +4,7 @@ import argparse, os, sys, traceback
 import SimpleHTTPServer, SocketServer
 import coffeescript, lesscpy, pyjade
 from StringIO import StringIO
-
+import subprocess
 
 class PeonServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     
@@ -84,11 +84,9 @@ class PeonServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             except Exception as e:
                 content = self.errorhandler(e, "Less Compiler Error:")
 
-        
         elif render_type == 'jade':
             try:
                 content = pyjade.ext.html.process_jade(file)
-                print type(content)
             except Exception as e:
                 content = self.errorhandler(e, "Jade Compiler Error:")
         else:
@@ -122,6 +120,12 @@ def command_options():
                         type=int,
                         help='Setup port.')
 
+    parser.add_argument('--harp', 
+                        dest='harp_server',
+                        action='store_const',
+                        const="HARP",
+                        help='Start with harp server.')
+
     opts, unknown = parser.parse_known_args()
     return opts
 
@@ -131,23 +135,37 @@ DEFAULT_PORT = 9527
 def server():
     opts = command_options()
     if opts.server_port:
-        PORT = opts.server_port
+        port = opts.server_port
     else:
-        PORT = DEFAULT_PORT
+        port = DEFAULT_PORT
     
-    httpd = SocketServer.TCPServer(("", PORT), PeonServerHandler,False)
+    if opts.harp_server:
+        harp(port)
+    else:
+        simplehttp(port)
+    
+
+def simplehttp(port):
+    httpd = SocketServer.TCPServer(("", port), PeonServerHandler,False)
     httpd.allow_reuse_address = True
     httpd.server_bind()
     httpd.server_activate()
 
     print "/*----------------------------"
-    print "Peon serving at port:", PORT
+    print "Peon serving at port:", port
     print "/*----------------------------"
 
     try:
         httpd.serve_forever()
     except (KeyboardInterrupt, SystemExit) as e:
         httpd.shutdown()
+    
+    
+def harp(port):
+    try:
+        subprocess.call("harp server -p "+str(port), shell=True)
+    except Exception as e:
+        raise e
 
 if __name__ == "__main__":
     server()
