@@ -48,32 +48,10 @@ class PeonServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
 
 
-def command_options():
-    # command line options
-    parser = argparse.ArgumentParser(
-                    description='Options of run Peon dev server.')
-
-    parser.add_argument('-p', '--port', 
-                        dest='server_port',
-                        action='store',
-                        type=int,
-                        help='Setup port.')
-
-    parser.add_argument('--harp', 
-                        dest='harp_server',
-                        action='store_const',
-                        const="HARP",
-                        help='Start with harp server.')
-
-    opts, unknown = parser.parse_known_args()
-    return opts
-
-
 DEFAULT_PORT = 9527
 PARSE_FILE_LIST = ['coffee','jade','less']
 
-def server():
-    opts = command_options()
+def server(opts):
     if opts.server_port:
         port = opts.server_port
     else:
@@ -126,4 +104,22 @@ def harp(port):
 
 
 if __name__ == "__main__":
-    server()
+    # command line options
+    parser = argparse.ArgumentParser(
+                    description='Options of run Peon dev server.')
+
+    parser.add_argument('-p', '--port', 
+                        dest='server_port',
+                        action='store',
+                        type=int,
+                        help='Setup port.')
+
+    parser.add_argument('--harp', 
+                        dest='harp_server',
+                        action='store_const',
+                        const="HARP",
+                        help='Start with harp server.')
+
+    opts, unknown = parser.parse_known_args()
+    
+    server(opts)

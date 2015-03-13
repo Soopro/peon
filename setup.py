@@ -22,8 +22,7 @@ setup(
     url = "http://github.com/soopro/peon",
     entry_points={
         'console_scripts' : [
-            'peon = peon.peon_construct:construct',
-            'peon_server = peon.peon_server:server',
+            'peon = peon:run',
         ]
     }
 )

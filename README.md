@@ -1,8 +1,11 @@
 # Peon
 
-A front-end constructing helper.
-Peon is much week than grunt, he can only set on task at once.
-He is better work with shell script.
+A front-end develop helper.
+
+1. Start dev server with SimpleHTTPServer or Harp.
+2. Watching file changes for coffee less and jade.
+3. Build static files from task config.
+
 
 ==============
 I build peon is becuase we are python project team, sometime grunt or gulp can't full fill our needs, custom nodejs scripts is too hard for my team, but python is much more easier...
@@ -12,10 +15,17 @@ I build peon is becuase we are python project team, sometime grunt or gulp can't
 You have to place a 'peon.json' intro the project root folder first.
 * peon.json: Config peon's tasks, see the example.
 
-`peon [-r] [-c] [--rev] [--copy]`
+`peon [-s] [-c] [-w]`
 
 =======================
--r or -rev: Revision to md5 by 'pattern' find in given files.
+### -c: - Construct
+
+Must with a peon.json in same folder when run this command.
+
+##### --rev: - Rev
+
+
+Revision to md5 by 'pattern' find in given files.
 
 ```
   "rev":{
@@ -37,8 +47,9 @@ pattern: Replacement pattern, peon will replace those string intro md5 code.
 
 find:  Specify the exact scope of a pattern. Peon will find those string and  replace pattern with that string.
 
-=======================
--c or -copy: Copy files from src to dest.
+##### --copy: - Copy
+
+Copy files from src to dest.
 
 ```
   "copy": {

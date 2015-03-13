@@ -4,7 +4,7 @@ import os, sys, shutil, time, hashlib, json, glob, argparse
 
 # variables
 CONFIG = {}
-temp_file = '_temp_.html'
+TEMP_FILE = '_temp_.html'
 default_libs_dir = 'src/libs/'
 
 # functions
@@ -52,11 +52,15 @@ def ensure_dir(path, isFile=False):
 
 # main
 
-def load_config():
+def load_config(config_type="build"):
     global CONFIG
     peon_data = open('peon.json')
-    CONFIG = json.load(peon_data)
+    config_data = json.load(peon_data)
     peon_data.close()
+    
+    CONFIG = config_data.get(config_type)
+    if not CONFIG:
+        raise "Invalid config file."
     print "peon: Ready to work"
 
 
@@ -92,9 +96,9 @@ def rev():
             print "peon: Failed -> " + path +" (not exist)"
             continue
         file = open(path)
-        if os.path.isfile(temp_file):
-            os.remove(temp_file)
-        tmp = open(temp_file,'w')
+        if os.path.isfile(TEMP_FILE):
+            os.remove(TEMP_FILE)
+        tmp = open(TEMP_FILE,'w')
         for line in file:
             for src, target in replacements.iteritems():
                 line = line.replace(src, target)
@@ -102,14 +106,14 @@ def rev():
         tmp.close()
         file.close()
         try:
-            os.rename(temp_file, path)
+            os.rename(TEMP_FILE, path)
             print "peon: MD5ify -> " + path
         except Exception as e:
             print('Error: %s' % e)
             raise e
 
-    if os.path.isfile(temp_file):
-        os.remove(temp_file)
+    if os.path.isfile(TEMP_FILE):
+        os.remove(TEMP_FILE)
         
     print "peon: Work work ..."
 
@@ -158,39 +162,39 @@ def copy(force=True):
     print "peon: Work work ..."
 
 
-def command_options():
-    # command line options
-    parser = argparse.ArgumentParser(
-                    description='Options of run Peon dev server.')
+def construct(opts):
+    config_type = 'build'
+    if opts.init:
+        config = 'init'
 
-    parser.add_argument('-r', '--rev', 
-                        dest='rev',
-                        action='store_const',
-                        const="REV",
-                        help='Run revsion with md5.')
-
-    parser.add_argument('-c', '--copy', 
-                        dest='copy',
-                        action='store_const',
-                        const="COPY",
-                        help='Run copy files.')
-    opts, unknown = parser.parse_known_args()
-    return opts
-
-
-def construct():
-    opts = command_options()
-    
-    load_config()
-    
-    if opts.copy:
+    load_config(config_type)
+        
+    if CONFIG.get('copy'):
         copy()
         
-    if opts.rev:
+    if CONFIG.get('rev'):
         rev()
     
     print "peon: No more work ..."
 
 
 if __name__ == '__main__':
-    construct()
+    # command line options
+    parser = argparse.ArgumentParser(
+                    description='Options of run Peon dev server.')
+
+    parser.add_argument('--init', 
+                        dest='init',
+                        action='store_const',
+                        const=True,
+                        help='Run Peon init tasks.')
+
+    parser.add_argument('--build', 
+                        dest='build',
+                        action='store_const',
+                        const=True,
+                        help='Run Peon build tasks.')
+
+    opts, unknown = parser.parse_known_args()
+    
+    construct(opts)

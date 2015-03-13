@@ -1,40 +1,45 @@
 {
-  "rev":{
-    "src":"/*.html",
-    "cwd":"release/",
-    "find":"?md5=null",
-    "pattern":"null"
+  "init":{
+    "copy": {
+      "libs":{
+        "flatten": true,
+        "src":[
+          "lodash/dist/lodash.js",
+          "angular/angular.js",
+          "angular-cookies/angular-cookies.js",
+          "angular-resource/angular-resource.js",
+          "angular-route/angular-route.js",
+          "angular-sanitize/angular-sanitize.js",
+          "danialfarid-angular-file-upload/dist/angular-file-upload.js",
+          "danialfarid-angular-file-upload/dist/angular-file-upload-shim.js"
+        ],
+        "cwd":"bower_components/",
+        "dest":"/xxx"
+      }
+    }
   },
-    
-  "copy": {
-    "libs":{
-      "flatten": true,
-      "src":[
-        "lodash/dist/lodash.js",
-        "angular/angular.js",
-        "angular-cookies/angular-cookies.js",
-        "angular-resource/angular-resource.js",
-        "angular-route/angular-route.js",
-        "angular-sanitize/angular-sanitize.js",
-        "danialfarid-angular-file-upload/dist/angular-file-upload.js",
-        "danialfarid-angular-file-upload/dist/angular-file-upload-shim.js"
-      ],
-      "cwd":"bower_components/",
-      "dest":"/xxx"
+  "build":{
+    "rev":{
+      "src":"/*.html",
+      "cwd":"release/",
+      "find":"?md5=null",
+      "pattern":"null"
     },
-    "test":{
-      "src":[
-        "lodash/dist/lodash.js",
-        "angular/angular.js",
-        "angular-cookies/angular-cookies.js",
-        "angular-resource/angular-resource.js",
-        "angular-route/angular-route.js",
-        "angular-sanitize/angular-sanitize.js",
-        "danialfarid-angular-file-upload/dist/angular-file-upload.js",
-        "danialfarid-angular-file-upload/dist/angular-file-upload-shim.js"
-      ],
-      "cwd":"bower_components/",
-      "dest":"/xxx/test"
+    "copy": {
+      "test":{
+        "src":[
+          "lodash/dist/lodash.js",
+          "angular/angular.js",
+          "angular-cookies/angular-cookies.js",
+          "angular-resource/angular-resource.js",
+          "angular-route/angular-route.js",
+          "angular-sanitize/angular-sanitize.js",
+          "danialfarid-angular-file-upload/dist/angular-file-upload.js",
+          "danialfarid-angular-file-upload/dist/angular-file-upload-shim.js"
+        ],
+        "cwd":"bower_components/",
+        "dest":"/xxx/test"
+      }
     }
   }
 }
