@@ -86,8 +86,8 @@ def rev():
     for file in files:
         file = safe_path(file)
         file_path = safe_path(os.path.join(cwd,file))
-        _path = glob.glob(file_path)
-        for p in _path:
+        _paths = glob.glob(file_path)
+        for p in _paths:
             if p not in path_list:
                 path_list.append(p)
 
@@ -165,7 +165,7 @@ def copy(force=True):
 def construct(opts):
     config_type = 'build'
     if opts.init:
-        config = 'init'
+        config_type = 'init'
 
     load_config(config_type)
         
