@@ -68,8 +68,15 @@ def command_options():
                         const=True,
                         help='Run Peon packing zip file.')
     
+    parser.add_argument('--upload', 
+                        dest='upload',
+                        action='store_const',
+                        const=True,
+                        help='Upload after packing.')
+    
+    
     # Backup
-    parser.add_argument('-backup', '--backup', 
+    parser.add_argument('-b', '--backup', 
                         dest='backup',
                         action='store_const',
                         const=True,

@@ -4,6 +4,11 @@ import os, argparse
 from .utlis import makeZip
 
 DEFAULT_PATH = './'
+exclude_from_zip=['sercet_key.json']
+
+def upload(filename):
+    pass
+
 
 def packing(opts):
     if isinstance(opts.zip, (str,unicode)):
@@ -21,7 +26,11 @@ def packing(opts):
     if os.path.isfile(zip_filename):
         os.remove(zip_filename)
     
-    makeZip(target_path, zip_filename)
+    filename = makeZip(target_path, zip_filename, exclude=exclude_from_zip)
+    
+    if opts.upload:
+        upload(filename)
+    
     print "peon: files in the package ..."
 
 
