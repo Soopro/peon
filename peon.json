@@ -1,5 +1,6 @@
 {
   "init":{
+    "install":["bower","npm"],
     "copy": {
       "libs":{
         "flatten": true,
@@ -18,28 +19,15 @@
       }
     }
   },
-  "build":{
+  "release":{
+    "run":[
+      "grunt release"
+    ],
     "rev":{
       "src":"/*.html",
       "cwd":"release/",
       "find":"?md5=null",
       "pattern":"null"
-    },
-    "copy": {
-      "test":{
-        "src":[
-          "lodash/dist/lodash.js",
-          "angular/angular.js",
-          "angular-cookies/angular-cookies.js",
-          "angular-resource/angular-resource.js",
-          "angular-route/angular-route.js",
-          "angular-sanitize/angular-sanitize.js",
-          "danialfarid-angular-file-upload/dist/angular-file-upload.js",
-          "danialfarid-angular-file-upload/dist/angular-file-upload-shim.js"
-        ],
-        "cwd":"bower_components/",
-        "dest":"/xxx/test"
-      }
     }
   }
 }

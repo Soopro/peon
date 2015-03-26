@@ -3,8 +3,10 @@ import argparse
 from peon_construct import construct
 from peon_server import server
 from peon_watcher import watch
+from peon_packing import packing
 
-__version_info__ = ('0', '0', '3')
+
+__version_info__ = ('0', '0', '4')
 __version__ = '.'.join(__version_info__)
 
 def command_options():
@@ -45,17 +47,24 @@ def command_options():
                         help='Run Peon construct to build files.')
 
     parser.add_argument('--init', 
-                        dest='init',
+                        dest='construct_action',
                         action='store_const',
-                        const=True,
+                        const='init',
                         help='Run Peon init tasks.')
 
-    parser.add_argument('--build', 
-                        dest='build',
+    parser.add_argument('--release', 
+                        dest='construct_action',
+                        action='store_const',
+                        const='release',
+                        help='Run Peon build tasks.')
+    
+    # Packing
+    parser.add_argument('-z', '--zip', 
+                        dest='packing',
                         action='store_const',
                         const=True,
-                        help='Run Peon build tasks.')
-
+                        help='Run Peon packing zip file')
+    
     opts, unknown = parser.parse_known_args()
 
     return opts
@@ -64,11 +73,13 @@ def command_options():
 def run():
     opts = command_options()
     if opts.watcher:
-        peon_watcher.watch()
+        watch()
     elif opts.construct:
-        peon_construct.construct(opts)
+        construct(opts)
+    elif opts.packing:
+        packing()
     else:
-        peon_server.server(opts)
+        server(opts)
 
 
 if __name__ == '__main__':

@@ -1,13 +1,17 @@
 #coding=utf-8
 from __future__ import absolute_import
 import os, sys, shutil, time, hashlib, json, glob, argparse
+from collections import OrderedDict
+from zipfile import ZipFile
+import subprocess
 
 # variables
-CONFIG = {}
 TEMP_FILE = '_temp_.html'
 default_libs_dir = 'src/libs/'
+DEFAULT_ACTION = 'release'
 
-# functions
+
+# helpers
 def now():
     return int(time.time())
 
@@ -49,36 +53,56 @@ def ensure_dir(path, isFile=False):
         os.makedirs(path)
         print('peon: Create dir -> %s' % path)
 
-
 # main
 
-def load_config(config_type="build"):
-    global CONFIG
+def load_config(config_type=DEFAULT_ACTION):
     peon_data = open('peon.json')
-    config_data = json.load(peon_data)
+    config_data = json.load(peon_data,
+                            object_pairs_hook=OrderedDict)
     peon_data.close()
     
-    CONFIG = config_data.get(config_type)
-    if not CONFIG:
-        raise "Invalid config file."
-    print "peon: Ready to work"
+    config = config_data.get(config_type)
+    if not config:
+        raise Exception("Invalid config file.")
+    else:
+        print "peon: Ready to work"
+
+    return config
 
 
-def rev():
-    rev_rule=CONFIG.get('rev')
-    find = rev_rule.get('find')
-    if rev_rule.get('pattern'):
-        pattern = str(rev_rule['pattern'])
+def install(cfg):
+    for c in cfg:
+        if c is "bower":
+            try:
+                subprocess.call(["bower","update"])
+                subprocess.call(["bower","install"])
+            except Exception as e:
+                raise e
+        elif c is "npm":
+            try:
+                subprocess.call(["npm","update"])
+                subprocess.call(["npm","install"])
+            except Exception as e:
+                raise e
+
+def run_cmd(cfg):
+    for cmd in cfg:
+        subprocess.call(cmd, shell=True)
+
+
+def rev(cfg):
+    if cfg.get('pattern'):
+        pattern = str(cfg['pattern'])
+        find = cfg.get('find')
         if find:
             find = str(find)
         else:
             find = pattern
         pattern=find.replace(pattern, gen_md5())
         replacements = {find:pattern}
-
-    cwd = safe_path(rev_rule.get('cwd',''))
+    cwd = safe_path(cfg.get('cwd',''))
     
-    files = rev_rule.get('src') or []
+    files = cfg.get('src') or []
     if not isinstance(files,list):
         files = [files]
     
@@ -118,14 +142,14 @@ def rev():
     print "peon: Work work ..."
 
 
-def copy(force=True):
-    copy_rules=CONFIG.get('copy')
-    for key in copy_rules:
-        rule = copy_rules[key]
+def copy(cfg):
+    for key in cfg:
+        rule = cfg[key]
         dest = rule.get('dest', default_libs_dir)
         is_flatten = rule.get('flatten', False)
+        force = rule.get('force', True)
         cwd = rule.get('cwd','')
-        
+
         cwd, dest = safe_path(cwd, dest)
     
         files = rule.get('src') or []
@@ -159,23 +183,28 @@ def copy(force=True):
             else:
                 continue
     
-    print "peon: Work work ..."
+    print "peon: Work work ...(copy)"
 
 
 def construct(opts):
-    config_type = 'build'
-    if opts.init:
-        config_type = 'init'
+    config_type = opts.construct_action or DEFAULT_ACTION
 
-    load_config(config_type)
-        
-    if CONFIG.get('copy'):
-        copy()
-        
-    if CONFIG.get('rev'):
-        rev()
+    config = load_config(config_type)
+
+    for key in config:
+        cmd = COMMANDS.get(key)
+        if cmd:
+            cmd(config[key])
     
-    print "peon: No more work ..."
+    print "peon: finish work ..."
+
+
+COMMANDS = {
+    "install":install,
+    "copy":copy,
+    "rev":rev,
+    "run":run_cmd
+}
 
 
 if __name__ == '__main__':
@@ -184,15 +213,15 @@ if __name__ == '__main__':
                     description='Options of run Peon dev server.')
 
     parser.add_argument('--init', 
-                        dest='init',
+                        dest='construct_action',
                         action='store_const',
-                        const=True,
+                        const='init',
                         help='Run Peon init tasks.')
 
-    parser.add_argument('--build', 
-                        dest='build',
+    parser.add_argument('--release', 
+                        dest='construct_action',
                         action='store_const',
-                        const=True,
+                        const='release',
                         help='Run Peon build tasks.')
 
     opts, unknown = parser.parse_known_args()
