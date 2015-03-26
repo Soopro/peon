@@ -1,5 +1,6 @@
 #coding=utf-8
 import argparse
+import utlis
 from peon_construct import construct
 from peon_server import server
 from peon_watcher import watch
@@ -61,8 +62,9 @@ def command_options():
     
     # Packing
     parser.add_argument('-z', '--zip', 
-                        dest='packing',
-                        action='store_const',
+                        dest='zip',
+                        action='store',
+                        nargs='?',
                         const=True,
                         help='Run Peon packing zip file.')
     
@@ -84,8 +86,8 @@ def run():
         watch()
     elif opts.construct:
         construct(opts)
-    elif opts.packing:
-        packing()
+    elif opts.zip:
+        packing(opts)
     elif opts.backup:
         backup()
     else:

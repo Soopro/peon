@@ -1,0 +1,15 @@
+{
+  "redis":{
+    "src":"/Users/redy/dump.rdb"
+  },
+  "mongodb":{
+    "dbname":"dev"
+  },
+  "files":{
+    "src":[
+      "/Users/redy/deployment_data",
+      "/Users/redy/etc/nginx/sites-available",
+      "/Users/redy/etc/supervisor/conf.d"
+    ]
+  }
+}

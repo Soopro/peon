@@ -1,90 +1,123 @@
 #coding=utf-8
 from __future__ import absolute_import
-import os, sys, shutil, time
+import os, sys, shutil, time, json, datetime
+from collections import OrderedDict
 import subprocess
 
-BACKUP_FILE = "backups.json"
+from .utlis import makeZip
 
-BASE_DIR = "./"
+BACKUP_FILE = "backup.json"
+
 
 def copy(cfg):
+    name = "files"
     src = cfg.get("src",[])
-    dest = cfg.get("dest", BASE_DIR)
+    dest = name
+    
     for s in src:
-        shutil.copytree(src, dest)
+        to = os.path.join(dest, s.lstrip("/"))
+        try:
+            shutil.copytree(s, to)
+        except Exception as e:
+            raise e
+    
+    makeZip(name, name+".zip")
+
 
 def shell(cfg):
     for cmd in cfg:
         subprocess.call(cmd, shell=True)
 
+
 def redis(cfg):
+    name = "redis"
+    
     dbhost = cfg.get("dbhost")
-    dbhost = "-h " + dbhost if dbhost else ""
+    dbhost = " -h " + dbhost if dbhost else ""
     port = cfg.get("port")
-    port = "-p " + port if port else ""
+    port = " -p " + port if port else ""
     pwd = cfg.get("pwd")
-    pwd = "-a " + pwd if pwd else ""
+    pwd = " -a " + pwd if pwd else ""
     src =  cfg.get("src")
-    dest = cfg.get("dest", os.path.join(BASE_DIR,"redis"))
+    dest = name
+    if not os.path.isdir(dest):
+        os.mkdir(dest)
     try:
-        subprocess.call(["redis-cli", dbhost, port, pwd, "save"])
+        subprocess.call("redis-cli"+dbhost+port+pwd+" "+"save", shell=True)
         shutil.copy(src, dest)
+        makeZip(name, name+".zip")
     except Exception as e:
         raise e
 
-def monogodb(cfg):
+
+def mongodb(cfg):
+    
+    name = "mongodb"
+    
     dbhost = cfg.get("dbhost")
     port = cfg.get("port")
     if dbhost and port:
         dbhost = dbhost+":"+"port"
-    dbhost = "-h " + dbhost if dbhost else ""
+    dbhost = " -h " + dbhost if dbhost else ""
     dbname = cfg.get("dbname")
-    dbname = "-d " + dbname if dbname else ""
+    dbname = " -d " + dbname if dbname else ""
     
     user = cfg.get("user")
-    user = "-u " + user if user else ""
+    user = " -u " + user if user else ""
     
     pwd = cfg.get("pwd")
-    pwd = "-p " + pwd if pwd and user else ""
-    
-    dest = cfg.get("dest", os.path.join(BASE_DIR,"mongodb"))
-    
-    dest = "-o " + dest if dest else ""
+    pwd = " -p " + pwd if pwd and user else ""
 
-    subprocess.call(["mongodump", dbhost, dbname, user, pwd, dest])
+    dest = " -o " + name
+
+    try:
+        subprocess.call("mongodump"+dbhost+dbname+user+pwd+dest, shell=True)
+
+        makeZip(name, name+".zip")
+    except Exception as e:
+        raise e
+
 
 
 def load_config():
     config_file = open(BACKUP_FILE)
-    config_data = json.load(peon_data,
-                            object_pairs_hook=OrderedDict)
+    try:
+        config_data = json.load(config_file,
+                                object_pairs_hook=OrderedDict)
+    except Exception as e:
+        raise e
+
     config_file.close()
     
     print "peon: Ready to backup"
-
     return config_data
 
+
 def create_backup_folder():
-    now = datetime.datetime.now().strftime("%y_%m_%d")
+    now = datetime.datetime.now().strftime("%Y_%m_%d_%H%M%S")
     if not os.path.isdir(now):
         os.mkdir(now)
     return now
 
 
 def backup():
-    global BASE_DIR
     config = load_config()
-    BASE_DIR = create_backup_folder()
-    
+    new_dir = create_backup_folder()
+    old_dir = os.getcwd()
+    os.chdir(new_dir)
+
     for k, v in config.iteritems():
-        if k is 'redis':
+        if k == 'redis':
             redis(v)
-        elif k is 'files':
+        elif k == 'mongodb':
+            mongodb(v)
+        elif k == 'files':
             copy(v)
-        elif k is 'shell':
+        elif k == 'shell':
             shell(v)
-    
-    print "peon: finish backup files and datas ..."
+
+    os.chdir(old_dir)
+    print "peon: finish backups ..."
 
 
 if __name__ == '__main__':
