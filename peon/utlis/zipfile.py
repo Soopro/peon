@@ -13,13 +13,14 @@ def zipdir(path, zip, exclude=None, include_hidden=False):
     if not isinstance(zip, ZipFile):
         return None
     for root, dirs, files in os.walk(path):
+        if not include_hidden:
+            files = [f for f in files if not f[0] == '.']
+            dirs[:] = [d for d in dirs if not d[0] == '.']
+
         for file in files:
             if file in exclude_list:
                 continue
-
-            if not include_hidden and file.startswith('.'):
-                continue
-                
+           
             if file != TEMP_ZIP:
                 zip.write(os.path.join(root, file))
 
