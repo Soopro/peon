@@ -1,0 +1,25 @@
+{
+  "redis":{
+    "dbhost":"",
+    "port":"",
+    "user":"",
+    "pwd":"",
+    "src":"/var/lib/redis/dump.rdb",
+    "dest":""
+  },
+  "mongodb":{
+    "dbhost":"",
+    "dbname":"soopro_alpha",
+    "user":"",
+    "pwd":"",
+    "dest":""
+  },
+  "files":{
+    "src":[
+      "/deployment_data",
+      "/etc/nginx/sites-available",
+      "/etc/supervisor/conf.d"
+    ],
+    "dest":""
+  }
+}

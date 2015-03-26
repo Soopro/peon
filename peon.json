@@ -20,7 +20,7 @@
     }
   },
   "release":{
-    "run":[
+    "shell":[
       "grunt release"
     ],
     "rev":{

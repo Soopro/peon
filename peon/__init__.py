@@ -4,6 +4,7 @@ from peon_construct import construct
 from peon_server import server
 from peon_watcher import watch
 from peon_packing import packing
+from peon_backup import backup
 
 
 __version_info__ = ('0', '0', '4')
@@ -63,7 +64,14 @@ def command_options():
                         dest='packing',
                         action='store_const',
                         const=True,
-                        help='Run Peon packing zip file')
+                        help='Run Peon packing zip file.')
+    
+    # Backup
+    parser.add_argument('-backup', '--backup', 
+                        dest='backup',
+                        action='store_const',
+                        const=True,
+                        help='Run Peon backup files and datas.')
     
     opts, unknown = parser.parse_known_args()
 
@@ -78,6 +86,8 @@ def run():
         construct(opts)
     elif opts.packing:
         packing()
+    elif opts.backup:
+        backup()
     else:
         server(opts)
 

@@ -85,7 +85,7 @@ def install(cfg):
             except Exception as e:
                 raise e
 
-def run_cmd(cfg):
+def shell(cfg):
     for cmd in cfg:
         subprocess.call(cmd, shell=True)
 
@@ -203,7 +203,7 @@ COMMANDS = {
     "install":install,
     "copy":copy,
     "rev":rev,
-    "run":run_cmd
+    "shell":shell
 }
 
 
