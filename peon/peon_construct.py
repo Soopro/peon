@@ -133,9 +133,9 @@ def copy(cfg):
 def construct(opts):
     config_type = opts.construct_action or DEFAULT_ACTION
 
-    config = load_config(config_type)
+    peon_config = load_config(config_type)
 
-    for key in config:
+    for key in peon_config:
         cmd = COMMANDS.get(key)
         if cmd:
             cmd(config[key])

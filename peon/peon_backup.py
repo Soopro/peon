@@ -5,9 +5,16 @@ import os, sys, shutil, datetime
 import subprocess
 
 from .utlis import makeZip
-from .config import load_config
+from .config import load_config, CONFIG_FILE
 
 DEFAULT_ACTION = "backup"
+
+def _make_backup_zip(filename):
+    exclude_list = [CONFIG_FILE]
+    makeZip(filename,
+            filename+".zip",
+            excludes=exclude_list,
+            include_hidden=True)
 
 def copy(cfg):
     name = "files"
@@ -20,8 +27,10 @@ def copy(cfg):
             shutil.copytree(s, to)
         except Exception as e:
             raise e
-    
-    makeZip(name, name+".zip", include_hidden=True)
+    try:
+        _make_backup_zip(name)
+    except Exception as e:
+        raise e
 
 
 def shell(cfg):
@@ -45,7 +54,7 @@ def redis(cfg):
     try:
         subprocess.call("redis-cli"+dbhost+port+pwd+" "+"save", shell=True)
         shutil.copy(src, dest)
-        makeZip(name, name+".zip")
+        _make_backup_zip(name)
     except Exception as e:
         raise e
 
@@ -72,8 +81,7 @@ def mongodb(cfg):
 
     try:
         subprocess.call("mongodump"+dbhost+dbname+user+pwd+dest, shell=True)
-
-        makeZip(name, name+".zip")
+        _make_backup_zip(name)
     except Exception as e:
         raise e
 
@@ -86,12 +94,12 @@ def create_backup_folder():
 
 
 def backup():
-    config = load_config(DEFAULT_ACTION)
+    peon_config = load_config(DEFAULT_ACTION)
     new_dir = create_backup_folder()
     old_dir = os.getcwd()
     os.chdir(new_dir)
 
-    for k, v in config.iteritems():
+    for k, v in peon_config.iteritems():
         if k == 'redis':
             redis(v)
         elif k == 'mongodb':

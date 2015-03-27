@@ -4,7 +4,6 @@ from __future__ import absolute_import
 import os, fnmatch
 from zipfile import ZipFile, ZIP_DEFLATED
 
-
 TEMP_ZIP = '._tmp_zip'
 
 def _zipdir(path, zip, excludes=None, include_hidden=False):
@@ -29,7 +28,7 @@ def _zipdir(path, zip, excludes=None, include_hidden=False):
 
 
 def makeZip(target_path, zip_filename, excludes=None, include_hidden=False):
-    print "excludes: ", ", ".join(excludes)
+    print "excludes:", excludes
     zfile = ZipFile(TEMP_ZIP, 'w', ZIP_DEFLATED)
     _zipdir(target_path, zfile, excludes, include_hidden)
     zfile.close()

@@ -2,8 +2,8 @@
 from __future__ import absolute_import
 
 import os, argparse
-from utlis import makeZip, uploadFile
-from config import load_config
+from .utlis import makeZip, uploadFile
+from .config import load_config, CONFIG_FILE
 
 DEFAULT_PATH = './'
 DEFAULT_ACTION = "packing"
@@ -21,7 +21,7 @@ def upload_zip(filename, cfg):
 
 
 def packing(opts):
-    config = load_config(DEFAULT_ACTION, False)
+    peon_config = load_config(DEFAULT_ACTION, False)
     
     # gen file name
     if isinstance(opts.zip, (str,unicode)):
@@ -41,14 +41,18 @@ def packing(opts):
         os.remove(zip_filename)
     
     # parse config
-    include_hidden = config.get("include_hidden")
-    exclude_list = config.get("excludes")
-    upload_info = config.get("upload")
+    include_hidden = peon_config.get("include_hidden")
+    include_peon_config = peon_config.get("include_peon_config")
+    exclude_list = peon_config.get("excludes")
+    upload_info = peon_config.get("upload")
     if not isinstance(exclude_list, list):
         exclude_list = []
 
     if opts.exclude:
         exclude_list.append(opts.exclude)
+    
+    if not include_peon_config:
+        exclude_list.append(CONFIG_FILE)
     
     filename = makeZip(target_path,
                        zip_filename,

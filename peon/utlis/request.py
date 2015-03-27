@@ -28,7 +28,11 @@ def uploadFile(file_path, url, data=None, params=None, headers=None):
                           headers=headers)
         r.raise_for_status()
     except requests.RequestException as e:
+        print "=============================="
+        print e
+        print "------------------------------"
         print r.json()
+        print "=============================="
         raise e
     
     return r

@@ -1,12 +1,12 @@
 #coding=utf-8
 from __future__ import absolute_import
 import argparse
-import utlis
-from peon_construct import construct
-from peon_server import server
-from peon_watcher import watch
-from peon_packing import packing
-from peon_backup import backup
+
+from .peon_construct import construct
+from .peon_server import server
+from .peon_watcher import watch
+from .peon_packing import packing
+from .peon_backup import backup
 
 
 __version_info__ = ('0', '0', '4')

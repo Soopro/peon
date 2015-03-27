@@ -58,14 +58,15 @@
     }
   },
   "packing":{
-    "excludes":["peon.json","*.json"],
     "upload":{
       "headers":{
-        "SercetKey":""
+        "SecretKey":"1d02aa814dc64db3a6494624ca35a03a"
       },
-      "url":"",
+      "url":"http://localhost:5000/ws/test/develop_theme",
       "data":null,
-      "params":null
+      "params":null,
+      "include_peon_config":null,
+      "include_hidden":null
     }
   }
 }
