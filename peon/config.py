@@ -18,7 +18,10 @@ def load_config(config_type, force=True):
             if force:
                 raise Exception("Config error:", e)
             print "Config error: ", e
-
+            
+    if force and not config:
+        raise Exception("Config error: Nothing loaded!")
+        
     print "peon: Ready to work."
     
     return config

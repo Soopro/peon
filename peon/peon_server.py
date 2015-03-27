@@ -53,8 +53,8 @@ DEFAULT_PORT = 9527
 PARSE_FILE_LIST = ['coffee','jade','less']
 
 def server(opts):
-    if opts.server_port:
-        port = opts.server_port
+    if isinstance(opts.port, int):
+        port = opts.port
     else:
         port = DEFAULT_PORT
     
@@ -108,13 +108,15 @@ if __name__ == "__main__":
     # command line options
     parser = argparse.ArgumentParser(
                     description='Options of run Peon dev server.')
-
-    parser.add_argument('-p', '--port', 
-                        dest='server_port',
+    
+    parser.add_argument('-s', '--server', 
+                        dest='port',
                         action='store',
+                        nargs='?',
                         type=int,
-                        help='Setup port.')
-
+                        const=9527,
+                        help='Start Peon dev server at port.')
+    
     parser.add_argument('--harp', 
                         dest='harp_server',
                         action='store_const',

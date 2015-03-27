@@ -138,7 +138,7 @@ def construct(opts):
     for key in peon_config:
         cmd = COMMANDS.get(key)
         if cmd:
-            cmd(config[key])
+            cmd(peon_config[key])
     
     print "peon: finish work ..."
 

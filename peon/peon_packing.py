@@ -84,7 +84,7 @@ if __name__ == '__main__':
                         dest='exclude',
                         action='store',
                         type=str,
-                        help='Exclude filenames from packing.')
+                        help='Exclude filename pattern from packing.')
 
     
     opts, unknown = parser.parse_known_args()

@@ -10,10 +10,8 @@ from .config import load_config, CONFIG_FILE
 DEFAULT_ACTION = "backup"
 
 def _make_backup_zip(filename):
-    exclude_list = [CONFIG_FILE]
     makeZip(filename,
             filename+".zip",
-            excludes=exclude_list,
             include_hidden=True)
 
 def copy(cfg):

@@ -19,17 +19,13 @@ def command_options():
                     description='Options of run Peon dev server.')
     
     parser.add_argument('-s', '--server', 
-                        dest='server',
-                        action='store_const',
-                        const=True,
-                        help='Start Peon dev server.')
-    
-    parser.add_argument('-p', '--port', 
-                        dest='server_port',
+                        dest='port',
                         action='store',
+                        nargs='?',
                         type=int,
-                        help='Setup Peon dev server port.')
-
+                        const=9527,
+                        help='Start Peon dev server at port.')
+                        
     parser.add_argument('--harp', 
                         dest='harp_server',
                         action='store_const',
@@ -75,7 +71,7 @@ def command_options():
                         nargs='?',
                         action='store',
                         type=str,
-                        help='Exclude filenames from packing.')
+                        help='Exclude filename pattern from packing.')
 
     
     # Backup
