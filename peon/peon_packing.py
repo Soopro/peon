@@ -1,16 +1,29 @@
 #coding=utf-8
 from __future__ import absolute_import
+
 import os, argparse
-from .utlis import makeZip
+from utlis import makeZip, uploadFile
+from config import load_config
 
 DEFAULT_PATH = './'
-exclude_from_zip=['sercet_key.json']
+DEFAULT_ACTION = "packing"
 
-def upload(filename):
-    pass
+def upload_zip(filename, cfg):
+    url = cfg.get('url')
+    headers = cfg.get('headers')
+    data = cfg.get('data')
+    params = cfg.get('params')
+    file_path = os.path.join(os.getcwd(), filename)
+    try:
+        uploadFile(file_path, url, data=data, params=params, headers=headers)
+    except Exception as e:
+        raise e
 
 
 def packing(opts):
+    config = load_config(DEFAULT_ACTION, False)
+    
+    # gen file name
     if isinstance(opts.zip, (str,unicode)):
         target_path = opts.zip
         _splist = target_path.strip("/").split('/', 1)
@@ -23,15 +36,32 @@ def packing(opts):
     else:
         raise Exception("File path invalid")
     
+    # remove file if is exist
     if os.path.isfile(zip_filename):
         os.remove(zip_filename)
     
-    filename = makeZip(target_path, zip_filename, exclude=exclude_from_zip)
+    # parse config
+    include_hidden = config.get("include_hidden")
+    exclude_list = config.get("excludes")
+    upload_info = config.get("upload")
+    if not isinstance(exclude_list, list):
+        exclude_list = []
+
+    if opts.exclude:
+        exclude_list.append(opts.exclude)
     
-    if opts.upload:
-        upload(filename)
+    filename = makeZip(target_path,
+                       zip_filename,
+                       excludes=exclude_list,
+                       include_hidden=include_hidden)
     
     print "peon: files in the package ..."
+    
+    # make upload
+    if upload_info:
+        upload_zip(filename, upload_info)
+        print "peon: package is uploaded..."
+    
 
 
 if __name__ == '__main__':
@@ -45,7 +75,14 @@ if __name__ == '__main__':
                         nargs='?',
                         const=None,
                         help='Run Peon packing zip file.')
-                        
+
+    parser.add_argument('--exclude', 
+                        dest='exclude',
+                        action='store',
+                        type=str,
+                        help='Exclude filenames from packing.')
+
+    
     opts, unknown = parser.parse_known_args()
     
     packing(opts)

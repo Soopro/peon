@@ -1,9 +1,11 @@
 #coding=utf-8
 from __future__ import absolute_import
-import os, sys, shutil, time, hashlib, json, glob, argparse
-from collections import OrderedDict
-from zipfile import ZipFile
+
+import os, sys, glob, argparse
 import subprocess
+
+from .utlis import now, gen_md5, copy_file, safe_path, ensure_dir
+from .config import load_config
 
 # variables
 TEMP_FILE = '_temp_.html'
@@ -11,65 +13,7 @@ default_libs_dir = 'src/libs/'
 DEFAULT_ACTION = 'release'
 
 
-# helpers
-def now():
-    return int(time.time())
-
-def gen_md5():
-    md5 = hashlib.md5(str(now())).hexdigest()
-    return md5[:10]
-
-def copy_file(src, dest):
-    try:
-        shutil.copy2(src, dest)
-    # eg. src and dest are the same file
-    except shutil.Error as e:
-        print('peon: Error -> %s' % e)
-        raise e
-    # eg. source or destination doesn't exist
-    except IOError as e:
-        print('peon: Error -> %s' % e.strerror)
-        raise e
-        
-def safe_path(*args):
-    if len(args) == 0:
-        return None
-    if len(args) == 1:
-        return args[0].strip("/")
-    p_list = []
-    for path in args:
-        p_list.append(path.strip("/"))
-
-    return p_list
-
-def ensure_dir(path, isFile=False):
-    if not os.path.exists(os.path.dirname(path)):
-        dirname = os.path.dirname(path)
-        if dirname:
-            os.makedirs(dirname)
-            print('peon: Create dir -> %s' % dirname)
-    
-    if not os.path.isdir(path) and not isFile:
-        os.makedirs(path)
-        print('peon: Create dir -> %s' % path)
-
 # main
-
-def load_config(config_type=DEFAULT_ACTION):
-    peon_data = open('peon.json')
-    config_data = json.load(peon_data,
-                            object_pairs_hook=OrderedDict)
-    peon_data.close()
-    
-    config = config_data.get(config_type)
-    if not config:
-        raise Exception("Invalid config file.")
-    else:
-        print "peon: Ready to work"
-
-    return config
-
-
 def install(cfg):
     for c in cfg:
         if c is "bower":

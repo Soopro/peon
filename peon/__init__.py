@@ -1,4 +1,5 @@
 #coding=utf-8
+from __future__ import absolute_import
 import argparse
 import utlis
 from peon_construct import construct
@@ -10,6 +11,7 @@ from peon_backup import backup
 
 __version_info__ = ('0', '0', '4')
 __version__ = '.'.join(__version_info__)
+
 
 def command_options():
     # Dev server
@@ -68,12 +70,13 @@ def command_options():
                         const=True,
                         help='Run Peon packing zip file.')
     
-    parser.add_argument('--upload', 
-                        dest='upload',
-                        action='store_const',
-                        const=True,
-                        help='Upload after packing.')
-    
+    parser.add_argument('--exclude', 
+                        dest='exclude',
+                        nargs='?',
+                        action='store',
+                        type=str,
+                        help='Exclude filenames from packing.')
+
     
     # Backup
     parser.add_argument('-b', '--backup', 

@@ -61,10 +61,10 @@
     "excludes":["peon.json","*.json"],
     "upload":{
       "headers":{
-        "SercetKey":""
+        "SecretKey":"1d02aa814dc64db3a6494624ca35a03a"
       },
-      "url":"",
-      "data":null,
+      "url":"http://localhost:5000/ws/test/develop_theme",
+      "data":{"theme":"custom"},
       "params":null
     }
   }

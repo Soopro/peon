@@ -1,13 +1,13 @@
 #coding=utf-8
 from __future__ import absolute_import
-import os, sys, shutil, time, json, datetime
-from collections import OrderedDict
+
+import os, sys, shutil, datetime
 import subprocess
 
 from .utlis import makeZip
+from .config import load_config
 
-BACKUP_FILE = "backup.json"
-
+DEFAULT_ACTION = "backup"
 
 def copy(cfg):
     name = "files"
@@ -21,7 +21,7 @@ def copy(cfg):
         except Exception as e:
             raise e
     
-    makeZip(name, name+".zip")
+    makeZip(name, name+".zip", include_hidden=True)
 
 
 def shell(cfg):
@@ -78,21 +78,6 @@ def mongodb(cfg):
         raise e
 
 
-
-def load_config():
-    config_file = open(BACKUP_FILE)
-    try:
-        config_data = json.load(config_file,
-                                object_pairs_hook=OrderedDict)
-    except Exception as e:
-        raise e
-
-    config_file.close()
-    
-    print "peon: Ready to backup"
-    return config_data
-
-
 def create_backup_folder():
     now = datetime.datetime.now().strftime("%Y_%m_%d_%H%M%S")
     if not os.path.isdir(now):
@@ -101,7 +86,7 @@ def create_backup_folder():
 
 
 def backup():
-    config = load_config()
+    config = load_config(DEFAULT_ACTION)
     new_dir = create_backup_folder()
     old_dir = os.getcwd()
     os.chdir(new_dir)
