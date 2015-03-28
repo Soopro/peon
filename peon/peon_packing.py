@@ -3,68 +3,103 @@ from __future__ import absolute_import
 
 import os, argparse
 from .utlis import makeZip, uploadFile
-from .config import load_config, CONFIG_FILE
+from .helpers import load_config, run_task
+from .config import CONFIG_FILE
 
 DEFAULT_PATH = './'
 DEFAULT_ACTION = "packing"
 
-def upload_zip(filename, cfg):
+def _get_filename(target=None):
+    if isinstance(target, (str,unicode)):
+        filepath = target
+        filename = file.strip("/").split('/', 1)
+    else:
+        filepath = DEFAULT_PATH
+        filename = os.getcwd().strip("/").rsplit('/', 1)
+
+    if len(filename) > 1:
+        filename = "{}.{}".format(filename[1], "zip")
+    else:
+        raise Exception("File path invalid")
+
+    return filename, filepath
+
+
+def upload(cfg):
+    target = cfg.get("target")
+    file, _ = _get_filename(target)
+    
     url = cfg.get('url')
     headers = cfg.get('headers')
     data = cfg.get('data')
     params = cfg.get('params')
-    file_path = os.path.join(os.getcwd(), filename)
+    file_path = os.path.join(os.getcwd(), file)
     try:
         uploadFile(file_path, url, data=data, params=params, headers=headers)
     except Exception as e:
         raise e
+    print "peon: package is uploaded..."
+
+
+def packzip(cfg):
+    # gen file name
+    target = cfg.get("target")
+    filename, filepath = _get_filename(target)
+
+    
+    # remove file if is exist
+    if os.path.isfile(filename):
+        os.remove(filename)
+    
+    # parse config
+    include_hidden = cfg.get("include_hidden")
+    include_cfg = cfg.get("include_cfg")
+    exclude_list = cfg.get("excludes")
+
+    if not isinstance(exclude_list, list):
+        exclude_list = []
+    
+    if not include_cfg:
+        exclude_list.append(CONFIG_FILE)
+    
+    makeZip(filepath,
+            filename,
+            excludes=exclude_list,
+            include_hidden=include_hidden)
+    
+    print "peon: files in the package ..."
+
+  
+#-------------
+# main
+#-------------
+
+COMMANDS = {
+    "zip":packzip,
+    "upload":upload
+}
+
+def _ensure_cfg(config, opts):
+    if not config:
+        config = [{}]
+
+    for cfg in config:
+        cfg.setdefault("zip", {})
+        _zipcfg = cfg.get("zip")
+        _zipcfg.setdefault("excludes", [])
+        if opts.exclude:
+            _zipcfg["excludes"].append(opts.exclude)
+
+    return config
 
 
 def packing(opts):
     peon_config = load_config(DEFAULT_ACTION, False)
-    
-    # gen file name
-    if isinstance(opts.zip, (str,unicode)):
-        target_path = opts.zip
-        _splist = target_path.strip("/").split('/', 1)
-    else:
-        target_path = DEFAULT_PATH
-        _splist = os.getcwd().strip("/").rsplit('/', 1)
+    peon_config = _ensure_cfg(peon_config, opts)
 
-    if len(_splist) > 0:
-        zip_filename = "{}.{}".format(_splist[1], "zip")
-    else:
-        raise Exception("File path invalid")
-    
-    # remove file if is exist
-    if os.path.isfile(zip_filename):
-        os.remove(zip_filename)
-    
-    # parse config
-    include_hidden = peon_config.get("include_hidden")
-    include_peon_config = peon_config.get("include_peon_config")
-    exclude_list = peon_config.get("excludes")
-    upload_info = peon_config.get("upload")
-    if not isinstance(exclude_list, list):
-        exclude_list = []
+    run_task(peon_config, COMMANDS)
 
-    if opts.exclude:
-        exclude_list.append(opts.exclude)
-    
-    if not include_peon_config:
-        exclude_list.append(CONFIG_FILE)
-    
-    filename = makeZip(target_path,
-                       zip_filename,
-                       excludes=exclude_list,
-                       include_hidden=include_hidden)
-    
-    print "peon: files in the package ..."
-    
-    # make upload
-    if upload_info:
-        upload_zip(filename, upload_info)
-        print "peon: package is uploaded..."
+    print "peon: Finish packing ..."
     
 
 

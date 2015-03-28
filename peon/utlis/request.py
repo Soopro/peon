@@ -19,7 +19,8 @@ def uploadFile(file_path, url, data=None, params=None, headers=None):
         files = {'file': open(file_path, 'rb')}
     except Exception as e:
         raise e
-
+    
+    r = None
     try:
         r = requests.post(url,
                           files=files,
@@ -31,7 +32,8 @@ def uploadFile(file_path, url, data=None, params=None, headers=None):
         print "========== Requests =========="
         print e
         print "------------------------------"
-        print r.json()
+        if r is not None:
+            print r.json()
         print "=============================="
         raise e
     

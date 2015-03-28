@@ -9,7 +9,7 @@ from .peon_packing import packing
 from .peon_backup import backup
 
 
-__version_info__ = ('0', '0', '4')
+__version_info__ = ('0', '0', '5')
 __version__ = '.'.join(__version_info__)
 
 
@@ -86,7 +86,7 @@ def run():
     elif opts.zip:
         packing(opts)
     elif opts.backup:
-        backup()
+        backup(opts)
     else:
         server(opts)
 

@@ -5,7 +5,7 @@ import os, sys, shutil, datetime
 import subprocess
 
 from .utlis import makeZip, copy_file, copy_tree, ensure_dir
-from .config import load_config, CONFIG_FILE
+from .helpers import load_config, run_task
 
 DEFAULT_ACTION = "backup"
 
@@ -107,23 +107,26 @@ def create_backup_folder():
     return now
 
 
-def backup():
+#-------------
+# main
+#-------------
+
+COMMANDS = {
+    "redis":redis,
+    "mongodb":mongodb,
+    "files":files,
+    "shell":shell
+}
+
+def backup(opts):
     peon_config = load_config(DEFAULT_ACTION)
     new_dir = create_backup_folder()
     if not new_dir:
         raise Exception("Backup folder is exist.")
     old_dir = os.getcwd()
     os.chdir(new_dir)
-
-    for k, v in peon_config.iteritems():
-        if k == 'redis':
-            redis(v)
-        elif k == 'mongodb':
-            mongodb(v)
-        elif k == 'files':
-            files(v)
-        elif k == 'shell':
-            shell(v)
+    
+    run_task(peon_config, COMMANDS)
 
     os.chdir(old_dir)
     print "peon: finish backups ..."

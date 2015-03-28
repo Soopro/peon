@@ -47,7 +47,9 @@ class PeonServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
         return
 
-
+#-------------
+# main
+#-------------
 
 DEFAULT_PORT = 9527
 PARSE_FILE_LIST = ['coffee','jade','less']

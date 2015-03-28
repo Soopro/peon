@@ -15,8 +15,6 @@ WATCH_FILE_TYPES = {
 }
 SLEEP_TIME = 1
 
-
-
 # handlers
 class WatchPatternsHandler(PatternMatchingEventHandler):
     
@@ -172,7 +170,11 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
     def on_created(self, event):
         self.process(event)
 
-# functions
+
+#-------------
+# main
+#-------------
+
 def watch():
     print "---------- Peon Wacther start working ----------"
     observer = Observer()

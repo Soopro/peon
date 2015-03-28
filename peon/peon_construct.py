@@ -5,7 +5,7 @@ import os, sys, glob, argparse
 import subprocess
 
 from .utlis import now, gen_md5, copy_file, safe_path, ensure_dir
-from .config import load_config
+from .helpers import load_config, run_task
 
 # variables
 TEMP_FILE = '_temp_.html'
@@ -13,7 +13,6 @@ default_libs_dir = 'src/libs/'
 DEFAULT_ACTION = 'release'
 
 
-# main
 def install(cfg):
     for c in cfg:
         if c == "bower":
@@ -135,19 +134,9 @@ def copy(cfg):
     
     print "peon: Work work ...(copy)"
 
-
-def construct(opts):
-    config_type = opts.construct or DEFAULT_ACTION
-
-    peon_config = load_config(config_type)
-
-    for key in peon_config:
-        cmd = COMMANDS.get(key)
-        if cmd:
-            cmd(peon_config[key])
-    
-    print "peon: finish work ..."
-
+#-------------
+# main
+#-------------
 
 COMMANDS = {
     "install":install,
@@ -155,6 +144,16 @@ COMMANDS = {
     "rev":rev,
     "shell":shell
 }
+
+def construct(opts):
+    config_type = opts.construct or DEFAULT_ACTION
+
+    peon_config = load_config(config_type)
+
+    run_task(peon_config, COMMANDS)
+    
+    print "peon: finish work ..."
+
 
 
 if __name__ == '__main__':
