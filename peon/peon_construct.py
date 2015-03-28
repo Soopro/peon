@@ -130,7 +130,6 @@ def copy(cfg):
             
             if force or not os.path.isfile(_dest):
                 copy_file(path, _dest)
-                print "peon: Copied -> " + path
             else:
                 continue
     

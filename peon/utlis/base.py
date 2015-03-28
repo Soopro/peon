@@ -12,6 +12,7 @@ def gen_md5():
 def copy_tree(src, dest):
     try:
         shutil.copytree(src, dest)
+        print "peon: Copied -> " + src
     # eg. src and dest are the same file
     except shutil.Error as e:
         print('peon: Error -> %s' % e)
@@ -24,6 +25,7 @@ def copy_tree(src, dest):
 def copy_file(src, dest):
     try:
         shutil.copy2(src, dest)
+        print "peon: Copied -> " + src
     # eg. src and dest are the same file
     except shutil.Error as e:
         print('peon: Error -> %s' % e)
