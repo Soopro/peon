@@ -95,20 +95,23 @@ def copy(cfg):
         cwd = rule.get('cwd','')
 
         cwd, dest = safe_path(cwd, dest)
-    
+        
         files = rule.get('src') or []
+
         if not isinstance(files,list):
             files = [files]
 
         path_list = []
         for file in files:
             file = safe_path(file)
-            file_path = os.path.join(cwd,file)
+ 
+            file_path = os.path.join(cwd, file)
             _path = glob.glob(file_path)
+
             for p in _path:
                 if p not in path_list:
                     path_list.append(p)
-
+        
         for path in path_list:
             if not os.path.isfile(path):
                 print "peon: Failed -> " + path +" (not exist)"
@@ -120,7 +123,7 @@ def copy(cfg):
             else:
                 _dest = dest
                 ensure_dir(_dest)
-
+            
             if force or not os.path.isfile(_dest):
                 copy_file(path, _dest)
                 print "peon: Copied -> " + path
@@ -131,7 +134,7 @@ def copy(cfg):
 
 
 def construct(opts):
-    config_type = opts.construct_action or DEFAULT_ACTION
+    config_type = opts.construct or DEFAULT_ACTION
 
     peon_config = load_config(config_type)
 

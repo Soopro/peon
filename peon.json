@@ -1,9 +1,9 @@
 {
   "init":{
-    "install":["bower","npm"],
+
     "copy": {
       "libs":{
-        "flatten": true,
+        "flatten": false,
         "src":[
           "lodash/dist/lodash.js",
           "angular/angular.js",
@@ -51,9 +51,10 @@
     },
     "files":{
       "src":[
-        "/Users/redy/deployment_data",
-        "/Users/redy/etc/nginx/sites-available",
-        "/Users/redy/etc/supervisor/conf.d"
+        "/Users/redy/dump.rdb",
+        "/Users/redy/deployment_data/",
+        "/Users/redy/etc/nginx/sites-available/",
+        "/Users/redy/etc/supervisor/conf.d/"
       ]
     }
   },

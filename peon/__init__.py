@@ -42,21 +42,12 @@ def command_options():
     # Construct
     parser.add_argument('-c', '--construct', 
                         dest='construct',
-                        action='store_const',
-                        const=True,
+                        action='store',
+                        nargs='?',
+                        type=str,
+                        const='release',
                         help='Run Peon construct to build files.')
 
-    parser.add_argument('--init', 
-                        dest='construct_action',
-                        action='store_const',
-                        const='init',
-                        help='Run Peon init tasks.')
-
-    parser.add_argument('--release', 
-                        dest='construct_action',
-                        action='store_const',
-                        const='release',
-                        help='Run Peon build tasks.')
     
     # Packing
     parser.add_argument('-z', '--zip', 

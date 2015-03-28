@@ -14,17 +14,25 @@ def _make_backup_zip(filename):
             filename+".zip",
             include_hidden=True)
 
-def copy(cfg):
-    name = "files"
+def files(cfg):
+    name = "./files"
     src = cfg.get("src",[])
     dest = name
     
     for s in src:
-        to = os.path.join(dest, s.lstrip("/"))
-        try:
-            shutil.copytree(s, to)
-        except Exception as e:
-            raise e
+        d = os.path.join(dest, s.lstrip("/"))
+        print s, os.path.isdir(s), os.path.isfile(s)
+        print "======================="
+        if os.path.isdir(s):
+            try:
+                shutil.copytree(s, d)
+            except Exception as e:
+                raise e
+        else:
+            try:
+                shutil.copy2(s, d)
+            except Exception as e:
+                raise e
     try:
         _make_backup_zip(name)
     except Exception as e:
@@ -52,10 +60,16 @@ def redis(cfg):
     try:
         subprocess.call("redis-cli"+dbhost+port+pwd+" "+"save", shell=True)
         shutil.copy(src, dest)
-        _make_backup_zip(name)
     except Exception as e:
         raise e
 
+    if os.path.isdir(name):
+        _make_backup_zip(name)
+    else:
+        raise Exception("Can't not packing redis.")
+    
+    print "Backup: Redis -> OK"
+    
 
 def mongodb(cfg):
     
@@ -79,21 +93,31 @@ def mongodb(cfg):
 
     try:
         subprocess.call("mongodump"+dbhost+dbname+user+pwd+dest, shell=True)
-        _make_backup_zip(name)
     except Exception as e:
         raise e
+
+    if os.path.isdir(name):
+        _make_backup_zip(name)
+    else:
+        raise Exception("Can't not packing mongodb.")
+    
+    print "Backup: Mongodb -> OK"
 
 
 def create_backup_folder():
     now = datetime.datetime.now().strftime("%Y_%m_%d_%H%M%S")
     if not os.path.isdir(now):
         os.mkdir(now)
+    else:
+        now = None
     return now
 
 
 def backup():
     peon_config = load_config(DEFAULT_ACTION)
     new_dir = create_backup_folder()
+    if not new_dir:
+        raise Exception("Backup folder is exist.")
     old_dir = os.getcwd()
     os.chdir(new_dir)
 
@@ -103,7 +127,7 @@ def backup():
         elif k == 'mongodb':
             mongodb(v)
         elif k == 'files':
-            copy(v)
+            files(v)
         elif k == 'shell':
             shell(v)
 
