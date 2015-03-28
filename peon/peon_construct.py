@@ -16,18 +16,22 @@ DEFAULT_ACTION = 'release'
 # main
 def install(cfg):
     for c in cfg:
-        if c is "bower":
+        if c == "bower":
             try:
+                print "Bower installing......"
                 subprocess.call(["bower","update"])
                 subprocess.call(["bower","install"])
             except Exception as e:
                 raise e
-        elif c is "npm":
+
+        elif c == "npm":
             try:
+                print "Npm installing......"
                 subprocess.call(["npm","update"])
                 subprocess.call(["npm","install"])
             except Exception as e:
                 raise e
+
 
 def shell(cfg):
     for cmd in cfg:
@@ -159,17 +163,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
                     description='Options of run Peon dev server.')
 
-    parser.add_argument('--init', 
-                        dest='construct_action',
-                        action='store_const',
-                        const='init',
-                        help='Run Peon init tasks.')
-
-    parser.add_argument('--release', 
-                        dest='construct_action',
-                        action='store_const',
+    parser.add_argument('-c', '--construct', 
+                        dest='construct',
+                        action='store',
+                        nargs='?',
+                        type=str,
                         const='release',
-                        help='Run Peon build tasks.')
+                        help='Run Peon construct to build files.')
 
     opts, unknown = parser.parse_known_args()
     

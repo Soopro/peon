@@ -4,7 +4,7 @@ from __future__ import absolute_import
 import os, sys, shutil, datetime
 import subprocess
 
-from .utlis import makeZip
+from .utlis import makeZip, copy_file, copy_tree, ensure_dir
 from .config import load_config, CONFIG_FILE
 
 DEFAULT_ACTION = "backup"
@@ -15,24 +15,18 @@ def _make_backup_zip(filename):
             include_hidden=True)
 
 def files(cfg):
-    name = "./files"
+    name = "files"
     src = cfg.get("src",[])
     dest = name
-    
+    ensure_dir(dest)
     for s in src:
         d = os.path.join(dest, s.lstrip("/"))
-        print s, os.path.isdir(s), os.path.isfile(s)
-        print "======================="
-        if os.path.isdir(s):
-            try:
-                shutil.copytree(s, d)
-            except Exception as e:
-                raise e
+        if os.path.isfile(s):
+            ensure_dir(d, True)
+            copy_file(s, d)
         else:
-            try:
-                shutil.copy2(s, d)
-            except Exception as e:
-                raise e
+            copy_tree(s, d)
+
     try:
         _make_backup_zip(name)
     except Exception as e:
@@ -55,11 +49,10 @@ def redis(cfg):
     pwd = " -a " + pwd if pwd else ""
     src =  cfg.get("src")
     dest = name
-    if not os.path.isdir(dest):
-        os.mkdir(dest)
+    ensure_dir(dest)
     try:
         subprocess.call("redis-cli"+dbhost+port+pwd+" "+"save", shell=True)
-        shutil.copy(src, dest)
+        copy_file(src, dest)
     except Exception as e:
         raise e
 
@@ -72,8 +65,9 @@ def redis(cfg):
     
 
 def mongodb(cfg):
-    
     name = "mongodb"
+    dest = name
+    ensure_dir(dest)
     
     dbhost = cfg.get("dbhost")
     port = cfg.get("port")
@@ -89,10 +83,10 @@ def mongodb(cfg):
     pwd = cfg.get("pwd")
     pwd = " -p " + pwd if pwd and user else ""
 
-    dest = " -o " + name
+    odest = " -o " + dest
 
     try:
-        subprocess.call("mongodump"+dbhost+dbname+user+pwd+dest, shell=True)
+        subprocess.call("mongodump"+dbhost+dbname+user+pwd+odest, shell=True)
     except Exception as e:
         raise e
 

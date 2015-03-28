@@ -1,9 +1,9 @@
 {
   "init":{
-
+    "install":["bower","npm"],
     "copy": {
       "libs":{
-        "flatten": false,
+        "flatten": true,
         "src":[
           "lodash/dist/lodash.js",
           "angular/angular.js",

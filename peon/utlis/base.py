@@ -9,6 +9,18 @@ def gen_md5():
     md5 = hashlib.md5(str(now())).hexdigest()
     return md5[:10]
 
+def copy_tree(src, dest):
+    try:
+        shutil.copytree(src, dest)
+    # eg. src and dest are the same file
+    except shutil.Error as e:
+        print('peon: Error -> %s' % e)
+        raise e
+    # eg. source or destination doesn't exist
+    except IOError as e:
+        print('peon: Error -> %s' % e.strerror)
+        raise e
+
 def copy_file(src, dest):
     try:
         shutil.copy2(src, dest)
