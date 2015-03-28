@@ -1,6 +1,6 @@
 {
   "init":{
-    
+    "install":["bower","npm"],
     "copy": {
       "libs":{
         "flatten": true,
