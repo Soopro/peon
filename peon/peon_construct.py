@@ -152,7 +152,7 @@ def construct(opts):
 
     run_task(peon_config, COMMANDS)
     
-    print "peon: finish work ..."
+    print "peon: finish construct ..."
 
 
 

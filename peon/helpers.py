@@ -25,9 +25,10 @@ def load_config(config_type, force=True):
     
     if isinstance(config, dict):
        config = [config]
-
-    print "peon: Ready to work."
     
+    print "--------------------------------------------"
+    print "peon: Ready to work."
+    print "--------------------------------------------"
     return config
 
 
