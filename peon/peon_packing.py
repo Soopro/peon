@@ -53,7 +53,7 @@ def packzip(cfg):
     
     # parse config
     include_hidden = cfg.get("include_hidden")
-    include_cfg = cfg.get("include_cfg")
+    include_cfg = cfg.get("include_peon_config")
     exclude_list = cfg.get("excludes")
 
     if not isinstance(exclude_list, list):

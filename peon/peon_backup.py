@@ -39,6 +39,7 @@ def shell(cfg):
 
 
 def redis(cfg):
+    print "Backup: Redis ......"
     name = "redis"
     
     dbhost = cfg.get("dbhost")
@@ -60,11 +61,11 @@ def redis(cfg):
         _make_backup_zip(name)
     else:
         raise Exception("Can't not packing redis.")
-    
-    print "Backup: Redis -> OK"
+
     
 
 def mongodb(cfg):
+    print "Backup: Mongodb ......"
     name = "mongodb"
     dest = name
     ensure_dir(dest)
@@ -94,8 +95,7 @@ def mongodb(cfg):
         _make_backup_zip(name)
     else:
         raise Exception("Can't not packing mongodb.")
-    
-    print "Backup: Mongodb -> OK"
+
 
 
 def create_backup_folder():
