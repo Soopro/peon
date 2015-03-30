@@ -163,6 +163,15 @@ Backup file and db.
 
 ```
 
+## -w: Watcher
+
+`peon` -w
+
+Wactching Coffee jade less. If it's changed than compile a new file.
+
+files start or end with undescore '_' is changed will compile all files but it self.
+
+
 
 ## -s: Server
 
