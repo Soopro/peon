@@ -8,9 +8,8 @@ setup(
     version = peon.__version__,
     packages = find_packages(),
     install_requires = [
-        'CoffeeScript>=1.0.10',
-        'lesscpy>=0.10.2',
-        'pyjade>=3.0.0'
+        'watchdog>=0.8.3',
+        'requests>=2.3.0'
     ],
     author = "Redy",
     author_email = "redy.ru@gmail.com",
