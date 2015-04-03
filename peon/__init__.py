@@ -17,6 +17,13 @@ def command_options():
     # Dev server
     parser = argparse.ArgumentParser(
                     description='Options of run Peon dev server.')
+                    
+    parser.add_argument('-v', '--version', 
+                        dest='version',
+                        action='store_const',
+                        const=True,
+                        help='Show Peon current version.')
+
     
     parser.add_argument('-s', '--server', 
                         dest='port',
@@ -79,7 +86,9 @@ def command_options():
 
 def run():
     opts = command_options()
-    if opts.watcher:
+    if opts.version:
+        print "Peon - Version:", __version__
+    elif opts.watcher:
         watch()
     elif opts.construct:
         construct(opts)
