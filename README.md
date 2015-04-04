@@ -180,7 +180,7 @@ files start or end with undescore '_' is changed will compile all files but it s
 if you got coffee jade or less, will automaticly start with harp.
 
 `peon` -s --harp, start server with harp directly.
-
+`peon` -s --http, start server with simplehttp directly.
 
 
 Please make sure you have node npm harp kind stuff ...
