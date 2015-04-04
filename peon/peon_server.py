@@ -61,10 +61,12 @@ def server(opts):
         port = DEFAULT_PORT
     
     curr_path = os.getcwd()
-    if opts.harp_server or has_parse_files(curr_path):
-        harp(port)
-    else:
-        simplehttp(port)
+    
+    if not opts.http_server:
+        if opts.harp_server or has_parse_files(curr_path):
+            harp(port)
+    
+    simplehttp(port)
 
 
 def has_parse_files(path):
