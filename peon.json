@@ -37,7 +37,6 @@
   "backup":{
     "redis":{
       "src":"/Users/redy/dump.rdb",
-      "dbname":"dev",
       "dbhost":null,
       "port":null,
       "user":null,
