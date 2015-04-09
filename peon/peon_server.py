@@ -100,7 +100,7 @@ def simplehttp(port):
     
 def harp(port):
     try:
-        subprocess.call(["harp","server","-p",str(port)])
+        subprocess.call(["harp", "server", "-p", str(port)])
     except Exception as e:
         print "------------------------------------------"
         print "*** Harp can not start."
