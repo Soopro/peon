@@ -75,5 +75,21 @@
         "params":null
       }
     }
-  ]
+  ],
+  "transport":{
+    "upload":{
+      "cwd":"content",
+      "headers":{
+        "SecretKey":"1d02aa814dc64db3a6494624ca35a03a"
+      },
+      "url":"http://localhost:5000/ws/test/develop_theme"
+    },
+    "download":{
+      "dest":"content",
+      "headers":{
+        "SecretKey":"1d02aa814dc64db3a6494624ca35a03a"
+      },
+      "url":"http://localhost:5000/ws/test/develop_theme"
+    }
+  }
 }

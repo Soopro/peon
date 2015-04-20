@@ -6,12 +6,11 @@ from .peon_construct import construct
 from .peon_server import server
 from .peon_watcher import watch
 from .peon_packing import packing
+from .peon_transport import transport
 from .peon_backup import backup
 
-
-__version_info__ = ('0', '0', '5')
+__version_info__ = ('0', '0', '6')
 __version__ = '.'.join(__version_info__)
-
 
 def command_options():
     # Dev server
@@ -77,6 +76,14 @@ def command_options():
                         type=str,
                         help='Exclude filename pattern from packing.')
 
+    # Transport
+    parser.add_argument('-t', '--transport', 
+                        dest='transport',
+                        action='store',
+                        nargs='?',
+                        type=str,
+                        const=1,
+                        help='Start Peon transport mode. upload or download')
     
     # Backup
     parser.add_argument('-b', '--backup', 
@@ -100,6 +107,8 @@ def run():
         construct(opts)
     elif opts.zip:
         packing(opts)
+    elif opts.transport:
+        transport(opts)
     elif opts.backup:
         backup(opts)
     else:

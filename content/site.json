@@ -1,0 +1,67 @@
+{
+  "meta":{
+    "title": "Soopro",
+    "logo":null,
+    "author": "redy",
+    "description": "...",
+    "copyright": "2015 © Soopro tech Co., Ltd.",
+    "license": "#license",
+    "locale": "en_US",
+    "translates":{
+      "zh_CN":{"name":"汉语","url":"#"},
+      "en_US":{"name":"English","url":"#"}
+    },
+    "register": {
+      "text":"Free Register",
+      "placeholder":"Email address for register",
+      "url":""
+    }
+  },
+  
+  "content_types":{
+    "page":"Pages",
+    "feature":"Features"
+  },
+
+  "menus":{
+    "primary":[
+      {
+        "alias":"home",
+        "title":"Back to home",
+        "url":"/",
+        "meta":{},
+        "nodes":[]
+      },
+      {
+        "alias":"video",
+        "title":"Watch Video",
+        "url":"/video",
+        "meta":{},
+        "nodes":[]
+      },
+      {
+        "alias":"features",
+        "title":"Features",
+        "url":"/features",
+        "meta":{},
+        "nodes":[]
+      },
+      {
+        "alias":"themes",
+        "title":"Themes",
+        "url":"/themes",
+        "meta":{},
+        "nodes":[]
+      }
+    ],
+    "doc":[
+      {
+        "alias":"terms-of-use",
+        "title":"Terms of use",
+        "url":"/terms_of_use",
+        "meta":{},
+        "nodes":[]
+      }
+    ]
+  }
+}

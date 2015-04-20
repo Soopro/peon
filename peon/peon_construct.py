@@ -101,7 +101,7 @@ def copy(cfg):
         
         files = rule.get('src') or []
 
-        if not isinstance(files,list):
+        if not isinstance(files, list):
             files = [files]
 
         path_list = []
