@@ -13,10 +13,12 @@ from .helpers import load_config, run_task
 
 DEFAULT_ACTION = "transport"
 
+DEFAULT_CONTENT_DIR = "content"
 DEFAULT_CONTENT_TYPE = "page"
 DEFAULT_SITE_FILE = 'site.json'
 UPLOAD_MODE = "upload"
 DOWNLOAD_MODE = "download"
+
 
 def dict_to_md(data):
     meta = data.get("meta")
@@ -57,9 +59,17 @@ def md_to_dict(md_file):
     return rv
 
 
+def transport_download(cfg):
+    url = cfg.get("url")
+    dest = cfg.get("dest", DEFAULT_CONTENT_DIR)
+    dest = safe_path(dest)
+    if not os.path.isdir(dest):
+        os.mkdir(dest)
+    
+    
 def transport_upload(cfg):
     url = cfg.get("url")
-    cwd = cfg.get("cwd")
+    cwd = cfg.get("cwd", DEFAULT_CONTENT_DIR)
     cwd = safe_path(cwd)
     if not os.path.isdir(cwd):
         raise Exception("Transport upload dir dose not exist.")
@@ -96,6 +106,8 @@ def transport_upload(cfg):
             raise Exception("Site data error:", e)
     
     print payload
+    
+    
 #-------------
 # main
 #-------------
