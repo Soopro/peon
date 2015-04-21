@@ -7,7 +7,7 @@ import SimpleHTTPServer, SocketServer
 from StringIO import StringIO
 import subprocess
 
-from .utlis import now, safe_path
+from .utlis import now, safe_path, uploadData, getData
 from .helpers import load_config, run_task
 
 
@@ -61,14 +61,38 @@ def md_to_dict(md_file):
 
 def transport_download(cfg):
     url = cfg.get("url")
+    headers = cfg.get('headers')
+    params = cfg.get('params')
     dest = cfg.get("dest", DEFAULT_CONTENT_DIR)
     dest = safe_path(dest)
     if not os.path.isdir(dest):
         os.mkdir(dest)
+    try:
+        r = getData(url, params=params, headers=headers)
+        data = r.json()
+    except Exception as e:
+        raise e
+    site_data = {
+        "meta": data.get("site_meta"),
+        "menus": data.get("menus"),
+        "terms": data.get("terms"),
+        "content_types": data.get("content_types"),
+        "files": data.get("files")
+    }
+    print site_data.get("meta")
+    print "=================="
+    print site_data.get("terms")
+    print "=================="
+    print site_data.get("menus")
+    print "=================="
+    print site_data.get("content_types")
+    print "=================="
     
     
 def transport_upload(cfg):
     url = cfg.get("url")
+    headers = cfg.get('headers')
+    params = cfg.get('params')
     cwd = cfg.get("cwd", DEFAULT_CONTENT_DIR)
     cwd = safe_path(cwd)
     if not os.path.isdir(cwd):
@@ -76,6 +100,7 @@ def transport_upload(cfg):
     payload = {
         "site_meta":{},
         "menus":{},
+        "content_types":{},
         "terms":{},
         "files":[]
     }
@@ -88,9 +113,11 @@ def transport_upload(cfg):
         
         for file in files:
             if file.endswith('.md'):
+                filename = file[0:-3]
                 file_path = os.path.join(cwd, dirname, file)
                 f = open(file_path, "r")
                 file_data = md_to_dict(f.read())
+                file_data["alias"] = filename
                 file_data["content_type"] = content_type
                 payload['files'].append(file_data)
     
@@ -100,12 +127,16 @@ def transport_upload(cfg):
             site_file = open(site_path)
             site_data = json.load(site_file)
             payload["site_meta"] = site_data.get("meta",{})
+            payload["content_types"] = site_data.get("content_types",{})
             payload["menus"] = site_data.get("menus",{})
             payload["terms"] = site_data.get("terms",{})
         except Exception as e:
             raise Exception("Site data error:", e)
     
-    print payload
+    try:
+        uploadData(url, data=payload, params=params, headers=headers)
+    except Exception as e:
+        raise e
     
     
 #-------------

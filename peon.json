@@ -80,16 +80,17 @@
     "upload":{
       "cwd":"content",
       "headers":{
+        "content-type": "application/json",
         "SecretKey":"1d02aa814dc64db3a6494624ca35a03a"
       },
-      "url":"http://localhost:5000/ws/test/develop_theme"
+      "url":"http://localhost:5000/ws/123123/develop_sync_sitedata"
     },
     "download":{
       "dest":"content",
       "headers":{
         "SecretKey":"1d02aa814dc64db3a6494624ca35a03a"
       },
-      "url":"http://localhost:5000/ws/test/develop_theme"
+      "url":"http://localhost:5000/ws/123123/develop_sync_sitedata"
     }
   }
 }

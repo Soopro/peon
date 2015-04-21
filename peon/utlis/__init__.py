@@ -2,4 +2,4 @@
 from __future__ import absolute_import
 from .base import *
 from .zipfile import makeZip
-from .request import uploadFile
+from .request import *

@@ -20,8 +20,26 @@
   
   "content_types":{
     "page":"Pages",
-    "feature":"Features"
+    "_feature":"Features",
+    "_gallery":"Gallery"
   },
+  
+  "terms":{
+     "category":[
+       {
+         "alias":"inneral",
+         "title":"INNERAL",
+         "meta":{"pic":"","parent":""}, 
+         "priority": 0
+       },
+       {
+         "alias":"forign",
+         "title":"FORGIN",
+         "meta":{"pic":"","parent":""}, 
+         "priority": 0
+       }
+     ]
+   },
 
   "menus":{
     "primary":[
@@ -50,15 +68,6 @@
         "alias":"themes",
         "title":"Themes",
         "url":"/themes",
-        "meta":{},
-        "nodes":[]
-      }
-    ],
-    "doc":[
-      {
-        "alias":"terms-of-use",
-        "title":"Terms of use",
-        "url":"/terms_of_use",
         "meta":{},
         "nodes":[]
       }
