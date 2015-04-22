@@ -1,6 +1,6 @@
 # Peon
 
-A front-end develop helper.
+A supmice project develop helper.
 
 1. Start dev server with SimpleHTTPServer or Harp.
 2. Watching file changes for coffee less and jade.
@@ -10,7 +10,7 @@ A front-end develop helper.
 6. Transport data so supmice system.
 
 ==============
-I build peon is becuase we are python project team, sometime grunt or gulp can't full fill our needs, custom nodejs scripts is too hard for my team, but python is much more easier...
+I build peon is becuase we are python project team, sometime grunt or gulp can't full fill our needs, custom nodejs scripts is too hard for me, but python is much more easier...
 
 
 ## Usage
