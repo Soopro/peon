@@ -7,7 +7,7 @@ import SimpleHTTPServer, SocketServer
 from StringIO import StringIO
 import subprocess
 
-from .utlis import now, safe_path, uploadData, getData
+from .utlis import now, safe_path, uploadData, getData, replace
 from .helpers import load_config, run_task
 
 
@@ -59,8 +59,9 @@ def md_to_dict(md_file):
     rv["meta"] = dict()
     for item in meta:
         if item:
-            t = item.split(":")
+            t = item.split(":", 1)
             if len(t) == 2:
+                _tmp_value = t[1].strip()
                 try:
                     rv['meta'][t[0].lower()] = ast.literal_eval(t[1].strip())
                 except Exception as e:
@@ -68,12 +69,15 @@ def md_to_dict(md_file):
     rv['content'] = content
     return rv
 
+
 def transport_download(cfg):
     url = cfg.get("url")
     headers = cfg.get('headers')
     params = cfg.get('params')
     dest = cfg.get("dest", DEFAULT_CONTENT_DIR)
     dest = safe_path(dest)
+    replace_rules = cfg.get("replace", [])
+    
     if not os.path.isdir(dest):
         os.mkdir(dest)
     try:
@@ -89,14 +93,20 @@ def transport_download(cfg):
         # "files": data.get("files")
     }   
     
-    site_file_path = os.path.join(dest, DEFAULT_SITE_FILE)
-    site_file = open(site_file_path, 'w')
-    json_string = json.dumps(site_data,
+    json_unicode = json.dumps(site_data,
                              indent=2,
                              sort_keys=True,
                              separators=(',', ': '),
-                             ensure_ascii=False).encode("utf-8")
-    site_file.write(json_string)
+                             ensure_ascii=False)
+
+    for rule in replace_rules:
+        json_unicode = replace(rule.get("pattern"),
+                              rule.get("replacement"),
+                              json_unicode)
+    
+    site_file_path = os.path.join(dest, DEFAULT_SITE_FILE)
+    site_file = open(site_file_path, 'w')
+    site_file.write(json_unicode.encode("utf-8"))
     site_file.close()
     
     files = data.get("files")
@@ -120,10 +130,14 @@ def transport_download(cfg):
         new_file["meta"]["priority"] = file["priority"]
         
         
-        file_string = dict_to_md(new_file)
+        file_string = dict_to_md(new_file).decode("utf-8")
+        for rule in replace_rules:
+            file_string = replace(rule.get("pattern"),
+                                  rule.get("replacement"),
+                                  file_string)
         file_path = os.path.join(file_dest, "{}.md".format(file_alias))
         f = open(file_path, 'w')
-        f.write(file_string)
+        f.write(file_string.encode("utf-8"))
         f.close()
         
 
@@ -134,6 +148,8 @@ def transport_upload(cfg):
     params = cfg.get('params')
     cwd = cfg.get("cwd", DEFAULT_CONTENT_DIR)
     cwd = safe_path(cwd)
+    replace_rules = cfg.get("replace", [])
+    
     if not os.path.isdir(cwd):
         raise Exception("Transport upload dir dose not exist.")
     payload = {
@@ -155,7 +171,12 @@ def transport_upload(cfg):
                 filename = file[0:-3]
                 file_path = os.path.join(cwd, dirname, file)
                 f = open(file_path, "r")
-                file_data = md_to_dict(f.read())
+                file_source = f.read().decode("utf-8")
+                for rule in replace_rules:
+                    file_source = replace(rule.get("pattern"),
+                                          rule.get("replacement"),
+                                          file_source)
+                file_data = md_to_dict(file_source)
                 file_data["alias"] = filename
                 meta = file_data["meta"]
                 
@@ -174,8 +195,15 @@ def transport_upload(cfg):
     site_path = os.path.join(cwd, DEFAULT_SITE_FILE)
     if os.path.isfile(site_path):
         try:
-            site_file = open(site_path)
-            site_data = json.load(site_file)
+            site_file = open(site_path, "r")
+            site_file_source = site_file.read().decode("utf-8")
+            for rule in replace_rules:
+                site_file_source = replace(rule.get("pattern"),
+                                           rule.get("replacement"),
+                                           site_file_source)
+
+            site_data = json.loads(site_file_source)
+
             payload["site_meta"] = site_data.get("meta",{})
             payload["content_types"] = site_data.get("content_types",{})
             payload["menus"] = site_data.get("menus",{})

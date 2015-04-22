@@ -83,6 +83,12 @@
   "transport":{
     "upload":{
       "cwd":"content",
+      "replace": [
+        {
+          "pattern":"/$uploads/", 
+          "replacement":"http://localstatic:5050/apps/redy/123123/uploads/"
+        }
+      ],
       "headers":{
         "content-type": "application/json",
         "SecretKey":"1d02aa814dc64db3a6494624ca35a03a"
@@ -91,6 +97,12 @@
     },
     "download":{
       "dest":"content",
+      "replace": [
+        {
+          "pattern":"http://localstatic:5050/apps/redy/123123/uploads/", 
+          "replacement":"/$uploads/"
+        }
+      ],
       "headers":{
         "SecretKey":"1d02aa814dc64db3a6494624ca35a03a"
       },

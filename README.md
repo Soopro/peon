@@ -204,6 +204,12 @@ Trassport pyco content file and site data to supmice system
   "transport":{
     "upload":{
       "cwd":".",
+      "replace": [
+        {
+          "pattern":"/$uploads/", 
+          "replacement":"http://localstatic:5050/apps/redy/123123/uploads/"
+        }
+      ],
       "headers":{
         "SecretKey":"1d02aa814dc64db3a6494624ca35a03a"
       },
@@ -211,6 +217,12 @@ Trassport pyco content file and site data to supmice system
     },
     "download":{
       "dest":".",
+      "replace": [
+        {
+          "pattern":"http://localstatic:5050/apps/redy/123123/uploads/", 
+          "replacement":"/$uploads/"
+        }
+      ],
       "headers":{
         "SecretKey":"1d02aa814dc64db3a6494624ca35a03a"
       },
@@ -218,6 +230,13 @@ Trassport pyco content file and site data to supmice system
     }
   }
 ```
+
+`replace` for replace content and meta markers. etc., /$uploads/ to the uploads folder you know.
+`url` upload api
+`cwd` the content folder you want upload, for upload only.
+`dest` the content folder you want download to, for download only.
+`headers` request headers
+
 
 *** Content sample ***
 ```

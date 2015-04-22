@@ -1,6 +1,6 @@
 #coding=utf-8
 from __future__ import absolute_import
-import os, time, hashlib, shutil
+import os, re, time, hashlib, shutil
 
 def now():
     return int(time.time())
@@ -61,3 +61,11 @@ def ensure_dir(path, isFile=False):
     if not os.path.isdir(path) and not isFile:
         os.makedirs(path)
         print('peon: Create dir -> %s' % path)
+        
+
+def replace(pattern, replacement, content):
+    if isinstance(pattern, (str, unicode)):
+        pattern = re.escape(pattern)
+    pattern = re.compile(pattern, re.IGNORECASE)
+    content = re.sub(pattern, replacement, content)
+    return content
