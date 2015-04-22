@@ -2,32 +2,33 @@
 from __future__ import absolute_import
 
 import os, argparse
-from .utlis import makeZip, uploadFile
+from .utlis import makeZip, uploadFile, safe_path
 from .helpers import load_config, run_task
 from .config import CONFIG_FILE
 
 DEFAULT_PATH = './'
 DEFAULT_ACTION = "packing"
 
-def _get_filename(target=None):
-    if isinstance(target, (str,unicode)):
-        filepath = target
-        filename = file.strip("/").split('/', 1)
+def _get_filename(cwd=None):
+    if isinstance(cwd, (str,unicode)):
+        filename = cwd.strip("/").rsplit('/', 1)
     else:
-        filepath = DEFAULT_PATH
         filename = os.getcwd().strip("/").rsplit('/', 1)
 
-    if len(filename) > 1:
-        filename = "{}.{}".format(filename[1], "zip")
+    if len(filename) >= 1:
+        filename = "{}.{}".format(filename[-1], "zip")
     else:
-        raise Exception("File path invalid")
-
-    return filename, filepath
+        raise Exception("File cwd invalid")
+    return filename
 
 
 def upload(cfg):
-    target = cfg.get("target")
-    file, _ = _get_filename(target)
+    cwd = safe_path(cfg.get("cwd"))
+    old_dir = os.getcwd()
+    if cwd:
+        os.chdir(cwd)
+
+    file = cfg.get("file") or _get_filename(cwd)
     
     url = cfg.get('url')
     headers = cfg.get('headers')
@@ -38,15 +39,18 @@ def upload(cfg):
         uploadFile(file_path, url, data=data, params=params, headers=headers)
     except Exception as e:
         raise e
+
+    os.chdir(old_dir)
     print "peon: package is uploaded..."
 
 
 def packzip(cfg):
+    cwd = safe_path(cfg.get("cwd"))
+    old_dir = os.getcwd()
+    if cwd:
+        os.chdir(cwd)
     # gen file name
-    target = cfg.get("target")
-    filename, filepath = _get_filename(target)
-
-    
+    filename = cfg.get("file") or _get_filename(cwd)
     # remove file if is exist
     if os.path.isfile(filename):
         os.remove(filename)
@@ -62,11 +66,12 @@ def packzip(cfg):
     if not include_cfg:
         exclude_list.append(CONFIG_FILE)
     
-    makeZip(filepath,
+    makeZip(DEFAULT_PATH,
             filename,
             excludes=exclude_list,
             include_hidden=include_hidden)
     
+    os.chdir(old_dir)
     print "peon: files in the package ..."
 
   

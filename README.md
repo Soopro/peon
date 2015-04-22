@@ -95,12 +95,15 @@ You can also chose upload to a restapi.
 
 ```
   "zip":{
+    "cwd":null,
+    "file":null,
     "include_hidden":false,
     "include_peon_config":false,
-    "excludes":[],
+    "excludes":[]
   }
 
 ```
+`cwd` the dir path you want to packing
 `file` file name you want to specific. default is current folder name.
 `include_hidden` include start with '.'.
 `include_peon_config` include 'peon.json'.
@@ -113,6 +116,8 @@ make sure there is `zip` task before, otherwise will get a error.
 
 ```
   "upload":{
+    "cwd":null,
+    "file":null,
     "headers":{
       "SecretKey":"1d02aa814dc64db3a6494624ca35a03a"
     },
@@ -122,12 +127,12 @@ make sure there is `zip` task before, otherwise will get a error.
   }
 
 ```
-
+`cwd` the dir path you want to upload
+`file` file name you want to upload. default is current folder name.
 `headers` anything you need put intro headers.
 `url` request api url.
 `data` request data
 `params` request params
-`file` file name you want to specific. default is current folder name.
 
 
 ## -b: Backup

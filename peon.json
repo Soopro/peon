@@ -62,17 +62,21 @@
   "packing":[
     {
       "zip":{
+        "cwd":null,
+        "file":null,
         "include_hidden":false,
         "include_peon_config":false,
         "excludes":[]
       },
       "upload":{
+        "cwd":null,
+        "file":null,
         "headers":{
           "SecretKey":"1d02aa814dc64db3a6494624ca35a03a"
         },
         "url":"http://localhost:5000/ws/test/develop_theme",
         "data":null,
-        "params":null
+        "params":null,
       }
     }
   ],
