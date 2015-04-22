@@ -41,7 +41,6 @@ def uploadData(url, data=None, params=None, headers=None, is_json=True):
             print r.json()
         print "=============================="
         raise e
-    
     return r
 
 def uploadFile(file_path, url, data=None, params=None, headers=None):

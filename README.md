@@ -7,6 +7,7 @@ A front-end develop helper.
 3. Build static files from task config.
 4. Create backups.
 5. Packing and uploads
+6. Transport data so supmice system.
 
 ==============
 I build peon is becuase we are python project team, sometime grunt or gulp can't full fill our needs, custom nodejs scripts is too hard for my team, but python is much more easier...
@@ -184,6 +185,124 @@ if you got coffee jade or less, will automaticly start with harp.
 
 
 Please make sure you have node npm harp kind stuff ...
+
+## -t : Transport
+
+`peon` -t [upload] or `peon` -t [download]
+
+Trassport pyco content file and site data to supmice system
+
+'dest' or 'cwd' is define the content folder for upload or download.
+
+
+```
+  "transport":{
+    "upload":{
+      "cwd":".",
+      "headers":{
+        "SecretKey":"1d02aa814dc64db3a6494624ca35a03a"
+      },
+      "url":"http://localhost:5000/ws/123123/develop_sync_sitedata"
+    },
+    "download":{
+      "dest":".",
+      "headers":{
+        "SecretKey":"1d02aa814dc64db3a6494624ca35a03a"
+      },
+      "url":"http://localhost:5000/ws/123123/develop_sync_sitedata"
+    }
+  }
+```
+
+*** Content sample ***
+```
+  content/
+    content_type/
+      somepage.md
+      ...
+    site.json
+    index.md
+    error_404.md
+    somepage.md
+    ...
+    
+```
+
+*** Site.json smaple ***
+```
+{
+  "meta": {
+    "author": "redy",
+    "copyright": "2015 © Soopro tech Co., Ltd.",
+    "description": "...",
+    "license": "#license",
+    "locale": "en_US",
+    "logo": null,
+    "register": {
+      "placeholder": "Email address for register",
+      "text": "Free Register",
+      "url": ""
+    },
+    "title": "Soopro",
+    "translates": {
+      "en_US": {
+        "name": "English",
+        "url": "#"
+      },
+      "zh_CN": {
+        "name": "汉语",
+        "url": "#"
+      }
+    }
+  },
+  "content_types": {
+    "_feature": "Features",
+    "_gallery": "Gallery",
+    "page": "Pages"
+  },
+  "menus": {
+    "primary": [
+      {
+        "alias": "home",
+        "meta": {},
+        "nodes": [],
+        "title": "Back to home",
+        "url": "/"
+      },
+      {
+        "alias": "video",
+        "meta": {},
+        "nodes": [],
+        "title": "Watch Video",
+        "url": "/video"
+      }
+    ]
+  },
+  "terms": {
+    "category": [
+      {
+        "alias": "inneral",
+        "meta": {
+          "parent": "",
+          "pic": ""
+        },
+        "priority": 0,
+        "title": "INNERAL"
+      },
+      {
+        "alias": "forign",
+        "meta": {
+          "parent": "",
+          "pic": ""
+        },
+        "priority": 0,
+        "title": "FORGIN"
+      }
+    ]
+  }
+}
+```
+
 
 ## Installation
 python setup.py install

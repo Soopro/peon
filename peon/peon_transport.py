@@ -22,18 +22,28 @@ DOWNLOAD_MODE = "download"
 
 def dict_to_md(data):
     meta = data.get("meta")
-    content = data.get("content")
+    content = data.get("content").encode("utf-8")
 
     meta_template = "{key}:{value}"
-    meta = [meta_template.format(key=k.capitalize(), value=str(v)+"\n")
+    
+    def make_str(value):
+        if isinstance(value, unicode):
+            value = value.encode("utf-8")
+        elif not isinstance(value, str):
+            value = repr(value)
+        return str(value)
+        
+    meta = [meta_template.format(key= k.capitalize(),
+                                 value= make_str(v)+"\n")
+
             for k, v in meta.iteritems()]
 
     meta = "".join(meta)
 
     file_template = "/*\n{meta}*/\n{content}"
 
-    rv = file_template.format(meta=meta, content=content)
-    return rv
+    file = file_template.format(meta=meta, content=content)
+    return file
 
 
 def md_to_dict(md_file):
@@ -77,18 +87,43 @@ def transport_download(cfg):
         "menus": data.get("menus"),
         "terms": data.get("terms"),
         "content_types": data.get("content_types"),
-        "files": data.get("files")
-    }
-    print site_data.get("meta")
-    print "=================="
-    print site_data.get("terms")
-    print "=================="
-    print site_data.get("menus")
-    print "=================="
-    print site_data.get("content_types")
-    print "=================="
+        # "files": data.get("files")
+    }   
     
+    site_file_path = os.path.join(dest, DEFAULT_SITE_FILE)
+    site_file = open(site_file_path, 'w')
+    json_string = json.dumps(site_data,
+                             indent=2,
+                             sort_keys=True,
+                             separators=(',', ': '),
+                             ensure_ascii=False).encode("utf-8")
+    site_file.write(json_string)
+    site_file.close()
     
+    files = data.get("files")
+    for file in files:
+        file_type = file.get("content_type")
+        file_alias = file.get("alias")
+        file_dest = dest
+        if not file_type or not file_alias:
+            print "Write file filed:", file
+            continue
+        elif file_type != DEFAULT_CONTENT_TYPE:
+            file_dest = os.path.join(dest, file_type)
+            
+        if not os.path.isdir(file_dest):
+            os.mkdir(file_dest)
+        
+        file["meta"] = file["attrs"]
+        del file["attrs"]
+        file_string = dict_to_md(file)
+        file_path = os.path.join(file_dest, "{}.md".format(file_alias))
+        f = open(file_path, 'w')
+        f.write(file_string)
+        f.close()
+        
+
+
 def transport_upload(cfg):
     url = cfg.get("url")
     headers = cfg.get('headers')
@@ -118,7 +153,9 @@ def transport_upload(cfg):
                 f = open(file_path, "r")
                 file_data = md_to_dict(f.read())
                 file_data["alias"] = filename
-                file_data["content_type"] = content_type
+                file_data["content_type"] = file_data.get("type", content_type)
+                if file_data.get("type"):
+                    del file_data["type"]
                 payload['files'].append(file_data)
     
     site_path = os.path.join(cwd, DEFAULT_SITE_FILE)
@@ -134,7 +171,8 @@ def transport_upload(cfg):
             raise Exception("Site data error:", e)
     
     try:
-        uploadData(url, data=payload, params=params, headers=headers)
+        r = uploadData(url, data=payload, params=params, headers=headers)
+        print r.json()
     except Exception as e:
         raise e
     
@@ -158,6 +196,8 @@ def transport(opts):
         run_task(peon_config, COMMANDS)
     else:
         raise Exception("Transport mode does not exist.")
+    
+    print "peon: finish transport ..."
     
 
 if __name__ == "__main__":
