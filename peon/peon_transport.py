@@ -114,10 +114,11 @@ def transport_download(cfg):
             os.mkdir(file_dest)
         
         new_file = {}
-        new_file["meta"] = file["attrs"]
+        new_file["meta"] = file["meta"]
+        new_file["content"] = file["content"]
         new_file["meta"]["status"] = file["status"]
         new_file["meta"]["priority"] = file["priority"]
-        new_file["content"] = file["content"]
+        
         
         file_string = dict_to_md(new_file)
         file_path = os.path.join(file_dest, "{}.md".format(file_alias))
