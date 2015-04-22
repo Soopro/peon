@@ -68,7 +68,6 @@ def md_to_dict(md_file):
     rv['content'] = content
     return rv
 
-
 def transport_download(cfg):
     url = cfg.get("url")
     headers = cfg.get('headers')
@@ -114,9 +113,13 @@ def transport_download(cfg):
         if not os.path.isdir(file_dest):
             os.mkdir(file_dest)
         
-        file["meta"] = file["attrs"]
-        del file["attrs"]
-        file_string = dict_to_md(file)
+        new_file = {}
+        new_file["meta"] = file["attrs"]
+        new_file["meta"]["status"] = file["status"]
+        new_file["meta"]["priority"] = file["priority"]
+        new_file["content"] = file["content"]
+        
+        file_string = dict_to_md(new_file)
         file_path = os.path.join(file_dest, "{}.md".format(file_alias))
         f = open(file_path, 'w')
         f.write(file_string)
@@ -153,9 +156,18 @@ def transport_upload(cfg):
                 f = open(file_path, "r")
                 file_data = md_to_dict(f.read())
                 file_data["alias"] = filename
-                file_data["content_type"] = file_data.get("type", content_type)
-                if file_data.get("type"):
-                    del file_data["type"]
+                meta = file_data["meta"]
+                
+                file_data["content_type"] = meta.get("type", content_type)
+                meta.pop("type", None)
+                
+                file_data["status"] = meta.get("status", 1)
+                meta.pop("status", None)
+                
+                file_data["priority"] = meta.get("priority", 0)
+                meta.pop("priority", None)
+                
+                file_data["meta"] = meta
                 payload['files'].append(file_data)
     
     site_path = os.path.join(cwd, DEFAULT_SITE_FILE)
