@@ -20,6 +20,16 @@ UPLOAD_MODE = "upload"
 DOWNLOAD_MODE = "download"
 
 
+def convert_unicode(item):
+    if isinstance(item, (dict, list)):
+        obj = item if isinstance(item, dict) else xrange(len(item))
+        for i in obj:
+            item[i] = convert_unicode(item[i])
+    elif isinstance(item, str):
+        item = item.decode("utf-8")
+    return item
+
+
 def dict_to_md(data):
     meta = data.get("meta")
     content = data.get("content").encode("utf-8")
@@ -61,9 +71,9 @@ def md_to_dict(md_file):
         if item:
             t = item.split(":", 1)
             if len(t) == 2:
-                _tmp_value = t[1].strip()
                 try:
-                    rv['meta'][t[0].lower()] = ast.literal_eval(t[1].strip())
+                    tmp_obj = ast.literal_eval(t[1].strip())
+                    rv['meta'][t[0].lower()] = convert_unicode(tmp_obj)
                 except Exception as e:
                     rv['meta'][t[0].lower()] = t[1].strip()
     rv['content'] = content
