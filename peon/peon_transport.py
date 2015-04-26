@@ -1,7 +1,7 @@
 #coding=utf-8
 from __future__ import absolute_import
 
-import argparse, os, sys, traceback, re, ast, json
+import argparse, os, sys, traceback, re, yaml, json
 import SimpleHTTPServer, SocketServer
 
 from StringIO import StringIO
@@ -20,35 +20,45 @@ UPLOAD_MODE = "upload"
 DOWNLOAD_MODE = "download"
 
 
-def convert_unicode(item):
-    if isinstance(item, (dict, list)):
-        obj = item if isinstance(item, dict) else xrange(len(item))
-        for i in obj:
-            item[i] = convert_unicode(item[i])
-    elif isinstance(item, str):
-        item = item.decode("utf-8")
-    return item
+def convert_data(x):
+    if isinstance(x, dict):
+        return dict((k.lower(), convert_data(v)) 
+                     for k, v in x.iteritems())
+    elif isinstance(x, list):
+        return list([convert_data(i) for i in x])
+    elif isinstance(x, str):
+        return x.decode("utf-8")
+    elif isinstance(x, (unicode, int, float, bool)):
+        return x
+    else:
+        try:
+            x = str(x).decode("utf-8")
+        except Exception as e:
+            print e
+            pass
+    return x
 
 
 def dict_to_md(data):
     meta = data.get("meta")
     content = data.get("content").encode("utf-8")
-
-    meta_template = "{key}:{value}"
-    
-    def make_str(value):
-        if isinstance(value, unicode):
-            value = value.encode("utf-8")
-        elif not isinstance(value, str):
-            value = repr(value)
-        return str(value)
-        
-    meta = [meta_template.format(key= k.capitalize(),
-                                 value= make_str(v)+"\n")
-
-            for k, v in meta.iteritems()]
-
-    meta = "".join(meta)
+    meta = {k.capitalize():v for k, v in meta.iteritems()}
+    meta = yaml.safe_dump(meta, default_flow_style=False, indent=2)
+    # meta_template = "{key}:{value}"
+    #
+    # def make_str(value):
+    #     if isinstance(value, unicode):
+    #         value = value.encode("utf-8")
+    #     elif not isinstance(value, str):
+    #         value = repr(value)
+    #     return str(value)
+    #
+    # meta = [meta_template.format(key= k.capitalize(),
+    #                              value= make_str(v)+"\n")
+    #
+    #         for k, v in meta.iteritems()]
+    #
+    # meta = "".join(meta)
 
     file_template = "/*\n{meta}*/\n{content}"
 
@@ -63,19 +73,20 @@ def md_to_dict(md_file):
     if not m:
         return None
     content = m.group("content").replace("\n","")
-    meta = m.group("meta").split("\n")
+    meta_string = m.group("meta")
 
     rv = dict()
-    rv["meta"] = dict()
-    for item in meta:
-        if item:
-            t = item.split(":", 1)
-            if len(t) == 2:
-                try:
-                    tmp_obj = ast.literal_eval(t[1].strip())
-                    rv['meta'][t[0].lower()] = convert_unicode(tmp_obj)
-                except Exception as e:
-                    rv['meta'][t[0].lower()] = t[1].strip()
+    yaml_data = yaml.safe_load(meta_string)
+    rv["meta"] = convert_data(yaml_data)
+    # for item in meta:
+#         if item:
+#             t = item.split(":", 1)
+#             if len(t) == 2:
+#                 try:
+#                     tmp_obj = ast.literal_eval(t[1].strip())
+#                     rv['meta'][t[0].lower()] = convert_unicode(tmp_obj)
+#                 except Exception as e:
+#                     rv['meta'][t[0].lower()] = t[1].strip()
     rv['content'] = content
     return rv
 
@@ -138,7 +149,6 @@ def transport_download(cfg):
         new_file["content"] = file["content"]
         new_file["meta"]["status"] = file["status"]
         new_file["meta"]["priority"] = file["priority"]
-        
         
         file_string = dict_to_md(new_file).decode("utf-8")
         for rule in replace_rules:
