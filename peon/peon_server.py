@@ -121,11 +121,17 @@ if __name__ == "__main__":
                         const=9527,
                         help='Start Peon dev server at port.')
     
+    parser.add_argument('--http', 
+                        dest='http_server',
+                        action='store_const',
+                        const=True,
+                        help='Start Peon with simplehttp server.')
+    
     parser.add_argument('--harp', 
                         dest='harp_server',
                         action='store_const',
-                        const="HARP",
-                        help='Start with harp server.')
+                        const=True,
+                        help='Start Peon with harp server.')
 
     opts, unknown = parser.parse_known_args()
     
