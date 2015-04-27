@@ -17,7 +17,7 @@ I build peon is becuase we are python project team, sometime grunt or gulp can't
 You have to place a 'peon.json' intro the project root folder first.
 * peon.json: Config peon's tasks, see the example.
 
-`peon [-s] [-c] [-w]`
+`peon [-s] [-c] [-w] [-t] [-z]`
 
 =======================
 ### -c: Construct

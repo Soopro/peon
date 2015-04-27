@@ -144,8 +144,15 @@ COMMANDS = {
     "rev":rev,
     "shell":shell
 }
+CONSTRUST_TYPES = {
+    "init":install,
+    "release":copy
+}
 
 def construct(opts):
+    if opts.construct not in CONSTRUST_TYPES:
+        opts.construct = None
+    
     config_type = opts.construct or DEFAULT_ACTION
 
     peon_config = load_config(config_type)
