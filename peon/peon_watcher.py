@@ -62,7 +62,7 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
     def _compile_path_filter(self, path):
         filename, ext = os.path.splitext(path)
         ext = ext[1:]
-        comp_ext = self._replacement[ext]
+        comp_ext = self._replacement.get(ext)
         compile_path = "{}.{}".format(filename, comp_ext)
         return compile_path, comp_ext
     
@@ -73,7 +73,6 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
     
     def _find_files(self, file_type=None, path=".", includes=False):
         results = []
-        
         for dirpath, dirs, files in os.walk(path):
             for f in files:
                 filename, ext = os.path.splitext(f)
@@ -106,14 +105,14 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
         filename, ext, filepath = self._file_filter(src_path)
         src_compile_path, comp_ext = self._compile_path_filter(src_path)
         
+        if not comp_ext:
+            return
         if not replace and os.path.isfile(src_compile_path):
             return
         
         if filename.startswith('_') or filename.endswith('_'):
             if includes:
-                is_global = filename.startswith('_') and filename.endswith('_')
-                path = "." if is_global else filepath
-                    
+                path = "." if filename.startswith('_') else filepath
                 files = self._find_files(ext, path)
                 for f in files:
                     self.render(f)

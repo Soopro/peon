@@ -176,7 +176,8 @@ Backup file and db.
 Wactching Coffee jade less. If it's changed than compile a new file.
 
 files start or end with undescore '_' is changed will compile all files but it self.
-
+if start and end both with '_' watcher will render all files from watched folder.
+if only end with '_' will render files from same folder with the include file.
 
 
 ## -s: Server
