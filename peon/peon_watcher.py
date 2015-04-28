@@ -69,18 +69,18 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
     def _file_filter(self, path):
         filename, ext = os.path.splitext(path)
         filename = filename.rsplit('/',1)
-        return filename[1], ext[1:]
+        return filename[1], ext[1:], filename[0]
     
-    def _find_files(self, file_type=None, includes=False):
+    def _find_files(self, file_type=None, path=".", includes=False):
         results = []
         
-        for dirpath, dirs, files in os.walk("."):
+        for dirpath, dirs, files in os.walk(path):
             for f in files:
                 filename, ext = os.path.splitext(f)
 
                 if filename.startswith('.') or ext[1:] not in WATCH_FILE_TYPES:
                     continue
-
+                
                 is_includes = False
                 if filename.startswith('_') or filename.endswith('_'):
                     is_includes = True
@@ -93,7 +93,7 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
                     results.append(os.path.join(dirpath, f))
         return results
     
-    def set_hard_delete(hard=True):
+    def set_hard_delete(self, hard=True):
         self._hard_delete = hard
     
     def render_all(self):
@@ -103,7 +103,7 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
         print "---------- All files rendered. ----------"
                 
     def render(self, src_path, includes=True, replace=True):
-        filename, ext = self._file_filter(src_path)
+        filename, ext, filepath = self._file_filter(src_path)
         src_compile_path, comp_ext = self._compile_path_filter(src_path)
         
         if not replace and os.path.isfile(src_compile_path):
@@ -111,7 +111,10 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
         
         if filename.startswith('_') or filename.endswith('_'):
             if includes:
-                files = self._find_files(ext)
+                is_global = filename.startswith('_') and filename.endswith('_')
+                path = "." if is_global else filepath
+                    
+                files = self._find_files(ext, path)
                 for f in files:
                     self.render(f)
                 return
