@@ -15,6 +15,10 @@ WATCH_FILE_TYPES = {
 }
 SLEEP_TIME = 1
 
+INCL_MARK = "_"
+INCL_ROOT_MARK = "__"
+INCL_G_MARK = "_g_"
+
 # handlers
 class WatchPatternsHandler(PatternMatchingEventHandler):
     
@@ -71,25 +75,34 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
         filename = filename.rsplit('/',1)
         return filename[1], ext[1:], filename[0]
     
-    def _find_files(self, file_type=None, path=".", includes=False):
+    def _find_files(self, file_type=None, path='.', includes=False):
         results = []
-        for dirpath, dirs, files in os.walk(path):
+        
+        def _add_files(files, dirpath):
             for f in files:
                 filename, ext = os.path.splitext(f)
 
                 if filename.startswith('.') or ext[1:] not in WATCH_FILE_TYPES:
                     continue
-                
+            
                 is_includes = False
-                if filename.startswith('_') or filename.endswith('_'):
+                if filename.startswith(INCL_MARK) \
+                or filename.endswith(INCL_MARK):
                     is_includes = True
-                    
+                
                 if not includes and is_includes:
                     continue
                 if includes and not is_includes:
                     continue
                 if ext[1:] == file_type or not file_type:
                     results.append(os.path.join(dirpath, f))
+        
+        if not path:
+            _add_files(os.listdir("."), ".")
+        else:
+            for dirpath, dirs, files in os.walk(path):
+                _add_files(files, dirpath)
+
         return results
     
     def set_hard_delete(self, hard=True):
@@ -110,9 +123,15 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
         if not replace and os.path.isfile(src_compile_path):
             return
         
-        if filename.startswith('_') or filename.endswith('_'):
+        if filename.startswith(INCL_MARK) or filename.endswith(INCL_MARK):
             if includes:
-                path = "." if filename.startswith('_') else filepath
+                if filename.startswith(INCL_ROOT_MARK):
+                    path = None
+                elif filename.startswith(INCL_G_MARK):
+                    path = "."
+                else:
+                    path = filepath
+                
                 files = self._find_files(ext, path)
                 for f in files:
                     self.render(f)
@@ -122,19 +141,25 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
         
         if ext == 'coffee':
             try:
-                subprocess.call(["coffee", "-c", src_path])
+                result = subprocess.call(["coffee", "-c", src_path])
+                if result == -2:
+                    exit()
             except Exception as e:
                 self._raise_exception(e, src_path)
 
         elif ext == 'less':
             try:
-                subprocess.call(["lessc", src_path, src_compile_path])
+                result = subprocess.call(["lessc", src_path, src_compile_path])
+                if result == -2:
+                    exit()
             except Exception as e:
                 self._raise_exception(e, src_path)
 
         elif ext == 'jade':
             try:
-                subprocess.call(["jade", '-P', src_path])
+                result =subprocess.call(["jade", '-P', src_path])
+                if result == -2:
+                    exit()
             except Exception as e:
                 self._raise_exception(e, src_path)
         
