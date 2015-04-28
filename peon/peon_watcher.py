@@ -58,25 +58,26 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
         print "---------- Exception ----------"
         print e
     
-    def _come_path_filter(self, path):
+    def _compile_path_filter(self, path):
         filename, ext = os.path.splitext(path)
         ext = ext[1:]
         comp_ext = self._replacement[ext]
-        comp_path = "{}.{}".format(filename, comp_ext)
-        return comp_path, comp_ext
+        compile_path = "{}.{}".format(filename, comp_ext)
+        return compile_path, comp_ext
     
     def _file_filter(self, path):
         filename, ext = os.path.splitext(path)
         filename = filename.rsplit('/',1)
         return filename[1], ext[1:]
     
-    def _find_files(self, file_type, includes=False):
+    def _find_files(self, file_type=None, includes=False):
         results = []
         
         for dirpath, dirs, files in os.walk("."):
             for f in files:
                 filename, ext = os.path.splitext(f)
-                if filename.startswith('.'):
+
+                if filename.startswith('.') or ext[1:] not in WATCH_FILE_TYPES:
                     continue
 
                 is_includes = False
@@ -87,31 +88,41 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
                     continue
                 if includes and not is_includes:
                     continue
-                if ext[1:] == file_type:
+                if ext[1:] == file_type or not file_type:
                     results.append(os.path.join(dirpath, f))
         return results
-    
-    def render(self, src_path):
-        filename, ext = self._file_filter(src_path)
-        src_comp_path, comp_ext = self._come_path_filter(src_path)
 
-        is_includes = False
-        if filename.startswith('_') or filename.endswith('_'):
-            is_includes = True
-            files = self._find_files(ext)
-            for f in files:
-                self.render(f)
+    def render_all(self):
+        files = self._find_files()
+        for f in files:
+            self.render(f, includes=False)
+        print "---------- All files rendered. ----------"
+                
+    def render(self, src_path, includes=True, replace=True):
+        filename, ext = self._file_filter(src_path)
+        src_compile_path, comp_ext = self._compile_path_filter(src_path)
+        
+        if not replace and os.path.isfile(src_compile_path):
             return
+        
+        if filename.startswith('_') or filename.endswith('_'):
+            if includes:
+                files = self._find_files(ext)
+                for f in files:
+                    self.render(f)
+                return
+            else:
+                return
         
         if ext == 'coffee':
             try:
-                subprocess.call(["coffee","-c", src_path])
+                subprocess.call(["coffee", "-c", src_path])
             except Exception as e:
                 self._raise_exception(e, src_path)
 
         elif ext == 'less':
             try:
-                subprocess.call(["lessc", src_path, src_comp_path])
+                subprocess.call(["lessc", src_path, src_compile_path])
             except Exception as e:
                 self._raise_exception(e, src_path)
 
@@ -121,18 +132,18 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
             except Exception as e:
                 self._raise_exception(e, src_path)
         
-        report = {"src": src_path, "dest": src_comp_path}
+        report = {"src": src_path, "dest": src_compile_path}
         print "{src} ==> {dest}".format(**report)
         self._print_line()
         
     
     def move(self, src_path, dest_path):
-        src_comp_path, comp_ext = self._come_path_filter(src_path)
-        dest_comp_path, _ = self._come_path_filter(dest_path)
+        src_compile_path, comp_ext = self._compile_path_filter(src_path)
+        dest_compile_path, _ = self._compile_path_filter(dest_path)
         
         try:
-            if os.path.isfile(src_comp_path):
-                os.rename(src_comp_path, dest_comp_path)
+            if os.path.isfile(src_compile_path):
+                os.rename(src_compile_path, dest_compile_path)
             else:
                 comp_ext = None
         except Exception as e:
@@ -144,10 +155,10 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
   
         
     def delete(self, src_path):
-        src_comp_path, comp_ext = self._come_path_filter(src_path)
+        src_compile_path, comp_ext = self._compile_path_filter(src_path)
         try:    
-            if os.path.isfile(src_comp_path):
-                os.remove(src_comp_path)
+            if os.path.isfile(src_compile_path):
+                os.remove(src_compile_path)
             else:
                 comp_ext = None
         except Exception as e:
@@ -175,12 +186,14 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
 # main
 #-------------
 
-def watch():
+def watch(opts):
     print "---------- Peon Wacther start working ----------"
     observer = Observer()
-    watch_patterns = []
-    watcher = WatchPatternsHandler(patterns=WATCH_FILE_TYPES)
     
+    watcher = WatchPatternsHandler(patterns=WATCH_FILE_TYPES)
+    if opts.watcher == 'init':
+        watcher.render_all()
+
     observer.schedule(watcher, '.', recursive=True)
     observer.start()
     try:

@@ -47,7 +47,8 @@ def command_options():
     # Watcher
     parser.add_argument('-w', '--watcher', 
                         dest='watcher',
-                        action='store_const',
+                        action='store',
+                        nargs='?',
                         const=True,
                         help='Run Peon watcher for coffee less and jade.')
     
@@ -102,7 +103,7 @@ def run():
     if opts.version:
         print "Peon - Version:", __version__
     elif opts.watcher:
-        watch()
+        watch(opts)
     elif opts.construct:
         construct(opts)
     elif opts.zip:
