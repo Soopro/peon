@@ -31,6 +31,7 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
         self._ignore_patterns = ignore_patterns
         self._ignore_directories = ignore_directories
         self._case_sensitive = case_sensitive
+        self._hard_delete = False
         self.root = os.getcwd()
     
     def process(self, event):
@@ -91,7 +92,10 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
                 if ext[1:] == file_type or not file_type:
                     results.append(os.path.join(dirpath, f))
         return results
-
+    
+    def set_hard_delete(hard=True):
+        self._hard_delete = hard
+    
     def render_all(self):
         files = self._find_files()
         for f in files:
@@ -176,7 +180,8 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
         self.process(event)
     
     def on_deleted(self, event):
-        self.process(event)
+        if self._hard_delete:
+            self.process(event)
     
     def on_created(self, event):
         self.process(event)
@@ -193,6 +198,9 @@ def watch(opts):
     watcher = WatchPatternsHandler(patterns=WATCH_FILE_TYPES)
     if opts.watcher == 'init':
         watcher.render_all()
+    
+    if opts.hard:
+        watcher.set_hard_delete(True)
 
     observer.schedule(watcher, '.', recursive=True)
     observer.start()
