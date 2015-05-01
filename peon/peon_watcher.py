@@ -11,7 +11,9 @@ from watchdog.events import PatternMatchingEventHandler
 WATCH_FILE_TYPES = {
     "coffee":"js",
     "jade":"html",
-    "less":"css"
+    "less":"css",
+    "sass":"css",
+    "scss":"css",
 }
 SLEEP_TIME = 1
 
@@ -150,6 +152,15 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
         elif ext == 'less':
             try:
                 result = subprocess.call(["lessc", src_path, src_compile_path])
+                if result == -2:
+                    exit()
+            except Exception as e:
+                self._raise_exception(e, src_path)
+        
+        elif ext in ['sass','scss']:
+            try:
+                result = subprocess.call(["sass", "--sourcemap=none",
+                                          src_path, src_compile_path])
                 if result == -2:
                     exit()
             except Exception as e:
