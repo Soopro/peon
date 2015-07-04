@@ -12,12 +12,12 @@ class PeonServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     REWRITE_ROOT = "index"
     REWRITE_EXT = "html"
     
-    PARSE_FILE_LIST = {
-        'js':{'parse':'coffee', 'content_type':'text/javascript'},
-        'html':{'parse':'jade', 'content_type':'text/html'},
-        'css':{'parse':'less', 'content_type':'text/css'},
+    CONTENT_TYPES = {
+        'js': {'content_type': 'text/javascript'},
+        'html': {'content_type': 'text/html'},
+        'css': {'content_type': 'text/css'},
     }
-    DEFAULT_PARSE_FILE = {'parse':None, 'content_type':'text/plain'}
+    DEFAULT_CONTENT_TYPE = {'content_type': 'text/plain'}
     
     def do_GET(self):
         print "==========================================="

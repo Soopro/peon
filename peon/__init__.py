@@ -52,12 +52,6 @@ def command_options():
                         const=True,
                         help='Run Peon watcher for coffee less and jade.')
     
-    parser.add_argument('--hard', 
-                        dest='hard',
-                        action='store_const',
-                        const=True,
-                        help='Set Peon watcher delete file if source deleted.')
-    
     # Construct
     parser.add_argument('-c', '--construct', 
                         dest='construct',
