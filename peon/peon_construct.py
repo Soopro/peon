@@ -139,14 +139,14 @@ def copy(cfg):
 #-------------
 
 COMMANDS = {
-    "install":install,
-    "copy":copy,
-    "rev":rev,
-    "shell":shell
+    "install": install,
+    "copy": copy,
+    "rev": rev,
+    "shell": shell
 }
 CONSTRUST_TYPES = {
-    "init":install,
-    "release":copy
+    "init": install,
+    "release": copy
 }
 
 def construct(opts):
