@@ -1,7 +1,7 @@
 #coding=utf-8
 from __future__ import absolute_import
 
-import os, sys, glob, argparse
+import os, sys, glob
 import subprocess
 
 from .utlis import now, gen_md5, copy_file, safe_path, ensure_dir
@@ -164,6 +164,7 @@ def construct(opts):
 
 
 if __name__ == '__main__':
+    import argparse
     # command line options
     parser = argparse.ArgumentParser(
                     description='Options of run Peon dev server.')

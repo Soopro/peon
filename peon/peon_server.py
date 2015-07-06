@@ -1,7 +1,7 @@
 #coding=utf-8
 from __future__ import absolute_import
 
-import argparse, os, sys, traceback
+import os, sys, traceback
 import SimpleHTTPServer, SocketServer
 
 from StringIO import StringIO
@@ -112,6 +112,7 @@ def harp(port):
 
 
 if __name__ == "__main__":
+    import argparse
     # command line options
     parser = argparse.ArgumentParser(
                     description='Options of run Peon dev server.')

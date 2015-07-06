@@ -338,11 +338,12 @@ def watch(opts):
 
 
 if __name__ == '__main__':
+    import argparse
     # command line options
     parser = argparse.ArgumentParser(
                         description='Options of run Peon watcher.')
     
-    parser.add_argument('--dest', 
+    parser.add_argument('--dest',
                         dest='dest_dir',
                         action='store',
                         nargs='?',

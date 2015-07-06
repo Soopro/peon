@@ -1,7 +1,7 @@
 #coding=utf-8
 from __future__ import absolute_import
 
-import argparse, os, sys, traceback, re, yaml, json
+import os, sys, traceback, re, yaml, json
 import SimpleHTTPServer, SocketServer
 
 from StringIO import StringIO
@@ -244,16 +244,23 @@ def transport_upload(cfg):
 
 def transport(opts):
     peon_config = load_config(DEFAULT_ACTION)
-
-    if opts.transport == UPLOAD_MODE:
-        COMMANDS = {
-            "upload": transport_upload
-        }
-        run_task(peon_config, COMMANDS)
-    elif opts.transport == DOWNLOAD_MODE:
-        COMMANDS = {
-            "download": transport_download,
-        }
+    
+    task_name = None
+    task = {}
+    if opts.transport
+        task_name = opts.transport
+        task = peon_config.get(task_name, {})
+    
+    if task.get('type'):
+        if task.get('type') == UPLOAD_MODE:
+            COMMANDS = {
+                task_name: transport_upload
+            }
+        elif task.get('type') == UPLOAD_MODE:
+            COMMANDS = {
+                task_name: transport_download,
+            }
+        
         run_task(peon_config, COMMANDS)
     else:
         raise Exception("Transport mode does not exist.")
@@ -262,6 +269,7 @@ def transport(opts):
     
 
 if __name__ == "__main__":
+    import argparse
     # command line options
     parser = argparse.ArgumentParser(
                     description='Options of run Peon transport.')

@@ -1,7 +1,7 @@
 #coding=utf-8
 from __future__ import absolute_import
 
-import os, argparse
+import os
 from .utlis import makeZip, uploadFile, safe_path
 from .helpers import load_config, run_task
 from .config import CONFIG_FILE
@@ -109,6 +109,7 @@ def packing(opts):
 
 
 if __name__ == '__main__':
+    import argparse
     # command line options
     parser = argparse.ArgumentParser(
                     description='Run Peon packing zip file.')

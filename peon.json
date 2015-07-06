@@ -82,6 +82,7 @@
   ],
   "transport":{
     "upload":{
+      "type":"upload",
       "cwd":"content",
       "replace": [
         {
@@ -96,6 +97,7 @@
       "url":"http://localhost:5000/ws/123123/develop_sync_sitedata"
     },
     "download":{
+      "type":"download",
       "dest":"content",
       "replace": [
         {
