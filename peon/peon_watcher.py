@@ -1,7 +1,7 @@
 #coding=utf-8
 from __future__ import absolute_import
 
-import os, subprocess
+import os, subprocess, time
 from watchdog.observers import Observer  
 from watchdog.events import PatternMatchingEventHandler
 
@@ -63,7 +63,9 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
 #-------------
 
 def watch(opts):
-    print "---------- Peon Wacther start working ----------"
+    print "------------"
+    print "Peon Wacther started"
+    print "------------"
     
     src_dir = opts.src_dir or "src"
     dest_dir = opts.dest_dir or "build"
@@ -94,6 +96,9 @@ def watch(opts):
             time.sleep(SLEEP_TIME)
     except KeyboardInterrupt:
         observer.stop()
+        print "------------"
+        print "Peon Wacther stoped"
+        print "------------"
         
     observer.join()
     
