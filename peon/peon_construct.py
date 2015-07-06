@@ -4,8 +4,11 @@ from __future__ import absolute_import
 import os, sys, glob
 import subprocess
 
+from .service import RenderHandler
 from .utlis import now, gen_md5, copy_file, safe_path, ensure_dir
 from .helpers import load_config, run_task
+
+
 
 # variables
 TEMP_FILE = '_temp_.html'
@@ -134,6 +137,18 @@ def copy(cfg):
     
     print "peon: Work work ...(copy)"
 
+
+def render(cfg):
+    render_opts = {
+        "src": cfg.get('src', 'src'),
+        "dest": cfg.get('dest', 'build')
+    }
+    render = RenderHandler(render_opts)
+    if cfg.get('clean') is True:
+        render.clean()
+    render.render_all()
+
+
 #-------------
 # main
 #-------------
@@ -141,20 +156,13 @@ def copy(cfg):
 COMMANDS = {
     "install": install,
     "copy": copy,
+    "render": render,
     "rev": rev,
     "shell": shell
 }
-CONSTRUST_TYPES = {
-    "init": install,
-    "release": copy
-}
 
 def construct(opts):
-    if opts.construct not in CONSTRUST_TYPES:
-        opts.construct = None
-    
     config_type = opts.construct or DEFAULT_ACTION
-
     peon_config = load_config(config_type)
 
     run_task(peon_config, COMMANDS)

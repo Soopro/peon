@@ -247,7 +247,7 @@ def transport(opts):
     
     task_name = None
     task = {}
-    if opts.transport
+    if opts.transport:
         task_name = opts.transport
         task = peon_config.get(task_name, {})
     
