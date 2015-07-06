@@ -5,7 +5,7 @@ import os, subprocess, time
 from watchdog.observers import Observer  
 from watchdog.events import PatternMatchingEventHandler
 
-from .service import RenderHandler
+from .services import RenderHandler
 
 # variables
 SLEEP_TIME = 1

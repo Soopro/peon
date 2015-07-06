@@ -4,7 +4,7 @@ from __future__ import absolute_import
 import os, sys, glob
 import subprocess
 
-from .service import RenderHandler
+from .services import RenderHandler
 from .utlis import now, gen_md5, copy_file, safe_path, ensure_dir
 from .helpers import load_config, run_task
 
