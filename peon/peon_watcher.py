@@ -233,9 +233,9 @@ class RenderHandler(object):
     def delete(self, src_path):
         dest_path, comp_ext = self.find_dest_path(src_path)
         try:
-            if os.path.isfile(src_path):
+            if os.path.isfile(dest_path):
                 os.remove(dest_path)
-            elif os.path.isdir(src_path):
+            elif os.path.isdir(dest_path):
                 shutil.rmtree(dest_path)
             else:
                 return
@@ -301,8 +301,8 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
 def watch(opts):
     print "---------- Peon Wacther start working ----------"
     
-    src_dir = "src"
-    dest_dir = "build"
+    src_dir = opts.src_dir or "src"
+    dest_dir = opts.dest_dir or "build"
     
     render_opts = {
         "src": src_dir,
@@ -315,11 +315,15 @@ def watch(opts):
         render.clean()
         render.render_all()
     
+    server_progress = None
+    if opts.port:
+        port = str(opts.port or '')
+        args = ['peon', '-s', port, '--http', '--dir', dest_dir]
+        server_progress = subprocess.Popen(args)
+    
     observer = Observer()
     watcher = WatchPatternsHandler(render_handler = render,
                                    ignore_patterns = ['*/.*'])
-    
-    
 
     observer.schedule(watcher, src_dir, recursive=True)
     observer.start()
@@ -334,4 +338,31 @@ def watch(opts):
 
 
 if __name__ == '__main__':
-    watch()
+    # command line options
+    parser = argparse.ArgumentParser(
+                        description='Options of run Peon watcher.')
+    
+    parser.add_argument('--dest', 
+                        dest='dest_dir',
+                        action='store',
+                        nargs='?',
+                        const='build',
+                        help='Define operation dest dir.')
+    
+    parser.add_argument('--src', 
+                        dest='src_dir',
+                        action='store',
+                        nargs='?',
+                        const='src',
+                        help='Define operation src dir.')
+    
+    parser.add_argument('-w', '--watcher', 
+                        dest='watcher',
+                        action='store',
+                        nargs='?',
+                        const=True,
+                        help='Run Peon watcher file changes.')
+
+    opts, unknown = parser.parse_known_args()
+
+    watch(opts)

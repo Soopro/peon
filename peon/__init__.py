@@ -13,7 +13,7 @@ __version_info__ = ('0', '0', '6')
 __version__ = '.'.join(__version_info__)
 
 def command_options():
-    # Dev server
+    
     parser = argparse.ArgumentParser(
                     description='Options of run Peon dev server.')
                     
@@ -23,7 +23,29 @@ def command_options():
                         const=True,
                         help='Show Peon current version.')
 
+    parser.add_argument('--dest', 
+                        dest='dest_dir',
+                        action='store',
+                        nargs='?',
+                        const=True,
+                        help='Define operation dest dir.')
     
+    parser.add_argument('--src', 
+                        dest='src_dir',
+                        action='store',
+                        nargs='?',
+                        const=True,
+                        help='Define operation src dir.')
+    
+    parser.add_argument('--dir', 
+                        dest='dir',
+                        action='store',
+                        nargs='?',
+                        type=str,
+                        const=None,
+                        help='Define operation dir.')
+    
+    # Server
     parser.add_argument('-s', '--server', 
                         dest='port',
                         action='store',
@@ -31,6 +53,7 @@ def command_options():
                         type=int,
                         const=9527,
                         help='Start Peon dev server at port.')
+
     
     parser.add_argument('--http', 
                         dest='http_server',
@@ -50,7 +73,7 @@ def command_options():
                         action='store',
                         nargs='?',
                         const=True,
-                        help='Run Peon watcher for coffee less and jade.')
+                        help='Run Peon watcher file changes.')
     
     # Construct
     parser.add_argument('-c', '--construct', 

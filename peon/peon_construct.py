@@ -18,16 +18,16 @@ def install(cfg):
         if c == "bower":
             try:
                 print "Bower installing......"
-                subprocess.call(["bower","update"])
-                subprocess.call(["bower","install"])
+                subprocess.call(["bower", "update"])
+                subprocess.call(["bower", "install"])
             except Exception as e:
                 raise e
 
         elif c == "npm":
             try:
                 print "Npm installing......"
-                subprocess.call(["npm","update"])
-                subprocess.call(["npm","install"])
+                subprocess.call(["npm", "update"])
+                subprocess.call(["npm", "install"])
             except Exception as e:
                 raise e
 

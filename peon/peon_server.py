@@ -52,7 +52,7 @@ class PeonServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 #-------------
 
 DEFAULT_PORT = 9527
-PARSE_FILE_LIST = ['coffee','jade','less']
+PARSE_FILE_LIST = ['coffee','jade','less','sass','scss']
 
 def server(opts):
     if isinstance(opts.port, int):
@@ -60,6 +60,9 @@ def server(opts):
     else:
         port = DEFAULT_PORT
     
+    if opts.dir:
+        os.chdir(opts.dir)
+
     curr_path = os.getcwd()
     
     if not opts.http_server:
@@ -120,6 +123,14 @@ if __name__ == "__main__":
                         type=int,
                         const=9527,
                         help='Start Peon dev server at port.')
+    
+    parser.add_argument('--dir', 
+                        dest='dir',
+                        action='store',
+                        nargs='?',
+                        type=str,
+                        const=None,
+                        help='Define operation dir.')
     
     parser.add_argument('--http', 
                         dest='http_server',
