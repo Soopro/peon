@@ -2,13 +2,15 @@
 from __future__ import absolute_import
 
 import os
-from .utlis import makeZip, uploadFile, safe_path
+
+from ..utlis import makeZip, uploadFile, safe_path
+from ..config import CONFIG_FILE
 from .helpers import load_config, run_task
-from .config import CONFIG_FILE
 
+# variables
 DEFAULT_PATH = './'
-DEFAULT_ACTION = "packing"
 
+# methods
 def _get_filename(cwd=None):
     if isinstance(cwd, (str,unicode)):
         filename = cwd.strip("/").rsplit('/', 1)
@@ -78,6 +80,7 @@ def packzip(cfg):
 #-------------
 # main
 #-------------
+DEFAULT_ACTION = "packing"
 
 COMMANDS = {
     "zip":packzip,

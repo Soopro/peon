@@ -2,20 +2,15 @@
 from __future__ import absolute_import
 import argparse
 
-from .peon_construct import construct
-from .peon_server import server
-from .peon_watcher import watch
-from .peon_packing import packing
-from .peon_transport import transport
-from .peon_backup import backup
+from .modules import (construct, backup, transport, packing, watch, server)
 
-__version_info__ = ('0', '0', '6')
+__version_info__ = ('0', '1', '0')
 __version__ = '.'.join(__version_info__)
 
 def command_options():
     
     parser = argparse.ArgumentParser(
-                    description='Options of run Peon dev server.')
+                        description='Options of run Peon dev server.')
                     
     parser.add_argument('-v', '--version', 
                         dest='version',

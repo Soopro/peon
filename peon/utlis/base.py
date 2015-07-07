@@ -15,26 +15,47 @@ def copy_tree(src, dest):
         print "peon: Copied -> " + src
     # eg. src and dest are the same file
     except shutil.Error as e:
-        print('peon: Error -> %s' % e)
+        print('peon: shutil Error -> %s' % e)
         raise e
     # eg. source or destination doesn't exist
     except IOError as e:
-        print('peon: Error -> %s' % e.strerror)
+        print('peon: IOError -> %s' % e.strerror)
         raise e
-
+    # other errors
+    except Exception as e:
+        print('peon: Error -> %s' % e)
+        raise e
+ 
 def copy_file(src, dest):
     try:
         shutil.copy2(src, dest)
-        print "peon: Copied -> " + src
+        print "peon: Copied ---> " + dest
     # eg. src and dest are the same file
     except shutil.Error as e:
-        print('peon: Error -> %s' % e)
+        print('peon: shutil Error -> %s' % e)
         raise e
     # eg. source or destination doesn't exist
     except IOError as e:
-        print('peon: Error -> %s' % e.strerror)
+        print('peon: IOError -> %s' % e.strerror)
         raise e
-        
+    # other errors
+    except Exception as e:
+        print('peon: Error -> %s' % e)
+        raise e
+
+def remove_file(path):
+    try:
+        os.remove(path)
+        print "peon: Removed ---> " + path
+    # eg. source or destination doesn't exist
+    except IOError as e:
+        print('peon: IOError -> %s' % e.strerror)
+        raise e
+    # other errors
+    except Exception as e:
+        print('peon: Error -> %s' % e)
+        raise e
+    
 def safe_path(*args):
     if len(args) == 0:
         return None
@@ -51,17 +72,35 @@ def safe_path(*args):
 
     return p_list
 
-def ensure_dir(path, isFile=False):
-    if not os.path.exists(os.path.dirname(path)):
+def ensure_dir(path, is_file = False):
+    if is_file:
         dirname = os.path.dirname(path)
-        if dirname:
+        if dirname and not os.path.isdir(dirname):
             os.makedirs(dirname)
             print('peon: Create dir -> %s' % dirname)
     
-    if not os.path.isdir(path) and not isFile:
-        os.makedirs(path)
-        print('peon: Create dir -> %s' % path)
-        
+    else:
+        if not os.path.isdir(path):
+            os.makedirs(path)
+            print('peon: Create dir -> %s' % path)
+
+def remove_dir(path):
+    try:
+        dir_path = safe_path(path)
+        shutil.rmtree(dir_path)
+        print "peon: Removed dir -> " + dir_path
+    # eg. src and dest are the same file
+    except shutil.Error as e:
+        print('peon: shutil Error -> %s' % e)
+        raise e
+    # eg. source or destination doesn't exist
+    except IOError as e:
+        print('peon: IOError -> %s' % e.strerror)
+        raise e
+    # other errors
+    except Exception as e:
+        print('peon: Error -> %s' % e)
+        raise e
 
 def replace(pattern, replacement, content):
     if isinstance(pattern, (str, unicode)):

@@ -7,6 +7,7 @@ import SimpleHTTPServer, SocketServer
 from StringIO import StringIO
 import subprocess
 
+# handlers
 class PeonServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     
     REWRITE_ROOT = "index"

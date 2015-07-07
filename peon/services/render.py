@@ -34,8 +34,8 @@ class RenderHandler(object):
             raise Exception("Render options is invalid. (opts)")
 
         self.root_dir = os.getcwd()
-        self.src_dir = opts.get('src', '.')
-        self.dest_dir = opts.get('dest', '.')
+        self.src_dir = opts.get('src', '.').lstrip("/")
+        self.dest_dir = opts.get('dest', '.').lstrip("/")
         self.replacement = opts.get('replacement', self.replacement)
 
         if not os.path.isdir(self.dest_dir):
@@ -112,7 +112,7 @@ class RenderHandler(object):
     
     def clean(self):
         if self.src_dir != self.dest_dir:
-            shutil.rmtree(self.dest_dir)
+            shutil.rmtree(self.dest_dir.lstrip("/"))
         
     def render_all(self):
         files = self.find_files(self.src_dir)
