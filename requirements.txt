@@ -4,3 +4,4 @@ PyYAML >= 3.11
 htmlmin >= 0.1.6
 cssmin >= 0.2.0
 jsmin >= 2.1.1
+slimit >= 0.8.1

@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 
 import os, time, shutil, re
-import htmlmin, jsmin, cssmin
+import htmlmin, jsmin, slimit, cssmin
 
 from ..utlis import BeautifyPrint as bpcolor
 
@@ -164,7 +164,8 @@ class MinifyHandler(object):
     
     def js(self, source, dest_path = None):
         try:
-            minifed = jsmin.jsmin(source)
+            # minifed = jsmin.jsmin(source)
+            minifed = slimit.minify(source, mangle=True, mangle_toplevel=True)
         except Exception as e:
             print e
             raise CompressError('js')
