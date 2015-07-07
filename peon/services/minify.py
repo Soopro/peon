@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 
 import os, time, shutil, re
-import htmlmin, jsmin, slimit, cssmin
+import htmlmin, slimit, cssmin
 
 from ..utlis import BeautifyPrint as bpcolor
 
