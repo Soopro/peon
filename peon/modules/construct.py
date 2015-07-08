@@ -158,6 +158,7 @@ def render(cfg):
     render.render_all()
     print "peon: Work work ...(render)"
 
+
 def clean(paths):
     cwd = ''
     path_list = helper_find_path_list(paths, cwd)
@@ -165,6 +166,7 @@ def clean(paths):
         if os.path.isdir(path):
             remove_dir(path)
     print "peon: Work work ...(clean)"
+
 
 def scrap(cfg):
     cwd = safe_path(cfg.get('cwd', ''))
@@ -177,16 +179,29 @@ def scrap(cfg):
             remove_file(path)
     print "peon: Work work ...(scrap)"
 
+
 def compress(cfg):
-    cwd, dest = safe_path(cfg.get('cwd', DEFAULT_BUILD_DIR),
-                          cfg.get('dest', DEFAULT_DIST_DIR))
-    minify = MinifyHandler(cwd)
-    files = cfg.get('src', [])
-    path_list = helper_find_path_list(files, cwd)
-    for path in path_list:
-        minify.process_html(path)
+    for key in cfg:
+        rule = cfg[key]
+        cwd = safe_path(rule.get('cwd', DEFAULT_BUILD_DIR))
+        minify = MinifyHandler(cwd)
+        files = rule.get('src', [])
+        minify_type = rule.get('type')
+        minify_output = safe_path(rule.get('output',''))
+        path_list = helper_find_path_list(files, cwd)
+        if minify_type == 'html' and minify_output:
+            minify.html(path_list)
+        elif minify_type == 'css' and minify_output:
+            minify.css(path_list, minify_output)
+        elif minify_type == 'js' and minify_output:
+            minify.js(path_list, minify_output)
+        elif minify_type == 'process_html':
+            minify.process_html(path_list)
+        elif minify_type == 'angular_template':
+            for path in path_list:
+                minify.process_angular_template(path)
     
-    print "peon: Work work ...(compress)"
+        print "peon: Work work ...(compress)"
 
 
 #-------------
