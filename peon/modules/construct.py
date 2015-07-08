@@ -131,7 +131,7 @@ def copy(cfg):
                 dest_path = dest
                 ensure_dir(dest_path)
             else:
-                _path = safe_path(path.replace(cwd, '', 1))
+                _path = safe_path(path.replace(cwd+'/', '', 1))
                 dest_path = safe_path(os.path.join(dest, _path))
                 ensure_dir(dest_path, True)
 
@@ -188,7 +188,10 @@ def compress(cfg):
         files = rule.get('src', [])
         minify_type = rule.get('type')
         minify_output = safe_path(rule.get('output',''))
+        minify_perfix = rule.get('perfix','')
+        
         path_list = helper_find_path_list(files, cwd)
+        
         if minify_type == 'html' and minify_output:
             minify.html(path_list)
         elif minify_type == 'css' and minify_output:
@@ -198,8 +201,9 @@ def compress(cfg):
         elif minify_type == 'process_html':
             minify.process_html(path_list)
         elif minify_type == 'angular_template':
-            for path in path_list:
-                minify.process_angular_template(path)
+            minify.concat_angular_template(path_list,
+                                           minify_output,
+                                           minify_perfix)
     
         print "peon: Work work ...(compress)"
 

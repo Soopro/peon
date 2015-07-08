@@ -21,9 +21,13 @@ class CompressError(Exception):
 # handlers
 class MinifyHandler(object):
     temp_file = '_minify_temp_.tmp'
+
+    tmpl_regex = re.compile('(<\!--\s*ng\-templates\s*-->)',
+                             re.MULTILINE | re.DOTALL | re.IGNORECASE)
+
     build_regex = re.compile('(<\!--\s*build:([\[]?\s*\w+\s*[\]]?)'+\
-                             '\s+([\w\$\-\./]*)\s*-->'+\
-                             '(.*?)<\!--\s*/build\s-->)',
+                             '\s*+([\w\$\-\./]*)\s*-->'+\
+                             '(.*?)<\!--\s*/build\s*-->)',
                              re.MULTILINE | re.DOTALL | re.IGNORECASE)
                              
     attr_regex = re.compile('\[["\']?\s*([^"\']+)\s*["\']?\]', re.IGNORECASE)
@@ -175,7 +179,16 @@ class MinifyHandler(object):
             print e
             raise CompressError('html')
         return minifed
-
+    
+    def _make_ng_tpl(self, tmpl_id, tmpl_content):
+        template = '<script type="text/ng-template" id="{}">{}</script>'
+        return template.format(tmpl_id, tmpl_content)
+    
+    def _inject_ng_tpl(self, tmpl_series, inject_path):
+        inject_source = self._read_file(inject_path)
+        inject_source.replace(self.tmpl_regex, '\n'.join(tmpl_series), 1)
+        return inject_source
+    
     def css(self, src_paths, output_path):
         css_series = []
         for path in src_paths:
@@ -209,8 +222,7 @@ class MinifyHandler(object):
                 print "peon: HTML minifed -> {}".format(path)
             else:
                 raise CompressError('html not found')
-        
-                
+
     def process_html(self, src_paths):
         for path in src_paths:
             if os.path.isfile(path)
@@ -219,13 +231,18 @@ class MinifyHandler(object):
                 print "peon: HTML processed -> {}".format(path)
             else:
                 raise CompressError('html not found')
-                
-    def concat_angular_template(self, src_paths):
-        tmpl_series = []
+    
+    def concat_angular_template(self, src_paths, inject_path, prefix=''):
+        tmpl_series = ["<!-- Begin Templates -->"]
         for path in src_paths:
             if os.path.isfile(path)
-                tmpl_content = self._read_file(path)
-                tmpl_series.append()
+                tmpl_id = path.replace(self.cwd_dir+'/', prefix, 1)
+                tmpl_content = _make_ng_tpl(tmpl_id, self._read_file(path))
+                tmpl_series.append(tmpl_content)
             else:
                 raise CompressError('angular template not found')
+        tmpl_series.append("<!-- End Templates -->")
+        inject_path = os.path.join(self.cwd_dir, inject_path)
+        inject_source = _inject_ng_tpl(tmpl_series, inject_path)
+        self._output(inject_source, inject_path)
         print "peon: Angular Template concated -> {}".format(path)
