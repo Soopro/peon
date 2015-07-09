@@ -7,7 +7,6 @@ do
       echo 'Start init Peon'
       sudo pip install -r requirements.txt
       sudo npm install -g coffee-script jade less
-      sudo gem install sass
   fi
 done
 

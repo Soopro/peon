@@ -3,6 +3,7 @@ from __future__ import absolute_import
 
 import os, time, shutil
 import subprocess
+import sass
 
 from ..utlis import BeautifyPrint as bpcolor
 
@@ -68,6 +69,14 @@ class RenderHandler(object):
             compile_path = "{}.{}".format(compile_path, comp_ext)
         return compile_path, comp_ext
     
+    def _write_file(self, file_path, file_source):
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+        tmp = open(file_path, 'w')
+        tmp.write(file_source.encode("utf-8"))
+        tmp.close()
+        return file_path
+    
     def get_file_path(self, path):
         filepath, ext = os.path.splitext(path)
         filepath = filepath.rsplit(os.path.sep, 1)
@@ -127,7 +136,7 @@ class RenderHandler(object):
             return
         filedir, filename, ext,  = self.get_file_path(src_path)
         dest_path, comp_ext = self.find_dest_path(src_path)
-        
+
         if not replace and os.path.isfile(dest_path):
             return
         
@@ -144,49 +153,51 @@ class RenderHandler(object):
                 self.render(f)
             return
         
-        try:
-            if ext == 'coffee':
-                result = subprocess.call(["coffee", "-c", src_path])
-                print result
-                if result == -2:
-                    exit()
-                elif result > 0:
-                    raise SubprocessError('coffee ↑')
+        if ext == 'coffee':
+            try:
+                result = subprocess.check_output(["coffee", "-p", src_path])
+            except Exception as e:
+                self._raise_exception(e, src_path)
+                raise SubprocessError('coffee ↑')
 
-            elif ext == 'less':
-                result = subprocess.call(["lessc", src_path, dest_path])
-                if result == -2:
-                    exit()
-                elif result > 0:
-                    raise SubprocessError('less ↑')
-        
-            elif ext in ['sass','scss']:
-                result = subprocess.call(["sass", "--sourcemap=none",
-                                          src_path, dest_path])
-                print result
-                if result == -2:
-                    exit()
-                elif result > 0:
-                    raise SubprocessError('sass ↑')
+        elif ext == 'less':
+            try:
+                result = subprocess.check_output(["lessc", src_path])
+            except Exception as e:
+                self._raise_exception(e, src_path)
+                raise SubprocessError('less ↑')
+    
+        elif ext in ['sass','scss']:
+            try:
+                result = subprocess.check_output(["sass", 
+                                                  "--sourcemap=none",
+                                                  src_path,
+                                                  dest_path])
+            except Exception as e:
+                self._raise_exception(e, src_path)
+                raise SubprocessError('sass ↑')
 
-            elif ext == 'jade':
-                result = subprocess.call(["jade", '-P', src_path, dest_path])
-                print result
-                if result == -2:
-                    exit()
-                elif result > 0:
-                    raise SubprocessError('jade ↑')
 
-            elif self.src_dir != self.dest_dir:
+        elif ext == 'jade':
+            try:
+                result = subprocess.check_output("jade -P < "+src_path,
+                                                 shell=True)
+                self._write_file(dest_path, result)
+            except Exception as e:
+                self._raise_exception(SubprocessError('jade ↑'), src_path)
+                exit()
+
+        elif self.src_dir != self.dest_dir:
+            try:
                 if os.path.isfile(src_path):
                     if not os.path.exists(os.path.dirname(dest_path)):
                         os.makedirs(os.path.dirname(dest_path))
                     shutil.copy2(src_path, dest_path)
-            else:
-                return False
-        except Exception as e:
-            self._raise_exception(e, src_path)
-            return
+            except Exception as e:
+                self._raise_exception(e, src_path)
+                raise e
+        else:
+            return False
     
         self._print_message("RENDERED: {} --> {}".format(src_path, dest_path))
     
