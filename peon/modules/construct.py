@@ -1,9 +1,7 @@
 #coding=utf-8
 from __future__ import absolute_import
 
-import os
-import sys
-import glob
+import os, sys, re, glob, fnmatch
 import subprocess
 
 from ..services import RenderHandler, MinifyHandler
@@ -17,21 +15,44 @@ TEMP_FILE = '_construct_temp_.tmp'
 DEFAULT_SRC_DIR = 'src'
 DEFAULT_BUILD_DIR = 'build'
 DEFAULT_DIST_DIR = 'dist'
-
+nested_regex = re.compile('[\*/]*\*\*/(\*[^/]*)$', re.IGNORECASE)
 
 # helpers
+def help_find_nested_files(nested, file_path, full_file_path):
+    nested_path = full_file_path.replace(nested.group(0), '')
+    nested_suffix = nested.group(1)
+    nested_level = len(file_path.split(os.path.sep))
+    paths = []
+    for dirpath, dirnames, files in os.walk(nested_path):
+        for f in fnmatch.filter(files, nested_suffix):
+            f_path = os.path.join(dirpath, f)
+            f_level = len(f_path.split(os.path.sep))
+            if f_level >= nested_level:
+                paths.append(f_path)
+
+    print "peon: Nested files -> {}/ [{}][{}]".format(nested_path,
+                                                      nested_suffix,
+                                                      nested_level)
+    return paths
+
+
 def helper_find_path_list(src, cwd):
     if not isinstance(src, list):
         src = [src]
     
     cwd = safe_path(cwd)
     path_list = []
+    
     for file in src:
         if file.startswith('!'):
             continue
-        file = safe_path(file)        
+        file = safe_path(file)
         file_path_pattern = os.path.join(cwd, file)
-        paths = glob.glob(file_path_pattern)
+        nested = nested_regex.search(file_path_pattern)
+        if nested:
+            paths = help_find_nested_files(nested, file, file_path_pattern)
+        else:
+            paths = glob.glob(file_path_pattern)
 
         for path in paths:
             if not os.path.exists(path):
@@ -45,12 +66,16 @@ def helper_find_path_list(src, cwd):
             continue
         file = safe_path(file[1:])
         file_path_pattern = os.path.join(cwd, file)
-        paths = glob.glob(file_path_pattern)
+        nested = nested_regex.search(file_path_pattern)
+        if nested:
+            paths = help_find_nested_files(nested, file, file_path_pattern)
+        else:
+            paths = glob.glob(file_path_pattern)
         
         for path in paths:
             if path in path_list:
                 path_list.remove(path)
-                
+        
     return path_list
 
 # methods
@@ -162,6 +187,7 @@ def copy(cfg):
         
         files = rule.get('src', [])
         path_list = helper_find_path_list(files, cwd)
+        ensure_dir(dest)
         
         for path in path_list:
             if is_flatten:
@@ -200,6 +226,8 @@ def render(cfg):
 def clean(paths):
     path_list = helper_find_path_list(paths, '')
     for path in path_list:
+        if path == DEFAULT_SRC_DIR:
+            continue
         if os.path.isdir(path):
             remove_dir(path)
     print "peon: Work work ...(clean)"
@@ -210,6 +238,8 @@ def scrap(cfg):
     files = cfg.get('src', [])
     path_list = helper_find_path_list(files, cwd)
     for path in path_list:
+        if path == DEFAULT_SRC_DIR:
+            continue
         if os.path.isdir(path):
             remove_dir(path)
         elif os.path.isfile(path):

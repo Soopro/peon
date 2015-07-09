@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 
 import os, time, shutil, re
-import htmlmin, slimit, cssmin
+import htmlmin, jsmin, cssmin
 
 from ..utlis import BeautifyPrint as bpcolor
 
@@ -32,6 +32,8 @@ class MinifyHandler(object):
     attr_regex = re.compile('\[["\']?\s*([^"\']+)\s*["\']?\]', re.IGNORECASE)
     src_regex = re.compile('src=["\']?\s*([^"\']+)\s*["\']?', re.IGNORECASE)
     href_regex = re.compile('href=["\']?\s*([^"\']+)\s*["\']?', re.IGNORECASE)
+    comment_regex = re.compile('<\!--\s*.*\s*-->', re.IGNORECASE)
+    
     
     cwd_dir = 'build'
     dest_dir = 'dist'
@@ -54,7 +56,9 @@ class MinifyHandler(object):
             os.remove(self.temp_file)
         try:
             tmp = open(self.temp_file, 'w')
-            tmp.write(file_source.encode("utf-8"))
+            if isinstance(file_source, unicode):
+                file_source = file_source.encode("utf-8")
+            tmp.write(file_source)
             tmp.close()
         except Exception as e:
             print e
@@ -90,7 +94,8 @@ class MinifyHandler(object):
 
             if comp_type == 'css':
                 css_series = []
-                for href in href_regex.findall(text):
+                _text = re.sub(self.comment_regex, u'', text)
+                for href in href_regex.findall(_text):
                     if href.startswith(os.path.sep):
                         _path = os.path.join(self.cwd_dir, href[1:])
                     else:
@@ -106,12 +111,13 @@ class MinifyHandler(object):
                 
             elif comp_type == 'js':
                 js_series = []
-                for src in src_regex.findall(text):
+                _text = re.sub(self.comment_regex, u'', text)
+                for src in src_regex.findall(_text):
                     if src.startswith(os.path.sep):
                         _path = os.path.join(self.cwd_dir, src[1:])
                     else:
                         _path = os.path.join(curr_dir, src)
-
+                
                     js_series.append(self._read_file(_path))
 
                 js_source = self._js('\n'.join(js_series))
@@ -128,7 +134,7 @@ class MinifyHandler(object):
                     continue
                 pattern = r'({}=["\']?\s*([^"\']+)\s*["\']?)'.format(attr_name)
                 comp_attr_regex = re.compile(pattern, re.IGNORECASE)
-                replacement = text
+                replacement = re.sub(self.comment_regex, u'', text)
                 for attr_match, attr in comp_attr_regex.findall(text):
                     if attr.startswith(os.path.sep):
                         _src_path = os.path.join(self.cwd_dir, attr[1:])
@@ -167,7 +173,7 @@ class MinifyHandler(object):
     def _js(self, source):
         try:
             # minifed = jsmin.jsmin(source)
-            minifed = slimit.minify(source, mangle=True, mangle_toplevel=True)
+            minifed = source
         except Exception as e:
             print e
             raise CompressError('js')
@@ -256,7 +262,6 @@ class MinifyHandler(object):
             if os.path.isfile(path):
                 if path == inject_path:
                     continue
-                print prefix, self.cwd_dir+os.path.sep
                 tmpl_id = path.replace(self.cwd_dir+os.path.sep, prefix, 1)
                 tmpl_content = self._make_ng_tpl(tmpl_id,
                                                  self._read_file(path),

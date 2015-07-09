@@ -29,7 +29,7 @@ def copy_tree(src, dest):
 def copy_file(src, dest):
     try:
         shutil.copy2(src, dest)
-        print "peon: Copied ---> " + dest
+        print "peon: Copied {} ---> {}".format(src, dest)
     # eg. src and dest are the same file
     except shutil.Error as e:
         print('peon: shutil Error -> %s' % e)

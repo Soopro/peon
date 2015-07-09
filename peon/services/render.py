@@ -54,9 +54,29 @@ class RenderHandler(object):
         print "[{}Exception{}]: {}".format(bpcolor.FAIL, bpcolor.ENDC, e)
         print "[src_path]: {}".format(src_path)
         print "--------------------"
+
     
     def _print_message(self, message):
         print "[{}] {}".format(int(time.time()), message)
+
+
+    def _write_file(self, file_path, file_source):
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+        tmp = open(file_path, 'w')
+        if isinstance(file_source, unicode):
+            file_source = file_source.encode("utf-8")
+        tmp.write(file_source)
+        tmp.close()
+        return file_path
+
+
+    def _move_file(self, src_path, dest_path):
+        if os.path.isfile(dest_path):
+            os.remove(dest_path)
+        if os.path.isfile(src_path):
+            os.rename(src_path, dest_path)
+        return src_path
     
     def find_dest_path(self, path):
         if path.startswith(self.src_dir):
@@ -69,18 +89,12 @@ class RenderHandler(object):
             compile_path = "{}.{}".format(compile_path, comp_ext)
         return compile_path, comp_ext
     
-    def _write_file(self, file_path, file_source):
-        if os.path.isfile(file_path):
-            os.remove(file_path)
-        tmp = open(file_path, 'w')
-        tmp.write(file_source.encode("utf-8"))
-        tmp.close()
-        return file_path
-    
+
     def get_file_path(self, path):
         filepath, ext = os.path.splitext(path)
         filepath = filepath.rsplit(os.path.sep, 1)
         return filepath[0], filepath[1], ext[1:]
+
     
     def find_files(self, path='.', file_type=None, includes=False):
         results = []
@@ -113,16 +127,19 @@ class RenderHandler(object):
                 add_files(files, dirpath)
 
         return results
-    
+
+
     def is_include_file(self, filename):
         is_incl_file = filename.startswith(self.incl_mark) \
                                or filename.endswith(self.incl_mark)
         return is_incl_file
-    
+
+
     def clean(self):
         if self.src_dir != self.dest_dir:
             shutil.rmtree(self.dest_dir.lstrip(os.path.sep))
-        
+
+
     def render_all(self):
         files = self.find_files(self.src_dir)
         for f in files:
@@ -136,7 +153,8 @@ class RenderHandler(object):
             return
         filedir, filename, ext,  = self.get_file_path(src_path)
         dest_path, comp_ext = self.find_dest_path(src_path)
-
+        _src_path = os.path.join(filedir, "{}.{}".format(filename, comp_ext))
+        
         if not replace and os.path.isfile(dest_path):
             return
         
@@ -153,19 +171,23 @@ class RenderHandler(object):
                 self.render(f)
             return
         
+        print "--------------------"
+        
         if ext == 'coffee':
             try:
-                result = subprocess.check_output(["coffee", "-p", src_path])
+                result = subprocess.call(["coffee", "-c", src_path])
+                self._move_file(_src_path, dest_path)
             except Exception as e:
-                self._raise_exception(e, src_path)
-                raise SubprocessError('coffee ↑')
+                self._raise_exception(SubprocessError('coffee ↑'), src_path)
+                raise e
 
         elif ext == 'less':
             try:
                 result = subprocess.check_output(["lessc", src_path])
+                self._write_file(dest_path, result)
             except Exception as e:
-                self._raise_exception(e, src_path)
-                raise SubprocessError('less ↑')
+                self._raise_exception(SubprocessError('less ↑'), src_path)
+                raise e
     
         elif ext in ['sass','scss']:
             try:
@@ -174,18 +196,17 @@ class RenderHandler(object):
                                                   src_path,
                                                   dest_path])
             except Exception as e:
-                self._raise_exception(e, src_path)
-                raise SubprocessError('sass ↑')
+                self._raise_exception(SubprocessError('sass ↑'), src_path)
+                raise e
 
 
         elif ext == 'jade':
             try:
-                result = subprocess.check_output("jade -P < "+src_path,
-                                                 shell=True)
-                self._write_file(dest_path, result)
+                result = subprocess.check_output(["jade", "-P", src_path])
+                self._move_file(_src_path, dest_path)
             except Exception as e:
                 self._raise_exception(SubprocessError('jade ↑'), src_path)
-                exit()
+                raise e
 
         elif self.src_dir != self.dest_dir:
             try:
@@ -194,7 +215,7 @@ class RenderHandler(object):
                         os.makedirs(os.path.dirname(dest_path))
                     shutil.copy2(src_path, dest_path)
             except Exception as e:
-                self._raise_exception(e, src_path)
+                self._raise_exception(SubprocessError('file'), src_path)
                 raise e
         else:
             return False
