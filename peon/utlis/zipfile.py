@@ -1,9 +1,8 @@
 #coding=utf-8
 from __future__ import absolute_import
 
-import os
-import fnmatch
-from zipfile import ZipFile ZIP_DEFLATED
+import os, fnmatch
+from zipfile import ZipFile, ZIP_DEFLATED
 
 TEMP_ZIP = '._tmp_zip'
 
@@ -34,5 +33,7 @@ def makeZip(target_path, zip_filename, excludes=None, include_hidden=False):
     zfile = ZipFile(TEMP_ZIP, 'w', ZIP_DEFLATED)
     _zipdir(target_path, zfile, excludes, include_hidden)
     zfile.close()
+    if os.path.isfile(zip_filename):
+        os.remove(zip_filename)
     os.rename(TEMP_ZIP, zip_filename)
     return zip_filename

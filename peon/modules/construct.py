@@ -77,19 +77,57 @@ def shell(cfg):
     for cmd in cfg:
         subprocess.call(cmd, shell=True)
 
-
+def replace(cfg):
+    files = cfg.get('src', [])
+    cwd = safe_path(cfg.get('cwd', ''))
+    replacements = cfg.get('replacements', [])
+    path_list = helper_find_path_list(files, cwd)
+    for path in path_list:
+        file = open(path)
+        if os.path.isfile(TEMP_FILE):
+            os.remove(TEMP_FILE)
+        tmp = open(TEMP_FILE, 'w')
+        for line in file:
+            for replace_rule in replacements:
+                pattern = replace_rule.get('pattern')
+                replace = replace_rule.get('replace')
+                if pattern is None or replace is None:
+                    print "peon: Failed -> replace (no pattern)"
+                    continue
+                if isinstance(pattern, unicode):
+                    pattern = pattern.encode('utf-8')
+                if isinstance(replace, unicode):
+                    replace = replace.encode('utf-8')
+                line = line.replace(pattern, replace)
+            tmp.write(line)
+        tmp.close()
+        file.close()
+        if os.path.isfile(path):
+            os.remove(path)
+        os.rename(TEMP_FILE, path)
+        print "peon: Replaced --> " + path
+    
+    if os.path.isfile(TEMP_FILE):
+        os.remove(TEMP_FILE)
+        
+    print "peon: Work work ...(replace)"
+    
+    
+    
 def rev(cfg):
-    if cfg.get('pattern'):
-        pattern = str(cfg['pattern'])
-        find = cfg.get('find')
-        if find:
-            find = str(find)
-        else:
-            find = pattern
-        pattern = find.replace(pattern, gen_md5())
-        replacements = {find: pattern}
+    if not cfg.get('pattern'):
+        print "peon: Failed -> rev (no pattern)"
+        return
+    pattern = str(cfg['pattern'])
+    find = cfg.get('find')
+    if find:
+        find = str(find)
+    else:
+        find = pattern
+    pattern = find.replace(pattern, gen_md5())
+    replacements = {find: pattern}
     cwd = safe_path(cfg.get('cwd',''))
-    files = cfg.get('src', []) 
+    files = cfg.get('src', [])
     path_list = helper_find_path_list(files, cwd)
 
     for path in path_list:
@@ -103,12 +141,10 @@ def rev(cfg):
             tmp.write(line)
         tmp.close()
         file.close()
-        try:
-            os.rename(TEMP_FILE, path)
-            print "peon: MD5ify -> " + path
-        except Exception as e:
-            print('Error: %s' % e)
-            raise e
+        if os.path.isfile(path):
+            os.remove(path)
+        os.rename(TEMP_FILE, path)
+        print "peon: MD5ify -> " + path
 
     if os.path.isfile(TEMP_FILE):
         os.remove(TEMP_FILE)
@@ -162,8 +198,7 @@ def render(cfg):
 
 
 def clean(paths):
-    cwd = ''
-    path_list = helper_find_path_list(paths, cwd)
+    path_list = helper_find_path_list(paths, '')
     for path in path_list:
         if os.path.isdir(path):
             remove_dir(path)
@@ -189,12 +224,13 @@ def compress(cfg):
         minify = MinifyHandler(cwd)
         files = rule.get('src', [])
         minify_type = rule.get('type')
-        minify_output = safe_path(rule.get('output',''))
-        minify_perfix = rule.get('perfix','')
-
+        minify_output = safe_path(rule.get('output', ''))
+        minify_perfix = rule.get('perfix', '')
+        minify_beautify = rule.get('beautify', False)
+        
         path_list = helper_find_path_list(files, cwd)
 
-        if minify_type == 'html' and minify_output:
+        if minify_type == 'html':
             minify.html(path_list)
         elif minify_type == 'css' and minify_output:
             minify.css(path_list, minify_output)
@@ -205,9 +241,10 @@ def compress(cfg):
         elif minify_type == 'angular_template':
             minify.concat_angular_template(path_list,
                                            minify_output,
-                                           minify_perfix)
+                                           minify_perfix,
+                                           minify_beautify)
     
-        print "peon: Work work ...(compress)"
+    print "peon: Work work ...(compress)"
 
 
 #-------------
@@ -221,6 +258,7 @@ COMMANDS = {
     "copy": copy,
     "clean": clean,
     "scrap": scrap,
+    "replace": replace,
     "render": render,
     "compress": compress,
     "rev": rev,

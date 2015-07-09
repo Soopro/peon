@@ -23,12 +23,62 @@
   ],
   "release":[
     {
-      "shell":[
-        "grunt release"
-      ],
+      "clean": "dist",
+      "copy":{
+        "dist":{
+          "src": [
+            "*",
+            "*/*",
+            "*/*/*"
+          ],
+          "cwd": "build",
+          "dest": "dist"
+        }
+      },
+      "compress": {
+        "angular_template":{
+          "type": "angular_template",
+          "src": "*.html",
+          "cwd": "dist",
+          "perfix": "",
+          "beautify": false,
+          "output":"index.html"
+        },
+        "process_html":{
+          "type": "process_html",
+          "cwd": "dist",
+          "src": "index.html"
+        },
+        "html":{
+          "type": "html",
+          "cwd": "dist",
+          "src": "index.html"
+        }
+      },
+      "replace": {
+        "src": "*.min.*",
+        "cwd": "dist",
+        "replacements": [
+          {
+            "pattern": "/styles/icons/svg",
+            "replace": "svg"
+          }
+        ]
+      },
+      "scrap": {
+        "src":[
+          "*.js",
+          "*.html",
+          "styles/*.png",
+          "!*.min.*",
+          "!*.png",
+          "!index.html"
+        ],
+        "cwd":"dist"
+      },
       "rev":{
-        "src":"/*.html",
-        "cwd":"release/",
+        "src":"*.html",
+        "cwd":"dist",
         "find":"?md5=null",
         "pattern":"null"
       }

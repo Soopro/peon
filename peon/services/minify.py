@@ -22,11 +22,10 @@ class CompressError(Exception):
 class MinifyHandler(object):
     temp_file = '_minify_temp_.tmp'
 
-    tmpl_regex = re.compile('(<\!--\s*ng\-templates\s*-->)',
-                             re.MULTILINE | re.DOTALL | re.IGNORECASE)
+    tmpl_regex = re.compile('<\!--\s*ng\-templates\s*-->', re.IGNORECASE)
 
-    build_regex = re.compile('(<\!--\s*build:([\[]?\s*\w+\s*[\]]?)'+\
-                             '\s*+([\w\$\-\./]*)\s*-->'+\
+    build_regex = re.compile('(<\!--\s*build:(\[?\s*\w+\s*\]?)'+\
+                             '\s+([\w\$\-\./]*)(\?.*?)*\s*-->'+\
                              '(.*?)<\!--\s*/build\s*-->)',
                              re.MULTILINE | re.DOTALL | re.IGNORECASE)
                              
@@ -78,15 +77,11 @@ class MinifyHandler(object):
         curr_dir = os.path.dirname(file_path)
         
         content = self._read_file(file_path)
-        for match, comp_type, comp_file, text in build_regex.findall(content):
+        regex_result = build_regex.findall(content)
+        for match, comp_type, comp_file, comp_param, text in regex_result:
             if not comp_file or not comp_type:
                 content = content.replace(match, '')
                 continue
-            
-            comp_file_args = ''
-            comp_file_split = comp_file.rsplit('?', 1)
-            if len(comp_file_split) > 1:
-                comp_file_args = '?'+comp_file_split[1]
             
             if comp_file.startswith(os.path.sep):
                 comp_file_path = os.path.join(self.dest_dir, comp_file[1:])
@@ -106,8 +101,8 @@ class MinifyHandler(object):
                 css_source = self._css('\n'.join(css_series))
                 self._output(css_source, comp_file_path)
                 
-                new_css_tpl = '<link rel="stylesheet" href="{}">'
-                replacement = new_css_tpl.format(comp_file)
+                new_css_tpl = u'<link rel="stylesheet" href="{}">'
+                replacement = new_css_tpl.format(comp_file+comp_param)
                 
             elif comp_type == 'js':
                 js_series = []
@@ -116,14 +111,19 @@ class MinifyHandler(object):
                         _path = os.path.join(self.cwd_dir, src[1:])
                     else:
                         _path = os.path.join(curr_dir, src)
-                    js_path_list.append(_path)
 
-                self.js(js_path_list, comp_file_path)
-                new_css_tpl = '<script src="{}"></script>'
-                replacement = new_css_tpl.format(comp_file)
+                    js_series.append(self._read_file(_path))
+
+                js_source = self._js('\n'.join(js_series))
+                self._output(js_source, comp_file_path)
                 
+                new_js_tpl = u'<script src="{}"></script>'
+                replacement = new_js_tpl.format(comp_file+comp_param)
+
             else:
-                attr_name = attr_regex.search(comp_type).group(1)
+                search_attr = attr_regex.search(comp_type)
+                if search_attr:
+                    attr_name = search_attr.group(1)
                 if not attr_name:
                     continue
                 pattern = r'({}=["\']?\s*([^"\']+)\s*["\']?)'.format(attr_name)
@@ -136,7 +136,8 @@ class MinifyHandler(object):
                         _src_path = os.path.join(curr_dir, attr)
                     if _src_path != comp_file_path:
                         shutil.copy2(_src_path, comp_file_path)
-                    new_attr = '{}="{}"'.format(attr_name, comp_file)
+                    new_attr = '{}="{}"'.format(attr_name,
+                                                comp_file+comp_param)
                     replacement = replacement.replace(attr_match, new_attr)
 
             if not replacement:
@@ -170,24 +171,35 @@ class MinifyHandler(object):
         except Exception as e:
             print e
             raise CompressError('js')
-        return self.minifed(dest_path, minifed)
+        return minifed
     
     def _html(self, source):
         try:
-            minifed = htmlmin.minify(source)
+            # Remove comments found in HTML. Individual comments can be 
+            # maintained by putting a ! as the first character inside the
+            # comment.
+            # <!-- FOO --> <!--! BAR --> become to <!-- BAR -->
+            minifed = htmlmin.minify(source,
+                                     remove_comments=True,
+                                     remove_empty_space=True)
         except Exception as e:
             print e
             raise CompressError('html')
         return minifed
     
-    def _make_ng_tpl(self, tmpl_id, tmpl_content):
-        template = '<script type="text/ng-template" id="{}">{}</script>'
-        return template.format(tmpl_id, tmpl_content)
+    def _make_ng_tpl(self, tmpl_id, tmpl_content, beautify=False):
+        if beautify:
+            new_line = '\n'
+        else:
+            tmpl_content = self._html(tmpl_content)
+            new_line = ''
+        template = u'<script type="text/ng-template" id="{}">{}{}{}</script>'
+        return template.format(tmpl_id, new_line, tmpl_content, new_line)
     
-    def _inject_ng_tpl(self, tmpl_series, inject_path):
+    def _inject_ng_tpl(self, tmpl_content, inject_path):
         inject_source = self._read_file(inject_path)
-        inject_source.replace(self.tmpl_regex, '\n'.join(tmpl_series), 1)
-        return inject_source
+        tmpl_content = u"\n{}".format(tmpl_content)
+        return re.sub(self.tmpl_regex, tmpl_content, inject_source, 1)
     
     def css(self, src_paths, output_path):
         css_series = []
@@ -225,24 +237,38 @@ class MinifyHandler(object):
 
     def process_html(self, src_paths):
         for path in src_paths:
-            if os.path.isfile(path)
-                html_source = _process_html(path)
+            if os.path.isfile(path):
+                html_source = self._process_html(path)
                 self._output(html_source, path)
                 print "peon: HTML processed -> {}".format(path)
             else:
                 raise CompressError('html not found')
     
-    def concat_angular_template(self, src_paths, inject_path, prefix=''):
-        tmpl_series = ["<!-- Begin Templates -->"]
+    def concat_angular_template(self, src_paths, inject_path, 
+                                                 prefix='', beautify=False):
+        inject_path = os.path.join(self.cwd_dir, inject_path)
+        if not os.path.isfile(inject_path):
+            raise CompressError('angular template inject path not found')
+
+        tmpl_series = [u'<!-- Begin Templates -->']
+        
         for path in src_paths:
-            if os.path.isfile(path)
+            if os.path.isfile(path):
+                if path == inject_path:
+                    continue
+                print prefix, self.cwd_dir+os.path.sep
                 tmpl_id = path.replace(self.cwd_dir+os.path.sep, prefix, 1)
-                tmpl_content = _make_ng_tpl(tmpl_id, self._read_file(path))
+                tmpl_content = self._make_ng_tpl(tmpl_id,
+                                                 self._read_file(path),
+                                                 beautify)
                 tmpl_series.append(tmpl_content)
             else:
-                raise CompressError('angular template not found')
-        tmpl_series.append("<!-- End Templates -->")
-        inject_path = os.path.join(self.cwd_dir, inject_path)
-        inject_source = _inject_ng_tpl(tmpl_series, inject_path)
+                raise CompressError('angular templates not found')
+                
+        tmpl_series.append(u'<!-- End Templates -->')
+        
+        inject_source = self._inject_ng_tpl('\n'.join(tmpl_series),
+                                            inject_path)
+
         self._output(inject_source, inject_path)
         print "peon: Angular Template concated -> {}".format(path)
