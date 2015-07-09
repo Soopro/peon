@@ -14,7 +14,6 @@ from .helpers import load_config, run_task
 
 # variables
 TEMP_FILE = '_construct_temp_.tmp'
-DEFAULT_LIBS_DIR = 'src{}libs{}'.format(os.path.sep)
 DEFAULT_SRC_DIR = 'src'
 DEFAULT_BUILD_DIR = 'build'
 DEFAULT_DIST_DIR = 'dist'
@@ -123,7 +122,7 @@ def copy(cfg):
         is_flatten = rule.get('flatten', False)
         force = rule.get('force', True)
         cwd, dest = safe_path(rule.get('cwd', ''),
-                              rule.get('dest', DEFAULT_LIBS_DIR))
+                              rule.get('dest', ''))
         
         files = rule.get('src', [])
         path_list = helper_find_path_list(files, cwd)
@@ -172,7 +171,7 @@ def clean(paths):
 
 
 def scrap(cfg):
-    cwd = safe_path(cfg.get('cwd', ''))
+    cwd = safe_path(cfg.get('cwd', DEFAULT_DIST_DIR))
     files = cfg.get('src', [])
     path_list = helper_find_path_list(files, cwd)
     for path in path_list:
@@ -186,15 +185,15 @@ def scrap(cfg):
 def compress(cfg):
     for key in cfg:
         rule = cfg[key]
-        cwd = safe_path(rule.get('cwd', DEFAULT_BUILD_DIR))
+        cwd = safe_path(rule.get('cwd', DEFAULT_DIST_DIR))
         minify = MinifyHandler(cwd)
         files = rule.get('src', [])
         minify_type = rule.get('type')
         minify_output = safe_path(rule.get('output',''))
         minify_perfix = rule.get('perfix','')
-        
+
         path_list = helper_find_path_list(files, cwd)
-        
+
         if minify_type == 'html' and minify_output:
             minify.html(path_list)
         elif minify_type == 'css' and minify_output:
