@@ -4,11 +4,10 @@ from __future__ import absolute_import
 import os, sys, shutil, datetime
 import subprocess
 
-from .utlis import makeZip, copy_file, copy_tree, ensure_dir
+from ..utlis import makeZip, copy_file, copy_tree, ensure_dir
 from .helpers import load_config, run_task
 
-DEFAULT_ACTION = "backup"
-
+# methods
 def _make_backup_zip(filename):
     makeZip(filename,
             filename+".zip",
@@ -20,7 +19,7 @@ def files(cfg):
     dest = name
     ensure_dir(dest)
     for s in src:
-        d = os.path.join(dest, s.lstrip("/"))
+        d = os.path.join(dest, s.lstrip(os.path.sep))
         if os.path.isfile(s):
             ensure_dir(d, True)
             copy_file(s, d)
@@ -110,6 +109,7 @@ def create_backup_folder():
 #-------------
 # main
 #-------------
+DEFAULT_ACTION = "backup"
 
 COMMANDS = {
     "redis":redis,

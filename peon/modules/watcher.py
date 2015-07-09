@@ -5,11 +5,15 @@ import os, subprocess, time
 from watchdog.observers import Observer  
 from watchdog.events import PatternMatchingEventHandler
 
-from .services import RenderHandler
+from ..services import RenderHandler
+from .helpers import load_config
 
 # variables
 SLEEP_TIME = 1
+DEFAULT_SRC_DIR = 'src'
+DEFAULT_DEST_DIR = 'build'
 
+# handlers
 class WatchPatternsHandler(PatternMatchingEventHandler):
     
     def __init__(self, render_handler,
@@ -35,7 +39,7 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
     def _find_end_path(self, path):
         if not path:
             return None
-        tmp_path_list = path.rsplit('/',1)
+        tmp_path_list = path.rsplit(os.path.sep,1)
         if len(tmp_path_list) > 0:
             return tmp_path_list[1]
         else:
@@ -61,14 +65,20 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
 #-------------
 # main
 #-------------
+DEFAULT_ACTION = 'watch'
+
 
 def watch(opts):
+    peon_config = load_config(DEFAULT_ACTION)
+    
     print "------------"
     print "Peon Wacther started"
     print "------------"
     
-    src_dir = opts.src_dir or "src"
-    dest_dir = opts.dest_dir or "build"
+    src_dir = opts.src_dir or peon_config.get('src_dir', DEFAULT_SRC_DIR)
+    dest_dir = opts.dest_dir or peon_config.get('dest_dir', DEFAULT_DEST_DIR)
+    init_dest = opts.watcher == 'init' or peon_config.get('init')
+    server_port = opts.port or peon_config.get('port')
     
     render_opts = {
         "src": src_dir,
@@ -76,12 +86,15 @@ def watch(opts):
     }
     render = RenderHandler(render_opts)
     
-    if opts.watcher == 'init':
+    if init_dest:
         render.clean()
         render.render_all()
     
-    if opts.port:
-        port = str(opts.port or '')
+    if server_port:
+        try:
+            port = str(server_port)
+        except:
+            port = ''
         args = ['peon', '-s', port, '--http', '--dir', dest_dir]
         server_progress = subprocess.Popen(args)
     

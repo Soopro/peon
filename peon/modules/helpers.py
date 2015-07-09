@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import os, json
 from collections import OrderedDict
 
-from .config import CONFIG_FILE
+from ..config import CONFIG_FILE
 
 
 def load_config(config_type, force=True):
@@ -23,7 +23,7 @@ def load_config(config_type, force=True):
     if force and not config:
         raise Exception("Config error: Nothing loaded!")
     
-    if isinstance(config, dict):
+    if not isinstance(config, list):
        config = [config]
     
     print "--------------------------------------------"

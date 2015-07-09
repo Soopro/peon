@@ -60,7 +60,8 @@ Copy files from src to dest.
       "src":[
         "lodash/dist/lodash.js",
         "angular/angular.js",
-        "**/**/*.js",
+        "*/*/*.js",
+        "!*/*.html"
       ],
       "cwd":"bower_components/",
       "dest":"src/libs"
@@ -71,7 +72,10 @@ copy: The key of task options.
 
 <group>: A group name of copy files. 'libs' is group name in the sample above. usual define different package. You can define multiple groups with different options. and you have to make different group name by your self.
 
-src: Source file path.
+src: Source file path. use 'glob' rules, with * or ? or Regex patterns.
+*** glob not support **/* search for all subfolder *** 
+unless python 3.5 (maybe)
+put ```!``` at first for exclude. make sure the exclude pattern is right level, because the reason above.
 
 cwd: Root dir of file path.
 
@@ -332,5 +336,9 @@ Trassport pyco content file and site data to supmice system
 
 
 ## Installation
-python setup.py install
+```sudo python setup.py install```
+
+or
+
+```sh setup.sh```
 

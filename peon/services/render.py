@@ -34,8 +34,8 @@ class RenderHandler(object):
             raise Exception("Render options is invalid. (opts)")
 
         self.root_dir = os.getcwd()
-        self.src_dir = opts.get('src', '.')
-        self.dest_dir = opts.get('dest', '.')
+        self.src_dir = opts.get('src', '.').lstrip(os.path.sep)
+        self.dest_dir = opts.get('dest', '.').lstrip(os.path.sep)
         self.replacement = opts.get('replacement', self.replacement)
 
         if not os.path.isdir(self.dest_dir):
@@ -59,18 +59,18 @@ class RenderHandler(object):
     
     def find_dest_path(self, path):
         if path.startswith(self.src_dir):
-            path = path.replace(self.src_dir, '', 1).lstrip('/')
+            path = path.replace(self.src_dir, '', 1).lstrip(os.path.sep)
         filepath, ext = os.path.splitext(path)
         ext = ext[1:]
         comp_ext = self.replacement.get(ext, ext)
-        compile_path = "{}/{}".format(self.dest_dir, filepath)
+        compile_path = "{}{}{}".format(self.dest_dir, os.path.sep, filepath)
         if comp_ext:
             compile_path = "{}.{}".format(compile_path, comp_ext)
         return compile_path, comp_ext
     
     def get_file_path(self, path):
         filepath, ext = os.path.splitext(path)
-        filepath = filepath.rsplit('/',1)
+        filepath = filepath.rsplit(os.path.sep, 1)
         return filepath[0], filepath[1], ext[1:]
     
     def find_files(self, path='.', file_type=None, includes=False):
@@ -112,7 +112,7 @@ class RenderHandler(object):
     
     def clean(self):
         if self.src_dir != self.dest_dir:
-            shutil.rmtree(self.dest_dir)
+            shutil.rmtree(self.dest_dir.lstrip(os.path.sep))
         
     def render_all(self):
         files = self.find_files(self.src_dir)

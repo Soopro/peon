@@ -7,19 +7,18 @@ import SimpleHTTPServer, SocketServer
 from StringIO import StringIO
 import subprocess
 
-from .utlis import now, safe_path, uploadData, getData, replace
+from ..utlis import now, safe_path, uploadData, getData, replace
 from .helpers import load_config, run_task
 
 
-DEFAULT_ACTION = "transport"
-
+# variables
 DEFAULT_CONTENT_DIR = "content"
 DEFAULT_CONTENT_TYPE = "page"
 DEFAULT_SITE_FILE = 'site.json'
 UPLOAD_MODE = "upload"
 DOWNLOAD_MODE = "download"
 
-
+# mathods
 def convert_data(x):
     if isinstance(x, dict):
         return dict((k.lower(), convert_data(v)) 
@@ -159,7 +158,6 @@ def transport_download(cfg):
         f = open(file_path, 'w')
         f.write(file_string.encode("utf-8"))
         f.close()
-        
 
 
 def transport_upload(cfg):
@@ -180,7 +178,7 @@ def transport_upload(cfg):
         "files":[]
     }
     for dirpath, dirs, files in os.walk(cwd):
-        dirname = dirpath.split(cwd)[-1].strip("/")
+        dirname = dirpath.split(cwd)[-1].strip(os.path.sep)
         if not dirname:
             content_type = DEFAULT_CONTENT_TYPE
         else:
@@ -241,6 +239,7 @@ def transport_upload(cfg):
 #-------------
 # main
 #-------------
+DEFAULT_ACTION = "transport"
 
 def transport(opts):
     peon_config = load_config(DEFAULT_ACTION)
