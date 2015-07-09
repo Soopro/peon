@@ -178,7 +178,7 @@ def transport_upload(cfg):
         "files":[]
     }
     for dirpath, dirs, files in os.walk(cwd):
-        dirname = dirpath.split(cwd)[-1].strip("/")
+        dirname = dirpath.split(cwd)[-1].strip(os.path.sep)
         if not dirname:
             content_type = DEFAULT_CONTENT_TYPE
         else:

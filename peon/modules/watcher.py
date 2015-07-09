@@ -39,7 +39,7 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
     def _find_end_path(self, path):
         if not path:
             return None
-        tmp_path_list = path.rsplit('/',1)
+        tmp_path_list = path.rsplit(os.path.sep,1)
         if len(tmp_path_list) > 0:
             return tmp_path_list[1]
         else:

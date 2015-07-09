@@ -1,7 +1,9 @@
 #coding=utf-8
 from __future__ import absolute_import
 
-import os, sys, glob
+import os
+import sys
+import glob
 import subprocess
 
 from ..services import RenderHandler, MinifyHandler
@@ -12,7 +14,7 @@ from .helpers import load_config, run_task
 
 # variables
 TEMP_FILE = '_construct_temp_.tmp'
-DEFAULT_LIBS_DIR = 'src/libs/'
+DEFAULT_LIBS_DIR = 'src{}libs{}'.format(os.path.sep)
 DEFAULT_SRC_DIR = 'src'
 DEFAULT_BUILD_DIR = 'build'
 DEFAULT_DIST_DIR = 'dist'
@@ -131,7 +133,8 @@ def copy(cfg):
                 dest_path = dest
                 ensure_dir(dest_path)
             else:
-                _path = safe_path(path.replace(cwd+'/', '', 1))
+                _cwd = os.path.join(cwd, '')
+                _path = safe_path(path.replace(_cwd, '', 1))
                 dest_path = safe_path(os.path.join(dest, _path))
                 ensure_dir(dest_path, True)
 

@@ -61,12 +61,12 @@ def safe_path(*args):
         return None
     if len(args) == 1:
         if isinstance(args[0], (str, unicode)):
-            return args[0].strip("/")
+            return args[0].strip(os.path.sep)
         return None
     p_list = []
     for path in args:
         if isinstance(path, (str, unicode)):
-            p_list.append(path.strip("/"))
+            p_list.append(path.strip(os.path.sep))
         else:
             p_list.append(None)
 

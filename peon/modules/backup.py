@@ -19,7 +19,7 @@ def files(cfg):
     dest = name
     ensure_dir(dest)
     for s in src:
-        d = os.path.join(dest, s.lstrip("/"))
+        d = os.path.join(dest, s.lstrip(os.path.sep))
         if os.path.isfile(s):
             ensure_dir(d, True)
             copy_file(s, d)

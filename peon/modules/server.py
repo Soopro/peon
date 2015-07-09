@@ -32,7 +32,7 @@ class PeonServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def path_parse(self, path):
         filename, ext = os.path.splitext(path)
 
-        if filename[-1:] is "/":
+        if filename.endswith(os.path.sep):
             filename = os.path.join(filename, self.REWRITE_ROOT)
 
         ext = ext[1:]

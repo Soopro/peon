@@ -88,7 +88,7 @@ class MinifyHandler(object):
             if len(comp_file_split) > 1:
                 comp_file_args = '?'+comp_file_split[1]
             
-            if comp_file.startswith('/'):
+            if comp_file.startswith(os.path.sep):
                 comp_file_path = os.path.join(self.dest_dir, comp_file[1:])
             else:
                 comp_file_path = os.path.join(curr_dir, comp_file)
@@ -96,7 +96,7 @@ class MinifyHandler(object):
             if comp_type == 'css':
                 css_series = []
                 for href in href_regex.findall(text):
-                    if href.startswith('/'):
+                    if href.startswith(os.path.sep):
                         _path = os.path.join(self.cwd_dir, href[1:])
                     else:
                         _path = os.path.join(curr_dir, href)
@@ -112,7 +112,7 @@ class MinifyHandler(object):
             elif comp_type == 'js':
                 js_series = []
                 for src in src_regex.findall(text):
-                    if src.startswith('/'):
+                    if src.startswith(os.path.sep):
                         _path = os.path.join(self.cwd_dir, src[1:])
                     else:
                         _path = os.path.join(curr_dir, src)
@@ -130,7 +130,7 @@ class MinifyHandler(object):
                 comp_attr_regex = re.compile(pattern, re.IGNORECASE)
                 replacement = text
                 for attr_match, attr in comp_attr_regex.findall(text):
-                    if attr.startswith('/'):
+                    if attr.startswith(os.path.sep):
                         _src_path = os.path.join(self.cwd_dir, attr[1:])
                     else:
                         _src_path = os.path.join(curr_dir, attr)
@@ -236,7 +236,7 @@ class MinifyHandler(object):
         tmpl_series = ["<!-- Begin Templates -->"]
         for path in src_paths:
             if os.path.isfile(path)
-                tmpl_id = path.replace(self.cwd_dir+'/', prefix, 1)
+                tmpl_id = path.replace(self.cwd_dir+os.path.sep, prefix, 1)
                 tmpl_content = _make_ng_tpl(tmpl_id, self._read_file(path))
                 tmpl_series.append(tmpl_content)
             else:
