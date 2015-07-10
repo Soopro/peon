@@ -251,12 +251,14 @@ def compress(cfg):
     for key in cfg:
         rule = cfg[key]
         cwd = safe_path(rule.get('cwd', DEFAULT_DIST_DIR))
-        minify = MinifyHandler(cwd)
+        allow_includes = rule.get('allow_includes', False)
+        minify = MinifyHandler(cwd, allow_includes)
         files = rule.get('src', [])
         minify_type = rule.get('type')
         minify_output = safe_path(rule.get('output', ''))
         minify_perfix = rule.get('perfix', '')
         minify_beautify = rule.get('beautify', False)
+        
         
         path_list = helper_find_path_list(files, cwd)
 
@@ -268,7 +270,7 @@ def compress(cfg):
             minify.js(path_list, minify_output)
         elif minify_type == 'process_html':
             minify.process_html(path_list)
-        elif minify_type == 'angular_template':
+        elif minify_type == 'inline_angular_templates':
             minify.concat_angular_template(path_list,
                                            minify_output,
                                            minify_perfix,

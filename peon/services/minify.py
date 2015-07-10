@@ -26,7 +26,7 @@ class MinifyHandler(object):
     tmpl_regex = re.compile('<\!--\s*ng\-templates\s*-->', re.IGNORECASE)
 
     build_regex = re.compile('(<\!--\s*build:(\[?\s*\w+\s*\]?)'+\
-                             '\s+([\w\$\-\./]*)(\?.*?)*\s*-->'+\
+                             '\s+([\w\$\-\./\{\}\(\)]*)(\?.*?)*\s*-->'+\
                              '(.*?)<\!--\s*/build\s*-->)',
                              re.MULTILINE | re.DOTALL | re.IGNORECASE)
                              
@@ -35,12 +35,13 @@ class MinifyHandler(object):
     href_regex = re.compile('href=["\']?\s*([^"\']+)\s*["\']?', re.IGNORECASE)
     comment_regex = re.compile('<\!--\s*.*\s*-->', re.IGNORECASE)
     
+    incl_mark = '_'
+    allow_includes = False
+    cwd_dir = 'dist'
     
-    cwd_dir = 'build'
-    dest_dir = 'dist'
-    
-    def __init__(self, cwd):
+    def __init__(self, cwd, allow_includes=False):
         self.cwd_dir = cwd
+        self.allow_includes = allow_includes
     
     def _read_file(self, file_path):
         try:
@@ -69,7 +70,15 @@ class MinifyHandler(object):
         os.rename(self.temp_file, file_path)
         print "peon: Minify writed ---> {}".format(file_path) 
         return file_path
-        
+    
+    def includes_gateway(self, path):
+        if self.allow_includes:
+            return False
+        filepath, ext = os.path.splitext(path)
+        filepath = filepath.rsplit(os.path.sep, 1)
+        filename = filepath[1]
+        return filename.startswith(self.incl_mark) \
+                   or filename.endswith(self.incl_mark)
     
     def _process_html(self, file_path, inner=False):
         print "peon: Minify HTML process start"
@@ -89,7 +98,7 @@ class MinifyHandler(object):
                 continue
             
             if comp_file.startswith(os.path.sep):
-                comp_file_path = os.path.join(self.dest_dir, comp_file[1:])
+                comp_file_path = os.path.join(self.cwd_dir, comp_file[1:])
             else:
                 comp_file_path = os.path.join(curr_dir, comp_file)
 
@@ -222,6 +231,8 @@ class MinifyHandler(object):
         css_series = []
         for path in src_paths:
             if os.path.isfile(path):
+                if self.includes_gateway(path):
+                    continue
                 css_series.append(self._read_file(path))
             else:
                 raise CompressError('css not found')
@@ -234,6 +245,8 @@ class MinifyHandler(object):
         js_series = []
         for path in src_paths:
             if os.path.isfile(path):
+                if self.includes_gateway(path):
+                    continue
                 js_series.append(self._read_file(path))
             else:
                 raise CompressError('js not found')
@@ -246,6 +259,8 @@ class MinifyHandler(object):
         # html doesn't need concat files
         for path in src_paths:
             if os.path.isfile(path):
+                if self.includes_gateway(path):
+                    continue
                 html_source = self._html(self._read_file(path))
                 self._output(path, html_source)
                 print "peon: HTML minifed -> {}".format(path)
@@ -262,16 +277,18 @@ class MinifyHandler(object):
                 raise CompressError('html not found')
     
     def concat_angular_template(self, src_paths, inject_path, 
-                                                 prefix='', beautify=False):
+                                      prefix='', beautify=False):
         inject_path = os.path.join(self.cwd_dir, inject_path)
         if not os.path.isfile(inject_path):
-            raise CompressError('angular template inject path not found')
+            raise CompressError('angular templates inject path not found')
 
         tmpl_series = [u'<!-- Begin Templates -->']
         
         for path in src_paths:
             if os.path.isfile(path):
                 if path == inject_path:
+                    continue
+                if self.includes_gateway(path):
                     continue
                 tmpl_id = path.replace(self.cwd_dir+os.path.sep, prefix, 1)
                 tmpl_content = self._make_ng_tpl(tmpl_id,

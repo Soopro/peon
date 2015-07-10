@@ -90,7 +90,7 @@ class RenderHandler(object):
         
     def _coffee(self, src_path, dest_path, temp_path):
         try:
-            subprocess.check_output(["coffee", "-c",
+            subprocess.check_output(["coffee", "-c", "-o",
                                      os.path.dirname(dest_path), src_path])
         except Exception as e:
             self._raise_exception(SubprocessError('coffee ↑'), src_path)
