@@ -6,7 +6,7 @@ do
     then
       echo 'Start init Peon'
       sudo pip install -r requirements.txt
-      sudo npm install -g coffee-script jade less
+      sudo npm install -g coffee-script jade less uglify-js
   fi
 done
 
