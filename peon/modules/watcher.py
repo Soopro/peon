@@ -69,16 +69,19 @@ DEFAULT_ACTION = 'watch'
 
 
 def watch(opts):
-    peon_config = load_config(DEFAULT_ACTION)
+    peon_config = load_config(DEFAULT_ACTION, force=False, multiple=False)
     
     print "------------"
     print "Peon Wacther started"
     print "------------"
     
-    src_dir = opts.src_dir or peon_config.get('src_dir', DEFAULT_SRC_DIR)
-    dest_dir = opts.dest_dir or peon_config.get('dest_dir', DEFAULT_DEST_DIR)
+    src_dir = opts.src_dir or peon_config.get('src', DEFAULT_SRC_DIR)
+    dest_dir = opts.dest_dir or peon_config.get('dest', DEFAULT_DEST_DIR)
     init_dest = opts.watcher == 'init' or peon_config.get('init')
     server_port = opts.port or peon_config.get('port')
+    
+    if dest_dir == DEFAULT_SRC_DIR:
+        dest_dir = DEFAULT_DEST_DIR
     
     render_opts = {
         "src": src_dir,

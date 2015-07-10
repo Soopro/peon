@@ -4,4 +4,4 @@ PyYAML >= 3.11
 libsass >= 0.8.2
 htmlmin >= 0.1.6
 cssmin >= 0.2.0
-slimit >= 0.8.1
+jsmin >= 2.1.1

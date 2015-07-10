@@ -21,7 +21,7 @@ class PeonServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     DEFAULT_CONTENT_TYPE = {'content_type': 'text/plain'}
     
     def do_GET(self):
-        print "==========================================="
+        print "------------------------------------------"
         print "Client requested:", self.command, self.path
 
         self.path = self.path_parse(self.path)

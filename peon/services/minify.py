@@ -1,7 +1,7 @@
 #coding=utf-8
 from __future__ import absolute_import
 
-import os, time, shutil, re
+import os, time, shutil, re, subprocess
 import htmlmin, jsmin, cssmin
 
 from ..utlis import BeautifyPrint as bpcolor
@@ -21,6 +21,7 @@ class CompressError(Exception):
 # handlers
 class MinifyHandler(object):
     temp_file = '_minify_temp_.tmp'
+    temp_js_file = '_minify_temp_.js'
 
     tmpl_regex = re.compile('<\!--\s*ng\-templates\s*-->', re.IGNORECASE)
 
@@ -70,7 +71,7 @@ class MinifyHandler(object):
         return file_path
         
     
-    def _process_html(self, file_path):
+    def _process_html(self, file_path, inner=False):
         print "peon: Minify HTML process start"
         
         build_regex = self.build_regex
@@ -104,7 +105,7 @@ class MinifyHandler(object):
                     css_series.append(self._read_file(_path))
                 
                 css_source = self._css('\n'.join(css_series))
-                self._output(css_source, comp_file_path)
+                self._output(comp_file_path, css_source)
                 
                 new_css_tpl = u'<link rel="stylesheet" href="{}">'
                 replacement = new_css_tpl.format(comp_file+comp_param)
@@ -120,8 +121,8 @@ class MinifyHandler(object):
                 
                     js_series.append(self._read_file(_path))
 
-                js_source = self._js('\n'.join(js_series))
-                self._output(js_source, comp_file_path)
+                js_source = self._uglifyjs('\n'.join(js_series))
+                self._output(comp_file_path, js_source)
                 
                 new_js_tpl = u'<script src="{}"></script>'
                 replacement = new_js_tpl.format(comp_file+comp_param)
@@ -158,7 +159,7 @@ class MinifyHandler(object):
         
         return content
     
-    def _output(self, content, dest_path):
+    def _output(self, dest_path, content):
         self._write_file(dest_path, content)
         return dest_path
     
@@ -170,10 +171,20 @@ class MinifyHandler(object):
             raise CompressError('css')
         return minifed
     
-    def _js(self, source):
+    def _uglifyjs(self, source):
         try:
             # minifed = jsmin.jsmin(source)
-            minifed = source
+            tmp_path = self._write_file(self.temp_js_file, source)
+            minifed = subprocess.check_output(["uglifyjs", tmp_path, '-m'])
+            os.remove(tmp_path)
+        except Exception as e:
+            print e
+            raise CompressError('js')
+        return minifed
+    
+    def _js(self, source):
+        try:
+            minifed = jsmin.jsmin(source)
         except Exception as e:
             print e
             raise CompressError('js')
@@ -216,7 +227,7 @@ class MinifyHandler(object):
                 raise CompressError('css not found')
         css_source = self._css('\n'.join(css_series))
         output_path = os.path.join(self.cwd_dir, output_path)
-        self._output(css_source, output_path)
+        self._output(output_path, css_source)
         print "peon: CSS minifed -> {}".format(output_path)
 
     def js(self, src_paths, output_path):
@@ -226,9 +237,9 @@ class MinifyHandler(object):
                 js_series.append(self._read_file(path))
             else:
                 raise CompressError('js not found')
-        js_source = self._css('\n'.join(js_series))
+        js_source = self._uglifyjs('\n'.join(js_series))
         output_path = os.path.join(self.cwd_dir, output_path)
-        self._output(js_source, outpu_path)
+        self._output(outpu_path, js_source)
         print "peon: JS minifed -> {}".format(output_path)
         
     def html(self, src_paths):
@@ -236,16 +247,16 @@ class MinifyHandler(object):
         for path in src_paths:
             if os.path.isfile(path):
                 html_source = self._html(self._read_file(path))
-                self._output(html_source, path)
+                self._output(path, html_source)
                 print "peon: HTML minifed -> {}".format(path)
             else:
                 raise CompressError('html not found')
 
-    def process_html(self, src_paths):
+    def process_html(self, src_paths, inner=False):
         for path in src_paths:
             if os.path.isfile(path):
-                html_source = self._process_html(path)
-                self._output(html_source, path)
+                html_source = self._process_html(path, inner)
+                self._output(path, html_source)
                 print "peon: HTML processed -> {}".format(path)
             else:
                 raise CompressError('html not found')
@@ -275,5 +286,5 @@ class MinifyHandler(object):
         inject_source = self._inject_ng_tpl('\n'.join(tmpl_series),
                                             inject_path)
 
-        self._output(inject_source, inject_path)
+        self._output(inject_path, inject_source)
         print "peon: Angular Template concated -> {}".format(path)
