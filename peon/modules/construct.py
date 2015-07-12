@@ -18,10 +18,10 @@ DEFAULT_DIST_DIR = 'dist'
 nested_regex = re.compile('[\*/]*\*\*/(\*[^/]*)$', re.IGNORECASE)
 
 # helpers
-def help_find_nested_files(nested, file_path, full_file_path):
-    nested_path = full_file_path.replace(nested.group(0), '')
+def help_find_nested_files(nested, pattern, cwd_pattern):
+    nested_path = cwd_pattern.replace(nested.group(0), '').strip() or '.'
     nested_suffix = nested.group(1)
-    nested_level = len(file_path.split(os.path.sep))
+    nested_level = len(pattern.split(os.path.sep))
     paths = []
     for dirpath, dirnames, files in os.walk(nested_path):
         for f in fnmatch.filter(files, nested_suffix):
