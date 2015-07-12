@@ -27,6 +27,11 @@ def help_find_nested_files(nested, pattern, cwd_pattern):
         for f in fnmatch.filter(files, nested_suffix):
             f_path = os.path.join(dirpath, f)
             f_level = len(f_path.split(os.path.sep))
+            # nested pattern '**/*' has 2 level,
+            # f_path alwasy '<cwd>/file_path' even cwd is '.',
+            # so f_level always 1+ than nested_level,
+            # that's why the '**/*' can match parent level files.
+            # and should do that right.
             if f_level >= nested_level:
                 paths.append(f_path)
 
