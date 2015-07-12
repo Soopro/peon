@@ -1,23 +1,25 @@
 #coding=utf-8
 from __future__ import absolute_import
 
-import os, time, shutil
+import os, time, shutil, re
 import subprocess
 import sass
 
 from ..utlis import BeautifyPrint as bpcolor
 
 # exception
-class SubprocessError(Exception):
-    status_msg = 'SubprocessError'
+class RenderingError(Exception):
+    status_msg = 'RenderingError'
     affix_msg = None
     
-    def __init__(self, message=None):
+    def __init__(self, error = None, message = None):
+        self.error = error
         self.affix_msg = message
 
     def __str__(self):
-        return '{}:{}'.format(self.status_msg,
-                              bpcolor.OKBLUE+self.affix_msg+bpcolor.ENDC)
+        return '{}:{} => \n{}'.format(self.status_msg,
+                              bpcolor.OKBLUE+self.affix_msg+bpcolor.ENDC,
+                              self.error)
 
 # handlers
 class RenderHandler(object):
@@ -29,11 +31,17 @@ class RenderHandler(object):
         "scss": "css",
     }
     
+    incl_regex = re.compile('(\s*)({%\s*include\s+'+\
+                            '["\']?\s*([\w\$\-\./\{\}\(\)]*)\s*["\']?'+\
+                            '\s*%})',
+                            re.MULTILINE | re.DOTALL | re.IGNORECASE)
+    
+    
     def __init__(self, opts = {}):
         
         if not isinstance(opts, dict):
             raise Exception("Render options is invalid. (opts)")
-
+        
         self.root_dir = os.getcwd()
         self.src_dir = opts.get('src', '.').lstrip(os.path.sep)
         self.dest_dir = opts.get('dest', '.').lstrip(os.path.sep)
@@ -47,18 +55,26 @@ class RenderHandler(object):
         self.incl_mark = include_marks.get('base', '_')
         self.incl_global_mark = include_marks.get('global', '_g_')
         self.incl_root_mark = include_marks.get('root', '__')
- 
+        
+        self.rendering_all = False
 
-    def _raise_exception(self, e, src_path):
+
+    def _raise_exception(self, err, src_path):
         print "--------------------"
-        print "[{}Exception{}]: {}".format(bpcolor.FAIL, bpcolor.ENDC, e)
+        print "[{}Exception{}]: {}".format(bpcolor.FAIL, bpcolor.ENDC, err)
         print "[src_path]: {}".format(src_path)
         print "--------------------"
+        raise err
 
     
     def _print_message(self, message):
         print "[{}] {}".format(int(time.time()), message)
-
+    
+    def _read_file(self, file_path):
+        file = open(file_path)
+        file_source = file.read().decode("utf-8")
+        file.close()
+        return file_source
     
     def _write_file(self, file_path, file_source):
         if os.path.isfile(file_path):
@@ -83,34 +99,33 @@ class RenderHandler(object):
             subprocess.check_output(["coffee", "-c", "-o", self.dest_dir,
                                                            self.src_dir])
         except Exception as e:
-            self._raise_exception(SubprocessError('coffee all ↑'),
+            self._raise_exception(RenderingError(e, 'coffee all ↑'),
                                   self.src_dir)
-            raise e
         
         
-    def _coffee(self, src_path, dest_path, temp_path):
+    def _coffee(self, src_path, dest_path):
         try:
             subprocess.check_output(["coffee", "-c", "-o",
                                      os.path.dirname(dest_path), src_path])
         except Exception as e:
-            self._raise_exception(SubprocessError('coffee ↑'), src_path)
-            raise e
-    
+            self._raise_exception(RenderingError(e, 'coffee ↑'), src_path)
+
+
     def _less(self, src_path, dest_path):
         try:
             result = subprocess.check_output(["lessc", src_path])
             self._write_file(dest_path, result)
         except Exception as e:
-            self._raise_exception(SubprocessError('less ↑'), src_path)
-            raise e
+            self._raise_exception(RenderingError(e, 'less ↑'), src_path)
+
     
     def _sass_all(self):
         try:
             sass.compile(dirname = (self.src_dir, self.dest_dir))
         except Exception as e:
-            self._raise_exception(SubprocessError('sass all ↑'),
-                                  self.src_dir)
-            raise e
+            self._raise_exception(RenderingError(e, 'sass all ↑'),
+                                  self.src_dir, e)
+
     
     def _sass(self, src_path, dest_path):
         try:
@@ -119,26 +134,59 @@ class RenderHandler(object):
             # subprocess.check_output(["sass", "--sourcemap=none",
             #                          src_path, dest_path])
         except Exception as e:
-            self._raise_exception(SubprocessError('sass ↑'), src_path)
-            raise e
+            self._raise_exception(RenderingError(e, 'sass ↑'), src_path)
+
 
     def _jade_all(self):
         try:
             subprocess.check_output(["jade", "-P", self.src_dir, 
                                      "-o", self.dest_dir, "--hierarchy"])
         except Exception as e:
-            self._raise_exception(SubprocessError('jade all ↑'))
-            raise e
+            self._raise_exception(RenderingError(e, 'jade all ↑'), 
+                                  self.src_dir, e)
+
         
         
-    def _jade(self, src_path, dest_path, temp_path):
+    def _jade(self, src_path, dest_path):
         try:
             subprocess.check_output(["jade", "-P", src_path, "-o", 
                                      os.path.dirname(dest_path)])
         except Exception as e:
-            self._raise_exception(SubprocessError('jade ↑'), src_path)
-            raise e
+            self._raise_exception(RenderingError(e, 'jade ↑'), src_path)
 
+    
+    def _relative_path(self, base, path):
+        if path.startswith(os.path.sep):
+            return os.path.join(self.src_dir, path[1:])
+        else:
+            return os.path.normpath(os.path.join(base, path))
+
+
+    def _process_html_includes(self, src_path):
+        content = self._read_file(src_path)
+        regex_result = self.incl_regex.findall(content)
+        for space, match, include_path in regex_result:
+            sub_path = self._relative_path(os.path.dirname(src_path),
+                                           include_path)
+            sub_content = self._process_html_includes(sub_path)
+            sub_splits = sub_content.splitlines()
+            _line = u'{}'.format(space)
+            # because the regex is match after spaces, 
+            # so only add spaces for other lines.
+            content = content.replace(match, _line.join(sub_splits))
+        return content
+
+
+    def _html(self, src_path, dest_path):
+        try:
+            if os.path.isfile(src_path):
+                if not os.path.exists(os.path.dirname(dest_path)):
+                    os.makedirs(os.path.dirname(dest_path))
+                html_content = self._process_html_includes(src_path)
+                self._write_file(dest_path, html_content)
+        except Exception as e:
+            self._raise_exception(RenderingError(e, 'html'), src_path)
+            
     
     def _copy(self, src_path, dest_path):
         try:
@@ -147,8 +195,7 @@ class RenderHandler(object):
                     os.makedirs(os.path.dirname(dest_path))
                 shutil.copy2(src_path, dest_path)
         except Exception as e:
-            self._raise_exception(SubprocessError('file'), src_path)
-            raise e
+            self._raise_exception(RenderingError(e, 'file'), src_path)
     
     
     def find_dest_path(self, path):
@@ -216,6 +263,7 @@ class RenderHandler(object):
         self._print_message("Rendering: {}/**/*".format(self.src_dir,
                                                         self.dest_dir))
         
+        self.rendering_all = True
         has_coffee = False
         has_jade = False
         has_sass = False
@@ -245,6 +293,8 @@ class RenderHandler(object):
         _files = [f for f in files if f not in excludes]
         for f in _files:
             self.render(f, includes=False)
+        
+        self.rendering_all = False
         self._print_message("Rendered: {}/**/*".format(self.src_dir,
                                                            self.dest_dir))
 
@@ -255,7 +305,6 @@ class RenderHandler(object):
             return
         filedir, filename, ext = self.get_file_path(src_path)
         dest_path, comp_ext = self.find_dest_path(src_path)
-        _temp_path = os.path.join(filedir, "{}.{}".format(filename, comp_ext))
         
         if not replace and os.path.isfile(dest_path):
             return
@@ -274,24 +323,32 @@ class RenderHandler(object):
             return
         
         print "--------------------"
-        
-        if ext == 'coffee':
-            self._coffee(src_path, dest_path, _temp_path)
+        try:
+            if ext == 'coffee':
+                self._coffee(src_path, dest_path)
 
-        elif ext == 'less':
-            self._less(src_path, dest_path)
+            elif ext == 'less':
+                self._less(src_path, dest_path)
     
-        elif ext in ['sass', 'scss']:
-            self._sass(src_path, dest_path)
+            elif ext in ['sass', 'scss']:
+                self._sass(src_path, dest_path)
 
-        elif ext == 'jade':
-            self._jade(src_path, dest_path, _temp_path)
+            elif ext == 'jade':
+                self._jade(src_path, dest_path)
+        
+            elif ext == 'html':
+                self._html(src_path, dest_path)
 
-        elif self.src_dir != self.dest_dir:
-            self._copy(src_path, dest_path)
+            elif self.src_dir != self.dest_dir:
+                self._copy(src_path, dest_path)
             
-        else:
-            return False
+            else:
+                return False
+        except Exception as e:
+            if self.rendering_all:
+                raise e
+            else:
+                return
     
         self._print_message("Rendered: {} --> {}".format(src_path, dest_path))
     
@@ -304,12 +361,15 @@ class RenderHandler(object):
         dest_path, comp_ext = self.find_dest_path(src_path)
         dest_moved_path, _ = self.find_dest_path(move_to_path)
         _, moved_filename, _,  = self.get_file_path(dest_moved_path)
-        
-        if self.is_include_file(moved_filename) and os.path.isfile(dest_path):
+
+        if self.is_include_file(moved_filename):
             try:
-                os.remove(dest_path)
+                if os.path.isfile(dest_path):
+                    os.remove(dest_path)
+                else:
+                    return
             except Exception as e:
-                self._raise_exception(e, src_path)
+                self._raise_exception(e, src_path, e)
                 return
             self._print_message("Deleted: {}".format(dest_path))
         else:
@@ -321,7 +381,7 @@ class RenderHandler(object):
                     self.render(move_to_path)
 
             except Exception as e:
-                self._raise_exception(e, src_path)
+                self._raise_exception(e, src_path, e)
                 return
             self._print_message("Moved: {} --> {}".format(dest_path,
                                                           dest_moved_path))
@@ -336,7 +396,7 @@ class RenderHandler(object):
             else:
                 return
         except Exception as e:
-            self._raise_exception(e, src_path)
+            self._raise_exception(e, src_path, e)
             return
             
         self._print_message("Deleted: {}".format(dest_path))
