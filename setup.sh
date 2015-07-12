@@ -2,9 +2,9 @@
 
 for arg in $@
 do
-  if [ $arg == "-i" -o $arg == "init" ]
+  if [ $arg == "-p" || $arg == "--packages" ]
     then
-      echo 'Start init Peon'
+      echo 'Setup Peon with reuiqred packages'
       sudo pip install -r requirements.txt
       sudo npm install -g coffee-script jade less uglify-js
   fi

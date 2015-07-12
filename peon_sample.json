@@ -41,7 +41,7 @@
           "type": "angular_template",
           "src": "*.html",
           "cwd": "dist",
-          "perfix": "",
+          "prefix": "",
           "beautify": false,
           "output":"index.html"
         },

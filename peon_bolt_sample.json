@@ -79,7 +79,7 @@
             "!**/_*.html"
           ],
           "cwd": "dist",
-          "perfix": "",
+          "prefix": "",
           "beautify": false,
           "allow_includes": false,
           "output":"index.html"

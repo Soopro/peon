@@ -1,17 +1,30 @@
 # Peon
 
-A supmice project develop helper.
+A front-end project develop helper.
 
 1. Start dev server with SimpleHTTPServer or Harp.
-2. Watching file changes for coffee less and jade.
-3. Build static files from task config.
+2. Watching file changes for coffee less sass and jade.
+3. Build/Compress static files by task config.
 4. Create backups.
-5. Packing and uploads
-6. Transport data so supmice system.
+5. Packing and uploads (for our platform only).
+6. Transport data so supmice system (for our platform only).
 
 ==============
-I build peon is becuase we are python project team, sometime grunt or gulp can't full fill our needs, custom nodejs scripts is too hard for me, but python is much more easier...
+Becuase grunt or gulp always can't full fill our needs, and custom nodejs scripts is too hard for me,
+but python is much more easier...
 
+Some basic node srcipt is call by subprocess, such as coffee-script jade less uglify-js.
+
+
+## Installation
+```sudo python setup.py install```
+
+or
+
+```sh setup.sh```
+
+You can run ```sh setup.sh -p``` to install all required packages once for all.
+without ```-p``` param, packages will skiped.
 
 ## Usage
 You have to place a 'peon.json' intro the project root folder first.
@@ -23,6 +36,190 @@ You have to place a 'peon.json' intro the project root folder first.
 ### -c: Construct
 
 Must with a peon.json in same folder when run this command.
+
+command with param could help define which action you want to run.
+
+Allow action params
+
+* 'construct'
+* 'init'
+* 'build'
+* 'release'
+
+Default is ```release``` (because this action is most often.)
+
+action is not related with task, you can run any task in any type aciton.
+As I said action is only help you define what you want to do.
+
+
+======================
+
+##### common config options
+
+src: Source files path, could be a list. use 'glob' rules, with * or ? or Regex patterns.
+*** glob not support **/* to search for all subfolder, there is custom funciton do recursive search ***
+put ```!``` at first for exclude. make sure the exclude pattern is right level, because the reason above.
+
+cwd: Root dir of file path.
+
+dest: Dest for copy files.
+
+
+##### task: Install
+Run bower install/update or npm install/update.
+It's take long time, and the remote source may block by GFW.
+I'ts better have people do it maunally.
+
+```
+  "install":["bower","npm"]
+```
+
+##### task: Copy
+
+Copy files from src to dest.
+
+```
+  "copy": {
+    "libs":{
+      "flatten": true,
+      "src":[
+        "lodash/dist/lodash.js",
+        "angular/angular.js",
+        "*/*/*.js",
+        "!*/*.html"
+      ],
+      "cwd":"bower_components/",
+      "dest":"src/libs"
+    }
+  }
+```
+copy: The key of task options.
+
+<group>: A group name of copy files. 'libs' is group name in the sample above. usual define different package. You can define multiple groups with different options. and you have to make different group name by your self.
+
+`flatten`: Those files will not keep their folder while copy to the dest.
+`force`: Replace file if exist. default is True.
+
+##### task: Clean
+
+Clean folders before do anything else.
+
+```
+  "clean": ["dist"]
+
+```
+
+Put dir names into this option, could be single string or list contain strings.
+
+##### task: Scrap
+
+Detele files with rules. Use that after compress task to remove useless files or dirs.
+
+```
+  "scrap": {
+    "src":[
+      "*.js",
+      "*.html",
+      "styles/*.png",
+      "!*.min.*",
+      "!*.png",
+      "!index.html"
+    ],
+    "cwd":"dist"
+  }
+```
+
+##### task: Replace
+
+Replace string with pattern
+
+```
+  "replace": {
+    "src": "*.min.*",
+    "cwd": "dist",
+    "replacements": [
+      {
+        "pattern": "/styles/icons/svg",
+        "replace": "svg"
+      }
+    ]
+  }
+
+```
+
+`replacements`: replace rules, support string only no regex yet.
+
+
+##### task: Render
+
+Render files from source dir to dest dir
+
+```
+  "render":{
+    "cwd": "src",
+    "dest": "build"
+  }
+
+```
+
+##### task: Compress
+
+Compress files, minify css js html, and process html, and able to concat angular templates.
+
+```
+  "compress": {
+    "inline_angular_templates":{
+      "type": "inline_angular_templates",
+      "src": [
+        "blueprints/**/*.html",
+        "modals/**/*.html",
+        "!**/_*.html"
+      ],
+      "cwd": "dist",
+      "prefix": "",
+      "beautify": false,
+      "allow_includes": false,
+      "output":"index.html"
+    },
+    "process_html":{
+      "type": "process_html",
+      "cwd": "dist",
+      "src": "*.html"
+    },
+    "html":{
+      "type": "html",
+      "cwd": "dist",
+      "src": "*.html"
+    }
+  }
+
+```
+
+Compress task include multiple groups. The group's key can be custom to any latin name.
+
+```
+  "<group>":{
+    "type": "process_html",
+    "cwd": "dist",
+    "src": "*.html"
+  }
+
+```
+
+`type`: define compress type. `html` `css` `js` `process_html` `inline_angular_templates`.
+
+`inline_angular_templates`: 
+- `prefix`: define ng templates id prefix, etc., '/'. this is for match the template reference.
+- `beautify`: define output templates is minifed or readable.
+- `allow_includes`: set it true will concat include files (starts or ends with '_'), default is False.
+- `output`: file you want fill template script into. `<!-- ng-templates -->` mark must somewhere in this file.
+
+type [css, js]:
+`output`: the file name you want output to minified file.
+
+type [html, process_html]:
+src: the file you want minify will output it self.
+
 
 ##### task: Rev
 
@@ -49,41 +246,7 @@ pattern: Replacement pattern, peon will replace those string intro md5 code.
 
 find:  Specify the exact scope of a pattern. Peon will find those string and  replace pattern with that string.
 
-##### task: Copy
 
-Copy files from src to dest.
-
-```
-  "copy": {
-    "libs":{
-      "flatten": true,
-      "src":[
-        "lodash/dist/lodash.js",
-        "angular/angular.js",
-        "*/*/*.js",
-        "!*/*.html"
-      ],
-      "cwd":"bower_components/",
-      "dest":"src/libs"
-    }
-  }
-```
-copy: The key of task options.
-
-<group>: A group name of copy files. 'libs' is group name in the sample above. usual define different package. You can define multiple groups with different options. and you have to make different group name by your self.
-
-src: Source file path. use 'glob' rules, with * or ? or Regex patterns.
-*** glob not support **/* search for all subfolder *** 
-unless python 3.5 (maybe)
-put ```!``` at first for exclude. make sure the exclude pattern is right level, because the reason above.
-
-cwd: Root dir of file path.
-
-dest: Dest for copy files.
-
-[optional]
-
-flatten: Those files will not keep their folder while copy to the dest.
 
 =======================
 ### -z:  Packing
@@ -175,10 +338,14 @@ Backup file and db.
 
 ## -w: Watcher
 
-`peon` -w
+`peon` -w [init] [-s port] [--src src_dir] [--dest dest_dir]
+
+`-w init`: start watcher, with keyword 'init' will clean dest dir before watching start.
+`-s port`: start watcher will server. define port or default is 9527
+`--src src_dir`: watcher will get source file from src folder.
+`--dest dest_dir`: watcher will render file into dest folder.
 
 Wactching Coffee jade less. If it's changed than compile a new file.
-
 files start or end with undescore '_' is changed will compile all files but it self.
 
 #### Prefix and settings
@@ -188,15 +355,16 @@ files start or end with undescore '_' is changed will compile all files but it s
 
 ## -s: Server
 
-`peon` -s [port] or just `peon`
+`peon` [-s port]  [--dir dir] or just `peon`
 
-if you got coffee jade or less, will automaticly start with harp.
+`-s port`: server port. default is 9527
+`--dir dir`: folder you want start as server host. must be sub of current working dir.
 
-`peon` -s --harp, start server with harp directly.
 `peon` -s --http, start server with simplehttp directly.
-
-
+`peon` -s --harp, start server with harp directly (no recommand, but you can do that if you need).
 Please make sure you have node npm harp kind stuff ...
+
+
 
 ## -t : Transport
 
@@ -333,12 +501,3 @@ Trassport pyco content file and site data to supmice system
   }
 }
 ```
-
-
-## Installation
-```sudo python setup.py install```
-
-or
-
-```sh setup.sh```
-

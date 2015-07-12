@@ -256,7 +256,7 @@ def compress(cfg):
         files = rule.get('src', [])
         minify_type = rule.get('type')
         minify_output = safe_path(rule.get('output', ''))
-        minify_perfix = rule.get('perfix', '')
+        minify_prefix = rule.get('prefix', '')
         minify_beautify = rule.get('beautify', False)
         
         
@@ -273,7 +273,7 @@ def compress(cfg):
         elif minify_type == 'inline_angular_templates':
             minify.concat_angular_template(path_list,
                                            minify_output,
-                                           minify_perfix,
+                                           minify_prefix,
                                            minify_beautify)
     
     print "peon: Work work ...(compress)"
@@ -283,7 +283,7 @@ def compress(cfg):
 # main
 #-------------
 DEFAULT_ACTION = 'release'
-ALLOWED_ACTION_TYPES = ['release', 'init', 'build']
+ALLOWED_ACTION_TYPES = ['construct', 'release', 'init', 'build']
 
 COMMANDS = {
     "install": install,
