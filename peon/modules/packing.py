@@ -102,7 +102,7 @@ def _ensure_cfg(config, opts):
 
 
 def packing(opts):
-    peon_config = load_config(DEFAULT_ACTION, False)
+    peon_config = load_config(DEFAULT_ACTION, force=False)
     peon_config = _ensure_cfg(peon_config, opts)
 
     run_task(peon_config, COMMANDS)

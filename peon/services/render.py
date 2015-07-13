@@ -260,7 +260,7 @@ class RenderHandler(object):
             shutil.rmtree(self.dest_dir.lstrip(os.path.sep))
 
     def render_all(self):
-        self._print_message("Rendering: {}/**/*".format(self.src_dir,
+        self._print_message("Rendering all: {}/**/*".format(self.src_dir,
                                                         self.dest_dir))
         
         self.rendering_all = True
@@ -295,7 +295,7 @@ class RenderHandler(object):
             self.render(f, includes=False)
         
         self.rendering_all = False
-        self._print_message("Rendered: {}/**/*".format(self.src_dir,
+        self._print_message("Rendered all: {}/**/*".format(self.src_dir,
                                                            self.dest_dir))
 
     

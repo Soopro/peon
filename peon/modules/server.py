@@ -56,7 +56,7 @@ DEFAULT_PORT = 9527
 PARSE_FILE_LIST = ['coffee','jade','less','sass','scss']
 
 def server(opts):
-    if isinstance(opts.port, int):
+    if isinstance(opts.port, int) or not opts.port:
         port = opts.port
     else:
         port = DEFAULT_PORT
@@ -66,11 +66,10 @@ def server(opts):
 
     curr_path = os.getcwd()
     
-    if not opts.http_server:
-        if opts.harp_server or has_parse_files(curr_path):
-            harp(port)
-    
-    simplehttp(port)
+    if opts.harp_server and has_parse_files(curr_path):
+        harp(port)
+    else:
+        simplehttp(port)
 
 
 def has_parse_files(path):

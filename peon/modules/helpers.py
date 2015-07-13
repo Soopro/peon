@@ -4,7 +4,7 @@ import os, json
 from collections import OrderedDict
 
 from ..config import CONFIG_FILE
-
+from ..utlis import BeautifyPrint as bpcolor
 
 def load_config(config_type, force=True, multiple=True):
     config = {}
@@ -16,12 +16,14 @@ def load_config(config_type, force=True, multiple=True):
             config_file.close()
             config = config_data.get(config_type, {})
         except Exception as e:
-            if force:
-                raise Exception("Config error:", e)
-            print "Config error: ", e
+            print "--------------------"
+            print "{}Config error{}:".format(bpcolor.FAIL, bpcolor.ENDC)
+            raise e
             
     if force and not config:
-        raise Exception("Config error: Nothing loaded!")
+        print "--------------------"
+        print "{}Config is required{}:".format(bpcolor.FAIL, bpcolor.ENDC)
+        raise Exception("Nothing loaded!")
     
     if multiple and not isinstance(config, list):
        config = [config]
