@@ -4,6 +4,7 @@ from __future__ import absolute_import
 import os, time, shutil, re
 import subprocess
 import sass
+from datetime import datetime
 
 from ..utlis import BeautifyPrint as bpcolor
 
@@ -68,7 +69,8 @@ class RenderHandler(object):
 
     
     def _print_message(self, message):
-        print "[{}] {}".format(int(time.time()), message)
+        time = datetime.now().strftime('%H:%M:%S')
+        print "[{}] {}".format(time, message)
     
     def _read_file(self, file_path):
         file = open(file_path)
