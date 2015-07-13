@@ -3,7 +3,7 @@ from __future__ import absolute_import
 
 import os
 
-from ..utlis import makeZip, uploadFile, safe_path
+from ..utlis import makeZip, uploadFile, safe_paths
 from ..config import CONFIG_FILE
 from .helpers import load_config, run_task
 
@@ -25,7 +25,7 @@ def _get_filename(cwd=None):
 
 
 def upload(cfg):
-    cwd = safe_path(cfg.get("cwd"))
+    cwd = safe_paths(cfg.get("cwd"))
     old_dir = os.getcwd()
     if cwd:
         os.chdir(cwd)
@@ -47,7 +47,7 @@ def upload(cfg):
 
 
 def packzip(cfg):
-    cwd = safe_path(cfg.get("cwd"))
+    cwd = safe_paths(cfg.get("cwd"))
     old_dir = os.getcwd()
     if cwd:
         os.chdir(cwd)

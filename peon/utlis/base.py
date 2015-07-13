@@ -55,17 +55,51 @@ def remove_file(path):
     except Exception as e:
         print('peon: Error -> %s' % e)
         raise e
-    
-def safe_path(*args):
+
+def child_of_path(path, path2):
+    _path = os.path.normpath(path)
+    _path_splits = _path.split(os.path.sep)
+    if _path_splits[0] == path2:
+        return True
+    else:
+        return False
+
+def grounded_paths(cwd=".", *args):
+    grounded_error_msg = "peon: Error -> Path [{}] is grounded."
+    if len(args) == 0:
+        return None
+    cwd_abs_dir = os.path.normpath(os.path.join(os.getcwd(), cwd))
+    if len(args) == 1:
+        if isinstance(args[0], (str, unicode)):
+            path = os.path.normpath(args[0])
+            _path = os.path.join(os.getcwd(), path)
+            if cwd_abs_dir in os.path.normpath(_path):
+                return path
+            else:
+                raise Exception(grounded_error_msg.format(path))
+        return None
+    p_list = []
+    for path in args:
+        path = os.path.normpath(path)
+        _path = os.path.join(os.getcwd(), path)
+        if cwd_abs_dir in os.path.normpath(_path):
+            p_list.append(path)
+        else:
+            raise Exception(grounded_error_msg.format(path))
+            p_list.append(None)
+    return p_list
+
+def safe_paths(*args):
     if len(args) == 0:
         return None
     if len(args) == 1:
         if isinstance(args[0], (str, unicode)):
-            return args[0].strip(os.path.sep)
+            return os.path.normpath(args[0]).strip(os.path.sep)
         return None
     p_list = []
     for path in args:
         if isinstance(path, (str, unicode)):
+            path = os.path.normpath(path)
             p_list.append(path.strip(os.path.sep))
         else:
             p_list.append(None)
@@ -86,7 +120,7 @@ def ensure_dir(path, is_file = False):
 
 def remove_dir(path):
     try:
-        dir_path = safe_path(path)
+        dir_path = safe_paths(path)
         shutil.rmtree(dir_path)
         print "peon: Removed dir -> " + dir_path
     # eg. src and dest are the same file

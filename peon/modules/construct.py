@@ -5,8 +5,8 @@ import os, sys, re, glob, fnmatch
 import subprocess
 
 from ..services import RenderHandler, MinifyHandler
-from ..utlis import (now, gen_md5, copy_file, safe_path, 
-                     ensure_dir, remove_dir, remove_file)
+from ..utlis import (now, gen_md5, copy_file, safe_paths, grounded_paths,
+                     child_of_path, ensure_dir, remove_dir, remove_file)
 from .helpers import load_config, run_task
 
 
@@ -45,13 +45,13 @@ def helper_find_path_list(src, cwd):
     if not isinstance(src, list):
         src = [src]
     
-    cwd = safe_path(cwd)
+    cwd = safe_paths(cwd)
     path_list = []
     
     for file in src:
         if file.startswith('!'):
             continue
-        file = safe_path(file)
+        file = safe_paths(file)
         file_path_pattern = os.path.join(cwd, file)
         nested = nested_regex.search(file_path_pattern)
         if nested:
@@ -69,7 +69,7 @@ def helper_find_path_list(src, cwd):
     for file in src:
         if not file.startswith('!'):
             continue
-        file = safe_path(file[1:])
+        file = safe_paths(file[1:])
         file_path_pattern = os.path.join(cwd, file)
         nested = nested_regex.search(file_path_pattern)
         if nested:
@@ -80,8 +80,8 @@ def helper_find_path_list(src, cwd):
         for path in paths:
             if path in path_list:
                 path_list.remove(path)
-        
-    return path_list
+    
+    return [path for path in path_list if grounded_paths(cwd, path)]
 
 # methods
 def install(cfg):
@@ -109,7 +109,7 @@ def shell(cfg):
 
 def replace(cfg):
     files = cfg.get('src', [])
-    cwd = safe_path(cfg.get('cwd', ''))
+    cwd = safe_paths(cfg.get('cwd', ''))
     replacements = cfg.get('replacements', [])
     path_list = helper_find_path_list(files, cwd)
     for path in path_list:
@@ -156,7 +156,7 @@ def rev(cfg):
         find = pattern
     pattern = find.replace(pattern, gen_md5())
     replacements = {find: pattern}
-    cwd = safe_path(cfg.get('cwd',''))
+    cwd = safe_paths(cfg.get('cwd',''))
     files = cfg.get('src', [])
     path_list = helper_find_path_list(files, cwd)
 
@@ -187,7 +187,7 @@ def copy(cfg):
         rule = cfg[key]
         is_flatten = rule.get('flatten', False)
         force = rule.get('force', True)
-        cwd, dest = safe_path(rule.get('cwd', ''),
+        cwd, dest = safe_paths(rule.get('cwd', ''),
                               rule.get('dest', ''))
         
         files = rule.get('src', [])
@@ -200,8 +200,8 @@ def copy(cfg):
                 ensure_dir(dest_path)
             else:
                 _cwd = os.path.join(cwd, '')
-                _path = safe_path(path.replace(_cwd, '', 1))
-                dest_path = safe_path(os.path.join(dest, _path))
+                _path = safe_paths(path.replace(_cwd, '', 1))
+                dest_path = safe_paths(os.path.join(dest, _path))
                 ensure_dir(dest_path, True)
 
             if os.path.isdir(path):
@@ -231,7 +231,9 @@ def render(cfg):
 def clean(paths):
     path_list = helper_find_path_list(paths, '')
     for path in path_list:
-        if path == DEFAULT_SRC_DIR:
+        if child_of_path(path, DEFAULT_SRC_DIR):
+            error = "peon: Error -> Path [{}] is protected ...(clean)"
+            raise Exception(error.format(path))
             continue
         if os.path.isdir(path):
             remove_dir(path)
@@ -239,11 +241,13 @@ def clean(paths):
 
 
 def scrap(cfg):
-    cwd = safe_path(cfg.get('cwd', DEFAULT_DIST_DIR))
+    cwd = safe_paths(cfg.get('cwd', DEFAULT_DIST_DIR))
     files = cfg.get('src', [])
     path_list = helper_find_path_list(files, cwd)
     for path in path_list:
-        if path == DEFAULT_SRC_DIR:
+        if child_of_path(path, DEFAULT_SRC_DIR):
+            error = "peon: Path [{}] is protected ...(scrap)"
+            print error.format(path)
             continue
         if os.path.isdir(path):
             remove_dir(path)
@@ -255,12 +259,12 @@ def scrap(cfg):
 def compress(cfg):
     for key in cfg:
         rule = cfg[key]
-        cwd = safe_path(rule.get('cwd', DEFAULT_DIST_DIR))
+        cwd = safe_paths(rule.get('cwd', DEFAULT_DIST_DIR))
         allow_includes = rule.get('allow_includes', False)
         minify = MinifyHandler(cwd, allow_includes)
         files = rule.get('src', [])
         minify_type = rule.get('type')
-        minify_output = safe_path(rule.get('output', ''))
+        minify_output = safe_paths(rule.get('output', ''))
         minify_prefix = rule.get('prefix', '')
         minify_beautify = rule.get('beautify', False)
         

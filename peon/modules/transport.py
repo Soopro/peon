@@ -7,7 +7,7 @@ import SimpleHTTPServer, SocketServer
 from StringIO import StringIO
 import subprocess
 
-from ..utlis import now, safe_path, uploadData, getData, replace
+from ..utlis import now, safe_paths, uploadData, getData, replace
 from .helpers import load_config, run_task
 
 
@@ -95,7 +95,7 @@ def transport_download(cfg):
     headers = cfg.get('headers')
     params = cfg.get('params')
     dest = cfg.get("dest", DEFAULT_CONTENT_DIR)
-    dest = safe_path(dest)
+    dest = safe_paths(dest)
     replace_rules = cfg.get("replace", [])
     
     if not os.path.isdir(dest):
@@ -165,7 +165,7 @@ def transport_upload(cfg):
     headers = cfg.get('headers')
     params = cfg.get('params')
     cwd = cfg.get("cwd", DEFAULT_CONTENT_DIR)
-    cwd = safe_path(cwd)
+    cwd = safe_paths(cwd)
     replace_rules = cfg.get("replace", [])
     
     if not os.path.isdir(cwd):
