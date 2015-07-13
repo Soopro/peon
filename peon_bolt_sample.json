@@ -3,6 +3,7 @@
     "src": "src",
     "dest": "build",
     "init": true,
+    "server": true,
     "port": 9527
   },
   "init":{
