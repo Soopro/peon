@@ -96,10 +96,11 @@ def watch(opts):
     
     if server:
         try:
-            port = str(server_port)
+            port = int(server_port)
+            args = ['peon', '-s', port, '--http', '--dir', dest_dir]
         except:
-            port = ''
-        args = ['peon', '-s', port, '--http', '--dir', dest_dir]
+            args = ['peon', '-s', '--http', '--dir', dest_dir]
+        
         server_progress = subprocess.Popen(args)
     
     observer = Observer()
