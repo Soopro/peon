@@ -15,6 +15,7 @@ but python is much more easier...
 
 Some basic node srcipt is call by subprocess, such as coffee-script jade less uglify-js.
 
+BTW, may not suppport ***Windows***.
 
 ## Installation
 ```sudo python setup.py install```
@@ -98,6 +99,7 @@ copy: The key of task options.
 <group>: A group name of copy files. 'libs' is group name in the sample above. usual define different package. You can define multiple groups with different options. and you have to make different group name by your self.
 
 `flatten`: Those files will not keep their folder while copy to the dest.
+
 `force`: Replace file if exist. default is True.
 
 ##### task: Clean
@@ -215,9 +217,12 @@ Compress task include multiple groups. The group's key can be custom to any lati
 - `output`: file you want fill template script into. `<!-- ng-templates -->` mark must somewhere in this file.
 
 type [css, js]:
+
 `output`: the file name you want output to minified file.
 
+
 type [html, process_html]:
+
 src: the file you want minify will output it self.
 
 
@@ -271,9 +276,13 @@ You can also chose upload to a restapi.
 
 ```
 `cwd` the dir path you want to packing
+
 `file` file name you want to specific. default is current folder name.
+
 `include_hidden` include start with '.'.
+
 `include_peon_config` include 'peon.json'.
+
 `excludes` excludes files as list. pattern supported.
 
 ##### task: Upload
@@ -295,10 +304,15 @@ make sure there is `zip` task before, otherwise will get a error.
 
 ```
 `cwd` the dir path you want to upload
+
 `file` file name you want to upload. default is current folder name.
+
 `headers` anything you need put intro headers.
+
 `url` request api url.
+
 `data` request data
+
 `params` request params
 
 
@@ -341,8 +355,11 @@ Backup file and db.
 `peon` -w [init] [-s port] [--src src_dir] [--dest dest_dir]
 
 `-w init`: start watcher, with keyword 'init' will clean dest dir before watching start.
+
 `-s port`: start watcher will server. define port or default is 9527
+
 `--src src_dir`: watcher will get source file from src folder.
+
 `--dest dest_dir`: watcher will render file into dest folder.
 
 Wactching Coffee jade less. If it's changed than compile a new file.
@@ -350,7 +367,9 @@ files start or end with undescore '_' is changed will compile all files but it s
 
 #### Prefix and settings
 `_` Local files, Render all files in same folder.
+
 `__` Root files, Render all files in top level of the watched folder.
+
 `_g_` Global files, Render all files from watched folder include sub folders.
 
 ## -s: Server
@@ -358,9 +377,11 @@ files start or end with undescore '_' is changed will compile all files but it s
 `peon` [-s port]  [--dir dir] or just `peon`
 
 `-s port`: server port. default is 9527
+
 `--dir dir`: folder you want start as server host. must be sub of current working dir.
 
 `peon` -s --http, start server with simplehttp directly.
+
 `peon` -s --harp, start server with harp directly (no recommand, but you can do that if you need).
 Please make sure you have node npm harp kind stuff ...
 
@@ -407,9 +428,13 @@ Trassport pyco content file and site data to supmice system
 ```
 
 `replace` for replace content and meta markers. etc., /$uploads/ to the uploads folder you know.
+
 `url` upload api
+
 `cwd` the content folder you want upload, for upload only.
+
 `dest` the content folder you want download to, for download only.
+
 `headers` request headers
 
 
