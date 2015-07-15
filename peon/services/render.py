@@ -31,8 +31,8 @@ class RenderHandler(object):
         "sass": "css",
         "scss": "css",
     }
-    allow_include_types = ['coffee', 'jade', 'less', 'sass', 'scss',
-                           'css', 'js', 'html', 'inc', 'tpl', 'incl']
+    # allow_include_types = ['coffee', 'jade', 'less', 'sass', 'scss',
+    #                        'css', 'js', 'html', 'inc', 'tpl', 'incl']
     
     incl_regex = re.compile('(\s*)({%\s*include\s+'+\
                             '["\']?\s*([\w\$\-\./\{\}\(\)]*)\s*["\']?'+\
@@ -254,8 +254,8 @@ class RenderHandler(object):
 
 
     def is_include_file(self, filename, ext):
-        if ext not in self.allow_include_types:
-            return False
+        # if ext not in self.allow_include_types:
+        #     return False
         is_incl_file = filename.startswith(self.incl_mark) \
                                or filename.endswith(self.incl_mark)
         return is_incl_file
