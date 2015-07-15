@@ -56,7 +56,7 @@ DEFAULT_PORT = 9527
 PARSE_FILE_LIST = ['coffee','jade','less','sass','scss']
 
 def server(opts):
-    if isinstance(opts.port, int) or not opts.port:
+    if isinstance(opts.port, int):
         port = opts.port
     else:
         port = DEFAULT_PORT
