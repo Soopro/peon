@@ -31,6 +31,8 @@ class RenderHandler(object):
         "sass": "css",
         "scss": "css",
     }
+    allow_include_types = ['coffee', 'jade', 'less', 'sass', 'scss',
+                           'css', 'js', 'html', 'inc', 'tpl', 'incl']
     
     incl_regex = re.compile('(\s*)({%\s*include\s+'+\
                             '["\']?\s*([\w\$\-\./\{\}\(\)]*)\s*["\']?'+\
@@ -228,7 +230,7 @@ class RenderHandler(object):
                 if filename.startswith('.'):
                     continue
             
-                is_includes = self.is_include_file(filename)
+                is_includes = self.is_include_file(filename, ext)
                 
                 if not includes and is_includes:
                     continue
@@ -251,7 +253,9 @@ class RenderHandler(object):
         return results
 
 
-    def is_include_file(self, filename):
+    def is_include_file(self, filename, ext):
+        if ext not in self.allow_include_types:
+            return False
         is_incl_file = filename.startswith(self.incl_mark) \
                                or filename.endswith(self.incl_mark)
         return is_incl_file
@@ -297,6 +301,16 @@ class RenderHandler(object):
             self.render(f, includes=False)
         
         self.rendering_all = False
+        
+        # clean up invalid files in dest folder
+        for dirpath, dirs, files in os.walk(self.dest_dir):
+            for f in files:
+                filename, ext = os.path.splitext(f)
+                if filename.startswith('.') \
+                or self.is_include_file(filename, ext):
+                    f_path = os.path.join(dirpath, f)
+                    os.remove(f_path)
+        
         self._print_message("Rendered all: {}/**/*".format(self.src_dir,
                                                            self.dest_dir))
 
@@ -311,7 +325,7 @@ class RenderHandler(object):
         if not replace and os.path.isfile(dest_path):
             return
         
-        if includes and self.is_include_file(filename):
+        if includes and self.is_include_file(filename, ext):
             if filename.startswith(self.incl_root_mark):
                 path = None
             elif filename.startswith(self.incl_global_mark):
@@ -362,9 +376,9 @@ class RenderHandler(object):
     def move(self, src_path, move_to_path):
         dest_path, comp_ext = self.find_dest_path(src_path)
         dest_moved_path, _ = self.find_dest_path(move_to_path)
-        _, moved_filename, _,  = self.get_file_path(dest_moved_path)
+        _, moved_filename, moved_ext,  = self.get_file_path(dest_moved_path)
 
-        if self.is_include_file(moved_filename):
+        if self.is_include_file(moved_filename, moved_ext):
             try:
                 if os.path.isfile(dest_path):
                     os.remove(dest_path)
