@@ -80,7 +80,7 @@ class MinifyHandler(object):
         return filename.startswith(self.incl_mark) \
                    or filename.endswith(self.incl_mark)
     
-    def _process_html(self, file_path, inner=False):
+    def _process_html(self, file_path, minify=True, inner=False):
         print "peon: Minify HTML process start"
         
         build_regex = self.build_regex
@@ -103,35 +103,37 @@ class MinifyHandler(object):
                 comp_file_path = os.path.join(curr_dir, comp_file)
 
             if comp_type == 'css':
-                css_series = []
-                _text = re.sub(self.comment_regex, u'', text)
-                for href in href_regex.findall(_text):
-                    if href.startswith(os.path.sep):
-                        _path = os.path.join(self.cwd_dir, href[1:])
-                    else:
-                        _path = os.path.join(curr_dir, href)
+                if minify:
+                    css_series = []
+                    _text = re.sub(self.comment_regex, u'', text)
+                    for href in href_regex.findall(_text):
+                        if href.startswith(os.path.sep):
+                            _path = os.path.join(self.cwd_dir, href[1:])
+                        else:
+                            _path = os.path.join(curr_dir, href)
                     
-                    css_series.append(self._read_file(_path))
+                        css_series.append(self._read_file(_path))
                 
-                css_source = self._css('\n'.join(css_series))
-                self._output(comp_file_path, css_source)
+                    css_source = self._css('\n'.join(css_series))
+                    self._output(comp_file_path, css_source)
                 
                 new_css_tpl = u'<link rel="stylesheet" href="{}">'
                 replacement = new_css_tpl.format(comp_file+comp_param)
                 
             elif comp_type == 'js':
-                js_series = []
-                _text = re.sub(self.comment_regex, u'', text)
-                for src in src_regex.findall(_text):
-                    if src.startswith(os.path.sep):
-                        _path = os.path.join(self.cwd_dir, src[1:])
-                    else:
-                        _path = os.path.join(curr_dir, src)
+                if minify:
+                    js_series = []
+                    _text = re.sub(self.comment_regex, u'', text)
+                    for src in src_regex.findall(_text):
+                        if src.startswith(os.path.sep):
+                            _path = os.path.join(self.cwd_dir, src[1:])
+                        else:
+                            _path = os.path.join(curr_dir, src)
                 
-                    js_series.append(self._read_file(_path))
+                        js_series.append(self._read_file(_path))
 
-                js_source = self._uglifyjs('\n'.join(js_series))
-                self._output(comp_file_path, js_source)
+                    js_source = self._uglifyjs('\n'.join(js_series))
+                    self._output(comp_file_path, js_source)
                 
                 new_js_tpl = u'<script src="{}"></script>'
                 replacement = new_js_tpl.format(comp_file+comp_param)
@@ -267,10 +269,10 @@ class MinifyHandler(object):
             else:
                 raise CompressError('html not found')
 
-    def process_html(self, src_paths, inner=False):
+    def process_html(self, src_paths, minify=True, inner=False):
         for path in src_paths:
             if os.path.isfile(path):
-                html_source = self._process_html(path, inner)
+                html_source = self._process_html(path, minify, inner)
                 self._output(path, html_source)
                 print "peon: HTML processed -> {}".format(path)
             else:

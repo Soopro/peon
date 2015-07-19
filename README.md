@@ -185,6 +185,7 @@ Compress files, minify css js html, and process html, and able to concat angular
     },
     "process_html":{
       "type": "process_html",
+      "minify": true,
       "cwd": "dist",
       "src": "*.html"
     },
@@ -210,21 +211,27 @@ Compress task include multiple groups. The group's key can be custom to any lati
 
 `type`: define compress type. `html` `css` `js` `process_html` `inline_angular_templates`.
 
-`inline_angular_templates`: 
+type [inline_angular_templates]: 
+
 - `prefix`: define ng templates id prefix, etc., '/'. this is for match the template reference.
 - `beautify`: define output templates is minifed or readable.
 - `allow_includes`: set it true will concat include files (starts or ends with '_'), default is False.
 - `output`: file you want fill template script into. `<!-- ng-templates -->` mark must somewhere in this file.
 
+
 type [css, js]:
 
-`output`: the file name you want output to minified file.
+- `output`: the file name you want output to minified file.
 
 
-type [html, process_html]:
+type [html]:
 
-src: the file you want minify will output it self.
+- `src`: the file you want minify will output it self.
 
+type [process_html]
+
+- `src`: the file you want minify will output it self.
+- `minify`: minify white process html.
 
 ##### task: Rev
 
