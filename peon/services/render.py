@@ -1,7 +1,7 @@
 #coding=utf-8
 from __future__ import absolute_import
 
-import os, time, shutil, re
+import os, time, shutil, re, sys
 import subprocess
 import sass
 from datetime import datetime
@@ -63,6 +63,7 @@ class RenderHandler(object):
 
 
     def _raise_exception(self, err, src_path):
+        sys.stdout.write("\a")
         print "--------------------"
         print "[{}Exception{}]: {}".format(bpcolor.FAIL, bpcolor.ENDC, err)
         print "[src_path]: {}".format(src_path)
