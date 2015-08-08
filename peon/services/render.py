@@ -54,9 +54,17 @@ class RenderHandler(object):
         if not os.path.isdir(self.dest_dir):
             os.mkdir(self.dest_dir)
         
-        self.skip_includes = opts.get('skip_includes')
-        if not isinstance(self.skip_includes, list):
-            self.skip_includes = []
+        skips = opts.get('skip_includes')
+        if isinstance(skips, (str, unicode)):
+            skips = [skips]
+        elif not isinstance(skips, list):
+            skips = []
+        
+        self.skip_includes = []
+        for incl in skips:
+            if not isinstance(incl, (str, unicode)):
+                continue
+            self.skip_includes.append(incl.lower())
 
         include_marks = opts.get('include_marks', {})
 
@@ -104,6 +112,11 @@ class RenderHandler(object):
             os.rename(src_path, dest_path)
         return src_path
 
+
+    def _in_skip_includes(self, file_type):
+        return any(x in self.skip_includes for x in ['*', file_type])
+    
+    
     def _coffee_all(self):
         try:
             subprocess.check_output(["coffee", "-c", "-o", self.dest_dir,
@@ -154,7 +167,6 @@ class RenderHandler(object):
         except Exception as e:
             self._raise_exception(RenderingError(e, 'jade all ↑'), 
                                   self.src_dir, e)
-
         
         
     def _jade(self, src_path, dest_path):
@@ -192,7 +204,10 @@ class RenderHandler(object):
             if os.path.isfile(src_path):
                 if not os.path.exists(os.path.dirname(dest_path)):
                     os.makedirs(os.path.dirname(dest_path))
-                html_content = self._process_html_includes(src_path)
+                if self._in_skip_includes('html'):
+                    html_content = self._read_file(src_path)
+                else:
+                    html_content = self._process_html_includes(src_path)
                 self._write_file(dest_path, html_content)
         except Exception as e:
             self._raise_exception(RenderingError(e, 'html'), src_path)
@@ -212,7 +227,7 @@ class RenderHandler(object):
         if path.startswith(self.src_dir):
             path = path.replace(self.src_dir, '', 1).lstrip(os.path.sep)
         filepath, ext = os.path.splitext(path)
-        ext = ext[1:]
+        ext = ext[1:].lower()
         comp_ext = self.replacement.get(ext, ext)
         compile_path = "{}{}{}".format(self.dest_dir, os.path.sep, filepath)
         if comp_ext:
@@ -234,15 +249,15 @@ class RenderHandler(object):
         
         def add_files(files, dirpath):
             for f in files:
-                filename, ext = os.path.splitext(f)
+                _, filename, ext = split_file_path(f)
                 
                 if filename.startswith('.'):
                     continue
                 
-                if self.is_include_file(filename, ext[1:]):
+                if self.is_include_file(filename, ext.lower()):
                     continue
 
-                if ext[1:] == file_type or not file_type:
+                if ext.lower() == file_type or not file_type:
                     results.append(os.path.join(dirpath, f))
 
         def add_dirs(dirs, dirpath):
@@ -258,9 +273,9 @@ class RenderHandler(object):
 
         return results
 
-
+    
     def is_include_file(self, filename, ext):
-        if any(x in self.skip_includes for x in ['*', ext]):
+        if isinstance(ext, str) and self._in_skip_includes(ext.lower()):
             return False
         is_incl_file = filename.startswith(self.incl_mark) \
                                or filename.endswith(self.incl_mark)
@@ -285,6 +300,8 @@ class RenderHandler(object):
         excludes = []
         for f in all_files:
             _, _, ext = self.split_file_path(f)
+            ext = ext.lower()
+            
             if ext == 'coffee':
                 has_coffee = True
                 excludes.append(f)
@@ -331,7 +348,7 @@ class RenderHandler(object):
         if not replace and os.path.isfile(dest_path):
             return
         
-        if self.is_include_file(filename, ext):
+        if self.is_include_file(filename, ext.lower()):
             if ext not in self.render_types:
                 return
             if filename.startswith(self.incl_root_mark):
@@ -348,6 +365,8 @@ class RenderHandler(object):
         
         print "--------------------"
         try:
+            ext = ext.lower()
+
             if ext == 'coffee':
                 self._coffee(src_path, dest_path)
 

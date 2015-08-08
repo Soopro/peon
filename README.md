@@ -159,10 +159,18 @@ Render files from source dir to dest dir
 ```
   "render":{
     "cwd": "src",
-    "dest": "build"
+    "dest": "build",
+    "clean": ["build"],
+    "skip_includes":[]
   }
 
 ```
+
+`clean`: clean a dest folder before rendering
+
+`skip_includes`: skip those file types from include rendring. If the type is 'html', 
+the {% include ... %} will not effect.
+
 
 ##### task: Compress
 
@@ -358,8 +366,18 @@ Backup file and db.
 ```
 
 ## -w: Watcher
+```
+  "watch":{
+    "src": "src",
+    "dest": "build",
+    "skip_includes":[],
+    "init": true,
+    "server": true,
+    "port": 9527
+  }
+```
 
-`peon` -w [init] [-s port] [--src src_dir] [--dest dest_dir]
+`peon` -w [init] [-s port] [--src src_dir] [--dest dest_dir] [--skip file_type]
 
 `-w init`: start watcher, with keyword 'init' will clean dest dir before watching start.
 
@@ -368,6 +386,8 @@ Backup file and db.
 `--src src_dir`: watcher will get source file from src folder.
 
 `--dest dest_dir`: watcher will render file into dest folder.
+
+`--skip`: watcher will skip a file type. this option can use multiple time for a list of file types.
 
 Wactching Coffee jade less. If it's changed than compile a new file.
 files start or end with undescore '_' is changed will compile all files but it self.
