@@ -2,6 +2,7 @@
   "watch":{
     "src": "src",
     "dest": "build",
+    "skip_includes":[],
     "init": true,
     "server": true,
     "port": 9527
