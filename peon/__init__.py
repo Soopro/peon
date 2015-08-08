@@ -4,7 +4,7 @@ import argparse
 
 from .modules import (construct, backup, transport, packing, watch, server)
 
-__version_info__ = ('0', '1', '4')
+__version_info__ = ('0', '1', '5')
 __version__ = '.'.join(__version_info__)
 
 def command_options():
@@ -40,6 +40,12 @@ def command_options():
                         const=None,
                         help='Define operation dir.')
     
+    parser.add_argument('--skip',
+                        dest='skip_includes',
+                        action='append',
+                        type=str,
+                        help='Skip type of include files with rendering.')
+    
     # Server
     parser.add_argument('-s', '--server', 
                         dest='port',
@@ -69,6 +75,7 @@ def command_options():
                         nargs='?',
                         const=True,
                         help='Run Peon watcher file changes.')
+
     
     # Construct
     parser.add_argument('-c', '--construct', 

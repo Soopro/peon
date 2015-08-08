@@ -219,7 +219,8 @@ def copy(cfg):
 def render(cfg):
     render_opts = {
         "src": cfg.get('cwd', DEFAULT_SRC_DIR),
-        "dest": cfg.get('dest', DEFAULT_BUILD_DIR)
+        "dest": cfg.get('dest', DEFAULT_BUILD_DIR),
+        "skip_includes": cfg.get('skip_includes', []),
     }
     render = RenderHandler(render_opts)
     if cfg.get('clean') is True:
@@ -321,7 +322,7 @@ if __name__ == '__main__':
     # command line options
     parser = argparse.ArgumentParser(
                     description='Options of run Peon dev server.')
-
+                        
     parser.add_argument('-c', '--construct', 
                         dest='construct',
                         action='store',

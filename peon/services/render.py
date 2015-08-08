@@ -48,11 +48,16 @@ class RenderHandler(object):
         self.root_dir = os.getcwd()
         self.src_dir = opts.get('src', '.').lstrip(os.path.sep)
         self.dest_dir = opts.get('dest', '.').lstrip(os.path.sep)
+        
         self.replacement = opts.get('replacement', self.replacement)
 
         if not os.path.isdir(self.dest_dir):
             os.mkdir(self.dest_dir)
         
+        self.skip_includes = opts.get('skip_includes')
+        if not isinstance(self.skip_includes, list):
+            self.skip_includes = []
+
         include_marks = opts.get('include_marks', {})
 
         self.incl_mark = include_marks.get('base', '_')
@@ -203,7 +208,7 @@ class RenderHandler(object):
             self._raise_exception(RenderingError(e, 'file'), src_path)
     
     
-    def find_dest_path(self, path):
+    def find_dest_path(self, path, output_ext=True):
         if path.startswith(self.src_dir):
             path = path.replace(self.src_dir, '', 1).lstrip(os.path.sep)
         filepath, ext = os.path.splitext(path)
@@ -212,31 +217,31 @@ class RenderHandler(object):
         compile_path = "{}{}{}".format(self.dest_dir, os.path.sep, filepath)
         if comp_ext:
             compile_path = "{}.{}".format(compile_path, comp_ext)
-        return compile_path, comp_ext
+        if output_ext:
+            return compile_path, comp_ext
+        else:
+            return compile_path
     
 
-    def get_file_path(self, path):
+    def split_file_path(self, path):
         filepath, ext = os.path.splitext(path)
         filepath = filepath.rsplit(os.path.sep, 1)
         return filepath[0], filepath[1], ext[1:]
 
     
-    def find_files(self, path='.', file_type=None, includes=False):
+    def find_files(self, path='.', file_type=None):
         results = []
         
         def add_files(files, dirpath):
             for f in files:
                 filename, ext = os.path.splitext(f)
-
+                
                 if filename.startswith('.'):
                     continue
-            
-                is_includes = self.is_include_file(filename)
                 
-                if not includes and is_includes:
+                if self.is_include_file(filename, ext[1:]):
                     continue
-                if includes and not is_includes:
-                    continue
+
                 if ext[1:] == file_type or not file_type:
                     results.append(os.path.join(dirpath, f))
 
@@ -254,7 +259,9 @@ class RenderHandler(object):
         return results
 
 
-    def is_include_file(self, filename):
+    def is_include_file(self, filename, ext):
+        if any(x in self.skip_includes for x in ['*', ext]):
+            return False
         is_incl_file = filename.startswith(self.incl_mark) \
                                or filename.endswith(self.incl_mark)
         return is_incl_file
@@ -274,10 +281,10 @@ class RenderHandler(object):
         has_sass = False
         # lessc cli not support output to folder
         
-        files = self.find_files(self.src_dir)
+        all_files = self.find_files(self.src_dir)
         excludes = []
-        for f in files:
-            _, _, ext = self.get_file_path(f)
+        for f in all_files:
+            _, _, ext = self.split_file_path(f)
             if ext == 'coffee':
                 has_coffee = True
                 excludes.append(f)
@@ -295,35 +302,36 @@ class RenderHandler(object):
         if has_jade:
             self._jade_all()
 
-        _files = [f for f in files if f not in excludes]
+        _files = [f for f in all_files if f not in excludes]
         for f in _files:
-            self.render(f, includes=False)
+            self.render(f)
         
         self.rendering_all = False
         
         # clean up invalid files in dest folder
+        all_dest_path = [self.find_dest_path(f, False) for f in all_files]
+
         for dirpath, dirs, files in os.walk(self.dest_dir):
             for f in files:
-                filename, ext = os.path.splitext(f)
-                if filename.startswith('.') or self.is_include_file(filename):
-                    f_path = os.path.join(dirpath, f)
+                f_path = os.path.join(dirpath, f)
+                if f_path not in all_dest_path:
                     os.remove(f_path)
         
         self._print_message("Rendered all: {}/**/*".format(self.src_dir,
                                                            self.dest_dir))
 
     
-    def render(self, src_path, includes=True, replace=True):
+    def render(self, src_path, replace=True):
         if os.path.isdir(src_path):
             self.dirs(src_path)
             return
-        filedir, filename, ext = self.get_file_path(src_path)
+        filedir, filename, ext = self.split_file_path(src_path)
         dest_path, comp_ext = self.find_dest_path(src_path)
         
         if not replace and os.path.isfile(dest_path):
             return
         
-        if includes and self.is_include_file(filename):
+        if self.is_include_file(filename, ext):
             if ext not in self.render_types:
                 return
             if filename.startswith(self.incl_root_mark):
@@ -376,9 +384,9 @@ class RenderHandler(object):
     def move(self, src_path, move_to_path):
         dest_path, comp_ext = self.find_dest_path(src_path)
         dest_moved_path, _ = self.find_dest_path(move_to_path)
-        _, moved_filename, moved_ext,  = self.get_file_path(dest_moved_path)
+        _, moved_filename, moved_ext,  = self.split_file_path(dest_moved_path)
 
-        if self.is_include_file(moved_filename):
+        if self.is_include_file(moved_filename, moved_ext):
             try:
                 if os.path.isfile(dest_path):
                     os.remove(dest_path)

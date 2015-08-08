@@ -74,12 +74,22 @@ def watch(opts):
     print "------------"
     print "Peon Wacther started"
     print "------------"
-    
-    src_dir = opts.src_dir or peon_config.get('src', DEFAULT_SRC_DIR)
-    dest_dir = opts.dest_dir or peon_config.get('dest', DEFAULT_DEST_DIR)
-    init_dest = (opts.watcher == 'init') or peon_config.get('init', True)
-    server = bool(opts.port) or peon_config.get('server', False)
-    server_port = opts.port or peon_config.get('port', '')
+
+    if peon_config:
+        src_dir = peon_config.get('src', DEFAULT_SRC_DIR)
+        dest_dir = peon_config.get('dest', DEFAULT_DEST_DIR)
+        skip_includes = peon_config.get('skip_includes', [])
+        init_dest = peon_config.get('init', True)
+        server = peon_config.get('server', False)
+        server_port = peon_config.get('port', '')
+    else:
+        src_dir = opts.src_dir or DEFAULT_SRC_DIR
+        dest_dir = opts.dest_dir or DEFAULT_DEST_DIR
+        skip_includes = opts.skip_includes or []
+        init_dest = (opts.watcher == 'init')
+        server = bool(opts.port)
+        server_port = opts.port
+
     
     if dest_dir == DEFAULT_SRC_DIR:
         dest_dir = DEFAULT_DEST_DIR
@@ -87,6 +97,7 @@ def watch(opts):
     render_opts = {
         "src": src_dir,
         "dest": dest_dir,
+        "skip_includes": skip_includes,
     }
     render = RenderHandler(render_opts)
     
@@ -146,7 +157,13 @@ if __name__ == '__main__':
                         const='src',
                         help='Define operation src dir.')
     
-    parser.add_argument('-w', '--watcher', 
+    parser.add_argument('--skip',
+                        dest='skip_includes',
+                        action='append',
+                        type=str,
+                        help='Skip type of include files with rendering.')
+    
+    parser.add_argument('-w', '--watcher',
                         dest='watcher',
                         action='store',
                         nargs='?',
