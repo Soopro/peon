@@ -62,9 +62,13 @@ class RenderHandler(object):
         
         self.skip_includes = []
         for incl in skips:
-            if not isinstance(incl, (str, unicode)):
+            try:
+                incl = str(incl)
+            except:
                 continue
             self.skip_includes.append(incl.lower())
+        
+        print "Skiped include types: {}".format(self.skip_includes)
 
         include_marks = opts.get('include_marks', {})
 
@@ -240,21 +244,21 @@ class RenderHandler(object):
 
     def split_file_path(self, path):
         filepath, ext = os.path.splitext(path)
-        filepath = filepath.rsplit(os.path.sep, 1)
-        return filepath[0], filepath[1], ext[1:].lower()
+        filepath_split = filepath.rsplit(os.path.sep, 1)
+        if len(filepath_split) < 2:
+            filepath_split.insert(0, '')
+        return filepath_split[0], filepath_split[1], ext[1:].lower()
 
     
     def find_files(self, path='.', file_type=None):
         results = []
-        
+
         def add_files(files, dirpath):
             for f in files:
                 _, filename, ext = self.split_file_path(f)
                 
-                if filename.startswith('.'):
-                    continue
-                
-                if self.is_include_file(filename, ext):
+                if filename.startswith('.') \
+                or self.is_include_file(filename, ext):
                     continue
 
                 if ext == file_type or not file_type:

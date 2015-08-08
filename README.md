@@ -160,7 +160,7 @@ Render files from source dir to dest dir
   "render":{
     "cwd": "src",
     "dest": "build",
-    "clean": ["build"],
+    "clean": true,
     "skip_includes":[]
   }
 
