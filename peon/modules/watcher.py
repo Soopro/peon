@@ -77,7 +77,7 @@ def watch(opts):
     
     src_dir = opts.src_dir or peon_config.get('src', DEFAULT_SRC_DIR)
     dest_dir = opts.dest_dir or peon_config.get('dest', DEFAULT_DEST_DIR)
-    init_dest = opts.watcher == 'init' or peon_config.get('init')
+    init_dest = (opts.watcher == 'init') or peon_config.get('init', True)
     server = bool(opts.port) or peon_config.get('server', False)
     server_port = opts.port or peon_config.get('port', '')
     
