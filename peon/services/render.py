@@ -46,8 +46,8 @@ class RenderHandler(object):
             raise Exception("Render options is invalid. (opts)")
         
         self.root_dir = os.getcwd()
-        self.src_dir = opts.get('src', '.').lstrip(os.path.sep)
-        self.dest_dir = opts.get('dest', '.').lstrip(os.path.sep)
+        self.src_dir = opts.get('src', '.').strip(os.path.sep)
+        self.dest_dir = opts.get('dest', '.').strip(os.path.sep)
         
         self.replacement = opts.get('replacement', self.replacement)
 

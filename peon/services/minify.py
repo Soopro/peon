@@ -40,7 +40,7 @@ class MinifyHandler(object):
     cwd_dir = 'dist'
     
     def __init__(self, cwd, allow_includes=False):
-        self.cwd_dir = cwd
+        self.cwd_dir = cwd.strip(os.path.sep)
         self.allow_includes = allow_includes
     
     def _read_file(self, file_path):
