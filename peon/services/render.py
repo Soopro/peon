@@ -279,7 +279,7 @@ class RenderHandler(object):
 
     
     def is_include_file(self, filename, ext):
-        if isinstance(ext, str) and self._in_skip_includes(ext.lower()):
+        if self._in_skip_includes(ext.lower()):
             return False
         is_incl_file = filename.startswith(self.incl_mark) \
                                or filename.endswith(self.incl_mark)
@@ -351,7 +351,7 @@ class RenderHandler(object):
         if not replace and os.path.isfile(dest_path):
             return
         
-        if self.is_include_file(filename, ext.lower()):
+        if self.is_include_file(filename, ext):
             if ext not in self.render_types:
                 # this cheat for some file not render to dest,
                 # not really a includes
