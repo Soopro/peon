@@ -241,7 +241,7 @@ class RenderHandler(object):
     def split_file_path(self, path):
         filepath, ext = os.path.splitext(path)
         filepath = filepath.rsplit(os.path.sep, 1)
-        return filepath[0], filepath[1], ext[1:]
+        return filepath[0], filepath[1], ext[1:].lower()
 
     
     def find_files(self, path='.', file_type=None):
@@ -249,15 +249,15 @@ class RenderHandler(object):
         
         def add_files(files, dirpath):
             for f in files:
-                _, filename, ext = split_file_path(f)
+                _, filename, ext = self.split_file_path(f)
                 
                 if filename.startswith('.'):
                     continue
                 
-                if self.is_include_file(filename, ext.lower()):
+                if self.is_include_file(filename, ext):
                     continue
 
-                if ext.lower() == file_type or not file_type:
+                if ext == file_type or not file_type:
                     results.append(os.path.join(dirpath, f))
 
         def add_dirs(dirs, dirpath):
@@ -300,8 +300,7 @@ class RenderHandler(object):
         excludes = []
         for f in all_files:
             _, _, ext = self.split_file_path(f)
-            ext = ext.lower()
-            
+
             if ext == 'coffee':
                 has_coffee = True
                 excludes.append(f)
@@ -350,7 +349,10 @@ class RenderHandler(object):
         
         if self.is_include_file(filename, ext.lower()):
             if ext not in self.render_types:
+                # this cheat for some file not render to dest,
+                # not really a includes
                 return
+            
             if filename.startswith(self.incl_root_mark):
                 path = None
             elif filename.startswith(self.incl_global_mark):
@@ -365,8 +367,6 @@ class RenderHandler(object):
         
         print "--------------------"
         try:
-            ext = ext.lower()
-
             if ext == 'coffee':
                 self._coffee(src_path, dest_path)
 
@@ -403,7 +403,7 @@ class RenderHandler(object):
     def move(self, src_path, move_to_path):
         dest_path, comp_ext = self.find_dest_path(src_path)
         dest_moved_path, _ = self.find_dest_path(move_to_path)
-        _, moved_filename, moved_ext,  = self.split_file_path(dest_moved_path)
+        _, moved_filename, moved_ext,  = self.split_file_path(move_to_path)
 
         if self.is_include_file(moved_filename, moved_ext):
             try:
