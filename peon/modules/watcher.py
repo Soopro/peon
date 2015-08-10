@@ -82,6 +82,7 @@ def watch(opts):
         init_dest = peon_config.get('init', True)
         server = peon_config.get('server', False)
         server_port = peon_config.get('port', '')
+        pyco_server = peon_config.get('pyco')
     else:
         src_dir = opts.src_dir or DEFAULT_SRC_DIR
         dest_dir = opts.dest_dir or DEFAULT_DEST_DIR
@@ -89,6 +90,7 @@ def watch(opts):
         init_dest = (opts.watcher == 'init')
         server = bool(opts.port)
         server_port = opts.port
+        pyco_server = opts.pyco
 
     
     if dest_dir == DEFAULT_SRC_DIR:
@@ -106,17 +108,22 @@ def watch(opts):
         render.render_all()
     
     if server:
-        try:
-            port = str(server_port)
-        except:
-            port = ''
-
-        if port:
-            args = ['peon', '-s', port, '--http', '--dir', dest_dir]
+        if pyco_server:
+            args = ['python', '{}{}pyco.py'.format(pyco_server, os.path.sep)]
+            pyco_progress = subprocess.Popen(args)
         else:
-            args = ['peon', '-s', '--http', '--dir', dest_dir]
+            try:
+                port = str(server_port)
+            except:
+                port = ''
 
-        server_progress = subprocess.Popen(args)
+            if port:
+                args = ['peon', '-s', port, '--http', '--dir', dest_dir]
+            else:
+                args = ['peon', '-s', '--http', '--dir', dest_dir]
+
+            server_progress = subprocess.Popen(args)
+    
     
     observer = Observer()
     watcher = WatchPatternsHandler(render_handler = render,

@@ -4,7 +4,7 @@ import argparse
 
 from .modules import (construct, backup, transport, packing, watch, server)
 
-__version_info__ = ('0', '1', '5')
+__version_info__ = ('0', '1', '6')
 __version__ = '.'.join(__version_info__)
 
 def command_options():
@@ -54,7 +54,14 @@ def command_options():
                         type=int,
                         const=9527,
                         help='Start Peon dev server at port.')
-
+    
+    parser.add_argument('--pyco', 
+                        dest='pyco',
+                        action='store',
+                        nargs='?',
+                        type=str,
+                        const='pyco',
+                        help='Start Pyco dev server by path.')
     
     parser.add_argument('--http', 
                         dest='http_server',
