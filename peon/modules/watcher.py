@@ -109,10 +109,12 @@ def watch(opts):
     
     if server:
         if pyco_server:
-            args = ['python', '{}{}pyco.py'.format(pyco_server, os.path.sep)]
-            pyco_progress = subprocess.Popen(args)
-            # args = 'cd '+pyco_server+' && python pyco.py'
-            # pyco_progress = subprocess.Popen(args, shell=True)
+            # args = ['python', '{}{}pyco.py'.format(pyco_server, os.path.sep)]
+            # pyco_progress = subprocess.Popen(args)
+            # live reload will be stop if chdir inside pyco, 
+            # that's why switch to shell=True.
+            args = 'cd '+pyco_server+' && python pyco.py'
+            pyco_progress = subprocess.Popen(args, shell=True)
         else:
             try:
                 port = str(server_port)
