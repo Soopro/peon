@@ -78,11 +78,16 @@ def command_options():
     # Watcher
     parser.add_argument('-w', '--watcher', 
                         dest='watcher',
-                        action='store',
-                        nargs='?',
+                        action='store_const',
                         const=True,
                         help='Run Peon watcher file changes.')
-
+    
+    parser.add_argument('--clean',
+                        dest='clean',
+                        action='store_const',
+                        const=True,
+                        help='Clean dest folder before take actions.')
+    
     
     # Construct
     parser.add_argument('-c', '--construct', 

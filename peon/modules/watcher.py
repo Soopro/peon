@@ -79,7 +79,7 @@ def watch(opts):
         src_dir = peon_config.get('src', DEFAULT_SRC_DIR)
         dest_dir = peon_config.get('dest', DEFAULT_DEST_DIR)
         skip_includes = peon_config.get('skip_includes', [])
-        init_dest = peon_config.get('init', True)
+        clean_dest = peon_config.get('clean', True)
         server = peon_config.get('server', False)
         server_port = peon_config.get('port', '')
         pyco_server = peon_config.get('pyco')
@@ -87,7 +87,7 @@ def watch(opts):
         src_dir = opts.src_dir or DEFAULT_SRC_DIR
         dest_dir = opts.dest_dir or DEFAULT_DEST_DIR
         skip_includes = opts.skip_includes or []
-        init_dest = (opts.watcher == 'init')
+        clean_dest = opts.clean
         server = bool(opts.port)
         server_port = opts.port
         pyco_server = opts.pyco
@@ -103,7 +103,7 @@ def watch(opts):
     }
     render = RenderHandler(render_opts)
     
-    if init_dest:
+    if clean_dest:
         render.clean()
         render.render_all()
     
@@ -111,6 +111,8 @@ def watch(opts):
         if pyco_server:
             args = ['python', '{}{}pyco.py'.format(pyco_server, os.path.sep)]
             pyco_progress = subprocess.Popen(args)
+            # args = 'cd '+pyco_server+' && python pyco.py'
+            # pyco_progress = subprocess.Popen(args, shell=True)
         else:
             try:
                 port = str(server_port)
@@ -164,6 +166,12 @@ if __name__ == '__main__':
                         const='src',
                         help='Define operation src dir.')
     
+    parser.add_argument('--clean',
+                        dest='clean',
+                        action='store_const',
+                        const=True,
+                        help='Clean dest folder before take actions.')
+    
     parser.add_argument('--skip',
                         dest='skip_includes',
                         action='append',
@@ -172,8 +180,7 @@ if __name__ == '__main__':
     
     parser.add_argument('-w', '--watcher',
                         dest='watcher',
-                        action='store',
-                        nargs='?',
+                        action='store_const',
                         const=True,
                         help='Run Peon watcher file changes.')
 
