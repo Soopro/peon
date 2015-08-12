@@ -33,7 +33,7 @@ class MinifyHandler(object):
     attr_regex = re.compile('\[["\']?\s*([^"\']+)\s*["\']?\]', re.IGNORECASE)
     src_regex = re.compile('src=["\']?\s*([^"\']+)\s*["\']?', re.IGNORECASE)
     href_regex = re.compile('href=["\']?\s*([^"\']+)\s*["\']?', re.IGNORECASE)
-    comment_regex = re.compile('<\!--\s*.*\s*-->', re.IGNORECASE)
+    comment_regex = re.compile('<\!--\s*((?!-->).)*\s*-->', re.IGNORECASE)
     
     incl_mark = '_'
     allow_includes = False
