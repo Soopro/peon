@@ -208,7 +208,9 @@ class RenderHandler(object):
             if os.path.isfile(src_path):
                 if not os.path.exists(os.path.dirname(dest_path)):
                     os.makedirs(os.path.dirname(dest_path))
-                if self._in_skip_includes('html'):
+                
+                _, _, ext = self.split_file_path(src_path)
+                if self._in_skip_includes(ext.lower()):
                     html_content = self._read_file(src_path)
                 else:
                     html_content = self._process_html_includes(src_path)
@@ -383,7 +385,7 @@ class RenderHandler(object):
             elif ext == 'jade':
                 self._jade(src_path, dest_path)
         
-            elif ext == 'html':
+            elif ext in ['html', 'tpl']:
                 self._html(src_path, dest_path)
 
             elif self.src_dir != self.dest_dir:
