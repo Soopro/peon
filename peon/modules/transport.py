@@ -112,10 +112,10 @@ def transport_download(cfg):
     }   
     
     json_unicode = json.dumps(site_data,
-                             indent=2,
-                             sort_keys=True,
-                             separators=(',', ': '),
-                             ensure_ascii=False)
+                              indent=2,
+                              sort_keys=True,
+                              separators=(',', ': '),
+                              ensure_ascii=False)
 
     for rule in replace_rules:
         json_unicode = replace(rule.get("pattern"),
@@ -243,18 +243,13 @@ COMMANDS = {
     "download": transport_download
 }
 def transport(opts):
-    peon_config = load_config(DEFAULT_ACTION, multiple=False)
-    
-    if not opts.transport:
-        return
+    peon_config = load_config(DEFAULT_ACTION)
+    cmd = opts.transport
+    if cmd:
+        peon_config = [task[cmd] for task in peon_config if task.get(cmd)]
 
-    task_cmd = opts.transport
-    task = peon_config.get(task_cmd, {})
-    task_type = task.get('type')
-
-    if task:
-        run_task = COMMANDS[task_type]
-        run_task(task)
+    if peon_config:
+        run_task(peon_config, COMMANDS)
     else:
         raise Exception("Transport config does not exist.")
     
