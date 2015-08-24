@@ -17,12 +17,12 @@ DEFAULT_CONTENT_TYPE = "page"
 DEFAULT_SITE_FILE = 'site.json'
 
 # mathods
-def convert_data(x):
+def convert_data_decode(x):
     if isinstance(x, dict):
-        return dict((k.lower(), convert_data(v)) 
+        return dict((k.lower(), convert_data_decode(v)) 
                      for k, v in x.iteritems())
     elif isinstance(x, list):
-        return list([convert_data(i) for i in x])
+        return list([convert_data_decode(i) for i in x])
     elif isinstance(x, str):
         return x.decode("utf-8")
     elif isinstance(x, (unicode, int, float, bool)):
@@ -35,12 +35,31 @@ def convert_data(x):
             pass
     return x
 
+def convert_data_encode(x):
+    if isinstance(x, dict):
+        return dict((k.lower(), convert_data_encode(v)) 
+                     for k, v in x.iteritems())
+    elif isinstance(x, list):
+        return list([convert_data_encode(i) for i in x])
+    elif isinstance(x, unicode):
+        return x.encode("utf-8")
+    elif isinstance(x, (str, int, float, bool)):
+        return x
+    else:
+        try:
+            x = str(x).encode("utf-8")
+        except Exception as e:
+            print e
+            pass
+    return x
+
 
 def dict_to_md(data):
-    meta = data.get("meta")
+    meta = convert_data_encode(data.get("meta"))
     content = data.get("content").encode("utf-8")
     meta = {k.capitalize():v for k, v in meta.iteritems()}
-    meta = yaml.safe_dump(meta, default_flow_style=False, indent=2)
+    meta = yaml.safe_dump(meta, default_flow_style=False, indent=2,
+                                allow_unicode=True)
     # meta_template = "{key}:{value}"
     #
     # def make_str(value):
@@ -74,7 +93,7 @@ def md_to_dict(md_file):
 
     rv = dict()
     yaml_data = yaml.safe_load(meta_string)
-    rv["meta"] = convert_data(yaml_data)
+    rv["meta"] = convert_data_decode(yaml_data)
     # for item in meta:
 #         if item:
 #             t = item.split(":", 1)
@@ -95,7 +114,7 @@ def transport_download(cfg):
     dest = cfg.get("dest", DEFAULT_CONTENT_DIR)
     dest = safe_paths(dest)
     replace_rules = cfg.get("replace", [])
-    
+
     if not os.path.isdir(dest):
         os.mkdir(dest)
     try:
@@ -142,12 +161,13 @@ def transport_download(cfg):
             os.mkdir(file_dest)
         
         new_file = {}
-        new_file["meta"] = file["meta"]
-        new_file["content"] = file["content"]
-        new_file["meta"]["status"] = file["status"]
-        new_file["meta"]["priority"] = file["priority"]
+        new_file["meta"] = file.get("meta")
+        new_file["content"] = file.get("content")
+        new_file["meta"]["status"] = file.get("status")
+        new_file["meta"]["priority"] = file.get("priority")
         
         file_string = dict_to_md(new_file).decode("utf-8")
+
         for rule in replace_rules:
             file_string = replace(rule.get("pattern"),
                                   rule.get("replacement"),
@@ -246,7 +266,8 @@ def transport(opts):
     peon_config = load_config(DEFAULT_ACTION)
     cmd = opts.transport
     if cmd:
-        peon_config = [task[cmd] for task in peon_config if task.get(cmd)]
+        peon_config = [{cmd:task[cmd]} for task in peon_config 
+                                       if task.get(cmd)]
 
     if peon_config:
         run_task(peon_config, COMMANDS)
