@@ -15,8 +15,6 @@ from .helpers import load_config, run_task
 DEFAULT_CONTENT_DIR = "content"
 DEFAULT_CONTENT_TYPE = "page"
 DEFAULT_SITE_FILE = 'site.json'
-UPLOAD_MODE = "upload"
-DOWNLOAD_MODE = "download"
 
 # mathods
 def convert_data(x):
@@ -240,29 +238,25 @@ def transport_upload(cfg):
 # main
 #-------------
 DEFAULT_ACTION = "transport"
-
+COMMANDS = {
+    "upload": transport_upload,
+    "download": transport_download
+}
 def transport(opts):
-    peon_config = load_config(DEFAULT_ACTION)
+    peon_config = load_config(DEFAULT_ACTION, multiple=False)
     
-    task_name = None
-    task = {}
-    if opts.transport:
-        task_name = opts.transport
-        task = peon_config.get(task_name, {})
-    
-    if task.get('type'):
-        if task.get('type') == UPLOAD_MODE:
-            COMMANDS = {
-                task_name: transport_upload
-            }
-        elif task.get('type') == UPLOAD_MODE:
-            COMMANDS = {
-                task_name: transport_download,
-            }
-        
-        run_task(peon_config, COMMANDS)
+    if not opts.transport:
+        return
+
+    task_cmd = opts.transport
+    task = peon_config.get(task_cmd, {})
+    task_type = task.get('type')
+
+    if task:
+        run_task = COMMANDS[task_type]
+        run_task(task)
     else:
-        raise Exception("Transport mode does not exist.")
+        raise Exception("Transport config does not exist.")
     
     print "peon: finish transport ..."
     
