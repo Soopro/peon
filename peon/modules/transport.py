@@ -121,8 +121,8 @@ def transport_download(cfg):
 
     for rule in replace_rules:
         json_unicode = replace(rule.get("pattern"),
-                              rule.get("replacement"),
-                              json_unicode)
+                               rule.get("replacement"),
+                               json_unicode)
     
     site_file_path = os.path.join(dest, DEFAULT_SITE_FILE)
     site_file = open(site_file_path, 'w')
