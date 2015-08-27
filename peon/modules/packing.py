@@ -26,29 +26,31 @@ def _get_filename(cwd=None):
 
 def upload(cfg):
     cwd = safe_paths(cfg.get("cwd"))
-    old_dir = os.getcwd()
-    if cwd:
-        os.chdir(cwd)
 
     file = cfg.get("file") or _get_filename(cwd)
-    
+
     url = cfg.get('url')
     headers = cfg.get('headers')
     data = cfg.get('data')
     params = cfg.get('params')
-    file_path = os.path.join(os.getcwd(), file)
+    delete = cfg.get('delete')
+    file_path = os.path.join(os.getcwd(), cwd, file)
+    os.path.normpath(file_path)
     try:
         uploadFile(file_path, url, data=data, params=params, headers=headers)
     except Exception as e:
         raise e
-
-    os.chdir(old_dir)
+    
+    if delete:
+        os.remove(file_path)
+    
     print "peon: package is uploaded..."
 
 
 def packzip(cfg):
     cwd = safe_paths(cfg.get("cwd"))
-    old_dir = os.getcwd()
+    dest = safe_paths(cfg.get("dest"))
+    start_dir = os.getcwd()
     if cwd:
         os.chdir(cwd)
     # gen file name
@@ -73,7 +75,14 @@ def packzip(cfg):
             excludes=exclude_list,
             include_hidden=include_hidden)
     
-    os.chdir(old_dir)
+    if dest:
+        abs_file_path = os.path.join(start_dir, dest, filename)
+        abs_file_path = os.path.normpath(abs_file_path)
+        if os.path.exists(abs_file_path):
+            os.remove(abs_file_path)
+        os.rename(filename, abs_file_path)
+
+    os.chdir(start_dir)
     print "peon: files in the package ..."
 
   
