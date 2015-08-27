@@ -121,6 +121,9 @@ def transport_download(cfg):
         r = getData(url, params=params, headers=headers)
         data = r.json()
     except Exception as e:
+        if isinstance(e, ValueError):
+            print "Response is not JSON!"
+            print "---------------------"
         raise e
     site_data = {
         "meta": data.get("site_meta"),
@@ -251,6 +254,9 @@ def transport_upload(cfg):
         r = uploadData(url, data=payload, params=params, headers=headers)
         print r.json()
     except Exception as e:
+        if isinstance(e, ValueError):
+            print "Response is not JSON!"
+            print "---------------------"
         raise e
     
     
