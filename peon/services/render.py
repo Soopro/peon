@@ -19,7 +19,7 @@ class RenderingError(Exception):
 
     def __str__(self):
         return '{}:{} => \n{}'.format(self.status_msg,
-                              bpcolor.OKBLUE+self.affix_msg+bpcolor.ENDC,
+                              bpcolor.FAIL+self.affix_msg+bpcolor.ENDC,
                               self.error)
 
 # handlers

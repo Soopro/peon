@@ -16,7 +16,7 @@ class CompressError(Exception):
 
     def __str__(self):
         return '{}:{}'.format(self.status_msg,
-                              bpcolor.OKBLUE+self.affix_msg+bpcolor.ENDC)
+                              bpcolor.FAIL+self.affix_msg+bpcolor.ENDC)
 
 # handlers
 class MinifyHandler(object):
@@ -25,7 +25,7 @@ class MinifyHandler(object):
 
     tmpl_regex = re.compile('<\!--\s*ng\-templates\s*-->', re.IGNORECASE)
 
-    build_regex = re.compile('(<\!--\s*build:(\[?\s*\w+\s*\]?)'+\
+    build_regex = re.compile('(<\!--\s*build:(\[?\s*[\w-]+\s*\]?)'+\
                              '\s+([\w\$\-\./\{\}\(\)]*)(\?.*?)*\s*-->'+\
                              '(.*?)<\!--\s*/build\s*-->)',
                              re.MULTILINE | re.DOTALL | re.IGNORECASE)
@@ -42,7 +42,15 @@ class MinifyHandler(object):
     def __init__(self, cwd, allow_includes=False):
         self.cwd_dir = cwd.strip(os.path.sep)
         self.allow_includes = allow_includes
-    
+        
+    def _isfile(self, file_path):
+        if os.path.isfile(file_path):
+            return True
+        else:
+            print "peon: Minify skip file ---> {}".format(bpcolor.OKBLUE+\
+                                                   file_path+bpcolor.ENDC)
+            return False    
+             
     def _read_file(self, file_path):
         try:
             file = open(file_path)
@@ -129,7 +137,7 @@ class MinifyHandler(object):
                             _path = os.path.join(self.cwd_dir, src[1:])
                         else:
                             _path = os.path.join(curr_dir, src)
-                
+                        
                         js_series.append(self._read_file(_path))
 
                     js_source = self._uglifyjs('\n'.join(js_series))
@@ -147,12 +155,14 @@ class MinifyHandler(object):
                 pattern = r'({}=["\']?\s*([^"\']+)\s*["\']?)'.format(attr_name)
                 comp_attr_regex = re.compile(pattern, re.IGNORECASE)
                 replacement = re.sub(self.comment_regex, u'', text)
+                
                 for attr_match, attr in comp_attr_regex.findall(text):
                     if attr.startswith(os.path.sep):
                         _src_path = os.path.join(self.cwd_dir, attr[1:])
                     else:
                         _src_path = os.path.join(curr_dir, attr)
-                    if _src_path != comp_file_path:
+                    if self._isfile(_src_path) \
+                    and _src_path != comp_file_path:
                         shutil.copy2(_src_path, comp_file_path)
                     new_attr = '{}="{}"'.format(attr_name,
                                                 comp_file+comp_param)
@@ -163,9 +173,9 @@ class MinifyHandler(object):
             content = content.replace(match, replacement)
             print "peon: processe_html {}".format(comp_type)
             print "--------------------"
-            print text
+            print text.replace('\n', '').replace('  ', ' ')
             print "--->"
-            print replacement
+            print replacement.replace('\n', '').replace('  ', ' ')
             print "--------------------"
         
         return content
@@ -229,31 +239,43 @@ class MinifyHandler(object):
         tmpl_content = u"\n{}".format(tmpl_content)
         return re.sub(self.tmpl_regex, tmpl_content, inject_source, 1)
     
-    def css(self, src_paths, output_path):
+    def css(self, src_paths, output):
         css_series = []
         for path in src_paths:
             if os.path.isfile(path):
                 if self.includes_gateway(path):
                     continue
+                if not output:
+                    output = os.path.basename(path)
                 css_series.append(self._read_file(path))
             else:
                 raise CompressError('css not found')
+        
+        try:
+            output_path = os.path.join(self.cwd_dir, output)
+        except:
+            raise CompressError('css output not found')
         css_source = self._css('\n'.join(css_series))
-        output_path = os.path.join(self.cwd_dir, output_path)
         self._output(output_path, css_source)
         print "peon: CSS minifed -> {}".format(output_path)
 
-    def js(self, src_paths, output_path):
+    def js(self, src_paths, output):
         js_series = []
         for path in src_paths:
             if os.path.isfile(path):
                 if self.includes_gateway(path):
                     continue
+                if not output:
+                    output = os.path.basename(path)
                 js_series.append(self._read_file(path))
             else:
                 raise CompressError('js not found')
+        try:
+            output_path = os.path.join(self.cwd_dir, output)
+        except:
+            raise CompressError('js output not found')
+            
         js_source = self._uglifyjs('\n'.join(js_series))
-        output_path = os.path.join(self.cwd_dir, output_path)
         self._output(outpu_path, js_source)
         print "peon: JS minifed -> {}".format(output_path)
         
@@ -278,9 +300,12 @@ class MinifyHandler(object):
             else:
                 raise CompressError('html not found')
     
-    def concat_angular_template(self, src_paths, inject_path, 
+    def concat_angular_template(self, src_paths, output, 
                                       prefix='', beautify=False):
-        inject_path = os.path.join(self.cwd_dir, inject_path)
+        if not output:
+            output = 'index.html'
+
+        inject_path = os.path.join(self.cwd_dir, output)
         if not os.path.isfile(inject_path):
             raise CompressError('angular templates inject path not found')
 

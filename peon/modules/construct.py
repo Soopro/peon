@@ -265,18 +265,20 @@ def compress(cfg):
         minify = MinifyHandler(cwd, allow_includes)
         files = rule.get('src', [])
         minify_type = rule.get('type')
-        minify_output = safe_paths(rule.get('output', ''))
-        minify_prefix = rule.get('prefix', '')
-        minify_beautify = rule.get('beautify', False)
+        minify_output = safe_paths(rule.get('output'))
+        # safe_paths('') will generate '.' which I don't want here.
+        
         minify_process = rule.get('minify', True)
+        minify_prefix = rule.get('prefix', '') 
+        minify_beautify = rule.get('beautify', False)
         
         path_list = helper_find_path_list(files, cwd)
 
         if minify_type == 'html':
             minify.html(path_list)
-        elif minify_type == 'css' and minify_output:
+        elif minify_type == 'css':
             minify.css(path_list, minify_output)
-        elif minify_type == 'js' and minify_output:
+        elif minify_type == 'js':
             minify.js(path_list, minify_output)
         elif minify_type == 'process_html':
             minify.process_html(path_list, minify_process)
