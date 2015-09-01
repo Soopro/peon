@@ -25,7 +25,7 @@ class MinifyHandler(object):
 
     tmpl_regex = re.compile('<\!--\s*ng\-templates\s*-->', re.IGNORECASE)
 
-    build_regex = re.compile('(<\!--\s*build:(\[?\s*[\w-]+\s*\]?)'+\
+    build_regex = re.compile('(<\!--\s*build:\s*(\[?\s*[\w-]+\s*\]?)'+\
                              '\s+([\w\$\-\./\{\}\(\)]*)(\?.*?)*\s*-->'+\
                              '(.*?)<\!--\s*/build\s*-->)',
                              re.MULTILINE | re.DOTALL | re.IGNORECASE)
@@ -33,7 +33,8 @@ class MinifyHandler(object):
     attr_regex = re.compile('\[["\']?\s*([^"\']+)\s*["\']?\]', re.IGNORECASE)
     src_regex = re.compile('src=["\']?\s*([^"\']+)\s*["\']?', re.IGNORECASE)
     href_regex = re.compile('href=["\']?\s*([^"\']+)\s*["\']?', re.IGNORECASE)
-    comment_regex = re.compile('<\!--\s*((?!-->).)*\s*-->', re.IGNORECASE)
+                               
+    comment_regex = re.compile('<\!--\s*(.*?)\s*-->', re.IGNORECASE)
     
     incl_mark = '_'
     allow_includes = False
@@ -95,12 +96,16 @@ class MinifyHandler(object):
         src_regex = self.src_regex
         href_regex = self.href_regex
         attr_regex = self.attr_regex
+        comment_regex = self.comment_regex
         
         curr_dir = os.path.dirname(file_path)
         
         content = self._read_file(file_path)
         regex_result = build_regex.findall(content)
+
         for match, comp_type, comp_file, comp_param, text in regex_result:
+            replacement = ''
+            
             if not comp_file or not comp_type:
                 content = content.replace(match, '')
                 continue
@@ -110,10 +115,17 @@ class MinifyHandler(object):
             else:
                 comp_file_path = os.path.join(curr_dir, comp_file)
 
-            if comp_type == 'css':
+
+            if comp_type == 'replace':
+                replist = []
+                for repl in comment_regex.findall(text):
+                    replist.append(repl)
+                replacement = '\n'.join(replist)
+
+            elif comp_type == 'css':
                 if minify:
                     css_series = []
-                    _text = re.sub(self.comment_regex, u'', text)
+                    _text = re.sub(comment_regex, u'', text)
                     for href in href_regex.findall(_text):
                         if href.startswith(os.path.sep):
                             _path = os.path.join(self.cwd_dir, href[1:])
@@ -131,7 +143,7 @@ class MinifyHandler(object):
             elif comp_type == 'js':
                 if minify:
                     js_series = []
-                    _text = re.sub(self.comment_regex, u'', text)
+                    _text = re.sub(comment_regex, u'', text)
                     for src in src_regex.findall(_text):
                         if src.startswith(os.path.sep):
                             _path = os.path.join(self.cwd_dir, src[1:])
@@ -154,14 +166,14 @@ class MinifyHandler(object):
                     continue
                 pattern = r'({}=["\']?\s*([^"\']+)\s*["\']?)'.format(attr_name)
                 comp_attr_regex = re.compile(pattern, re.IGNORECASE)
-                replacement = re.sub(self.comment_regex, u'', text)
+                replacement = re.sub(comment_regex, u'', text)
                 
                 for attr_match, attr in comp_attr_regex.findall(text):
                     if attr.startswith(os.path.sep):
                         _src_path = os.path.join(self.cwd_dir, attr[1:])
                     else:
                         _src_path = os.path.join(curr_dir, attr)
-                    if self._isfile(_src_path) \
+                    if minify and self._isfile(_src_path) \
                     and _src_path != comp_file_path:
                         shutil.copy2(_src_path, comp_file_path)
                     new_attr = '{}="{}"'.format(attr_name,
@@ -276,7 +288,7 @@ class MinifyHandler(object):
             raise CompressError('js output not found')
             
         js_source = self._uglifyjs('\n'.join(js_series))
-        self._output(outpu_path, js_source)
+        self._output(output_path, js_source)
         print "peon: JS minifed -> {}".format(output_path)
         
     def html(self, src_paths):
