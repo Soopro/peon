@@ -151,7 +151,7 @@ class RenderHandler(object):
             sass.compile(dirname = (self.src_dir, self.dest_dir))
         except Exception as e:
             self._raise_exception(RenderingError(e, 'sass all ↑'),
-                                  self.src_dir, e)
+                                  self.src_dir)
 
     
     def _sass(self, src_path, dest_path):
@@ -170,7 +170,7 @@ class RenderHandler(object):
                                      "-o", self.dest_dir, "--hierarchy"])
         except Exception as e:
             self._raise_exception(RenderingError(e, 'jade all ↑'), 
-                                  self.src_dir, e)
+                                  self.src_dir)
         
         
     def _jade(self, src_path, dest_path):
