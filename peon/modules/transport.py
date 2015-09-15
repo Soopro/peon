@@ -25,7 +25,7 @@ def convert_data_decode(x):
         return list([convert_data_decode(i) for i in x])
     elif isinstance(x, str):
         return x.decode("utf-8")
-    elif isinstance(x, (unicode, int, float, bool)):
+    elif isinstance(x, (unicode, int, float, bool)) or x is None:
         return x
     else:
         try:
@@ -43,7 +43,7 @@ def convert_data_encode(x):
         return list([convert_data_encode(i) for i in x])
     elif isinstance(x, unicode):
         return x.encode("utf-8")
-    elif isinstance(x, (str, int, float, bool)):
+    elif isinstance(x, (str, int, float, bool)) or x is None:
         return x
     else:
         try:
