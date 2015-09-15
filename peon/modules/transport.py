@@ -169,7 +169,11 @@ def transport_download(cfg):
         new_file["meta"]["status"] = file.get("status")
         new_file["meta"]["priority"] = file.get("priority")
         
-        file_string = dict_to_md(new_file).decode("utf-8")
+        try:
+            file_string = dict_to_md(new_file).decode("utf-8")
+        except Exception as e:
+            print "Current alias: {}".format(file_alias)
+            raise e
 
         for rule in replace_rules:
             file_string = replace(rule.get("pattern"),
@@ -215,7 +219,11 @@ def transport_upload(cfg):
                     file_source = replace(rule.get("pattern"),
                                           rule.get("replacement"),
                                           file_source)
-                file_data = md_to_dict(file_source)
+                try:
+                    file_data = md_to_dict(file_source)
+                except Exception as e:
+                    print "Current file: {}".format(file_path)
+                    raise e
                 file_data["alias"] = filename
                 meta = file_data["meta"]
                 
