@@ -73,9 +73,9 @@ class RenderHandler(object):
         include_marks = opts.get('include_marks', {})
 
         self.incl_mark = include_marks.get('base', '_')
+        self.incl_parent_mark = include_marks.get('parent', '__')
         self.incl_global_mark = include_marks.get('global', '_g_')
-        self.incl_root_mark = include_marks.get('root', '__')
-        
+        self.incl_root_mark = include_marks.get('root', '_r_')
         self.rendering_all = False
 
 
@@ -252,13 +252,13 @@ class RenderHandler(object):
         return filepath_split[0], filepath_split[1], ext[1:].lower()
 
     
-    def find_files(self, path='.', file_type=None):
+    def find_files(self, path='.', file_type = None, recursive = True):
         results = []
 
         def add_files(files, dirpath):
             for f in files:
                 _, filename, ext = self.split_file_path(f)
-                
+
                 if filename.startswith('.') \
                 or self.is_include_file(filename, ext):
                     continue
@@ -271,7 +271,10 @@ class RenderHandler(object):
                 results.append(os.path.join(dirpath, d))
                 
         if not path:
-            add_files(os.listdir(self.src_dir), self.src_dir)
+            path = self.src_dir
+
+        if not recursive:
+            add_files(os.listdir(path), path)
         else:
             for dirpath, dirs, files in os.walk(path):
                 add_dirs(dirs, dirpath)
@@ -295,7 +298,6 @@ class RenderHandler(object):
     def render_all(self):
         self._print_message("Rendering all: {}/**/*".format(self.src_dir,
                                                         self.dest_dir))
-        
         self.rendering_all = True
         has_coffee = False
         has_jade = False
@@ -358,15 +360,20 @@ class RenderHandler(object):
                 # this cheat for some file not render to dest,
                 # not really a includes
                 return
-            
             if filename.startswith(self.incl_root_mark):
                 path = None
+                recursive = False
             elif filename.startswith(self.incl_global_mark):
-                path = self.src_dir
+                path = None
+                recursive = True
+            elif filename.startswith(self.incl_parent_mark):
+                path = filedir
+                recursive = True
             else:
                 path = filedir
+                recursive = False
             
-            files = self.find_files(path, ext)
+            files = self.find_files(path, ext, recursive)
             for f in files:
                 self.render(f)
             return
