@@ -393,11 +393,15 @@ Wactching Coffee jade less. If it's changed than compile a new file.
 files start or end with undescore '_' is changed will compile all files but it self.
 
 #### Prefix and settings
+
 `_` Local files, Render all files in same folder.
 
-`__` Root files, Render all files in top level of the watched folder.
+`__` Parent files, Render all files in same folder and sub folders.
 
 `_g_` Global files, Render all files from watched folder include sub folders.
+
+`_r_` Root files, Render all files from root folder.
+
 
 ## -s: Server
 
