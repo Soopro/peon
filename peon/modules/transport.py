@@ -17,16 +17,6 @@ DEFAULT_CONTENT_TYPE = "page"
 DEFAULT_SITE_FILE = 'site.json'
 
 # mathods
-def _safe_quote(x):
-    if not isinstance(x, (str, unicode)):
-        return x
-    return x.replace('\'','&apos;').replace('"','&quot;')
-
-def _yaml_safe_str(x):
-    if not isinstance(x, (str, unicode)):
-        return x
-    return '\''+x+'\'' if x else x
-
 def convert_data_decode(x):
     if isinstance(x, dict):
         return dict((k.lower(), convert_data_decode(v)) 
@@ -34,9 +24,9 @@ def convert_data_decode(x):
     elif isinstance(x, list):
         return list([convert_data_decode(i) for i in x])
     elif isinstance(x, str):
-        return _safe_quote(x.decode("utf-8"))
+        return x.decode("utf-8")
     elif isinstance(x, unicode):
-        return _safe_quote(x)
+        return x
     elif isinstance(x, (int, float, bool)) or x is None:
         return x
     else:
@@ -54,9 +44,9 @@ def convert_data_encode(x):
     elif isinstance(x, list):
         return list([convert_data_encode(i) for i in x])
     elif isinstance(x, unicode):
-        return _yaml_safe_str(_safe_quote(x.encode("utf-8")))
+        return x.encode("utf-8")
     elif isinstance(x, str):
-        return _yaml_safe_str(_safe_quote(x))
+        return x
     elif isinstance(x, (int, float, bool)) or x is None:
         return x
     else:
@@ -74,10 +64,7 @@ def dict_to_md(data):
     meta = {k.capitalize():v for k, v in meta.iteritems()}
     meta_str = yaml.safe_dump(meta, default_flow_style=False, indent=2,
                                     allow_unicode=True)
-    quoted_regex = re.compile(r'(\'{3}(.*?)\'{3})', re.IGNORECASE)
-    for match, text in quoted_regex.findall(meta_str):
-        meta_str = meta_str.replace(match, '\''+text+'\'')
-    
+
     file_template = "/*\n{meta}*/\n{content}"
 
     file = file_template.format(meta=meta_str, content=content)
