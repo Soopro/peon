@@ -17,6 +17,16 @@ DEFAULT_CONTENT_TYPE = "page"
 DEFAULT_SITE_FILE = 'site.json'
 
 # mathods
+def _safe_quote(x):
+    if not isinstance(x, (str, unicode)):
+        return x
+    return x.replace('\'','&apos;').replace('"','&quot;')
+
+def _yaml_safe_str(x):
+    if not isinstance(x, (str, unicode)):
+        return x
+    return '\''+x+'\'' if x else x
+
 def convert_data_decode(x):
     if isinstance(x, dict):
         return dict((k.lower(), convert_data_decode(v)) 
@@ -24,8 +34,10 @@ def convert_data_decode(x):
     elif isinstance(x, list):
         return list([convert_data_decode(i) for i in x])
     elif isinstance(x, str):
-        return x.decode("utf-8")
-    elif isinstance(x, (unicode, int, float, bool)) or x is None:
+        return _safe_quote(x.decode("utf-8"))
+    elif isinstance(x, unicode):
+        return _safe_quote(x)
+    elif isinstance(x, (int, float, bool)) or x is None:
         return x
     else:
         try:
@@ -42,8 +54,10 @@ def convert_data_encode(x):
     elif isinstance(x, list):
         return list([convert_data_encode(i) for i in x])
     elif isinstance(x, unicode):
-        return x.encode("utf-8")
-    elif isinstance(x, (str, int, float, bool)) or x is None:
+        return _yaml_safe_str(_safe_quote(x.encode("utf-8")))
+    elif isinstance(x, str):
+        return _yaml_safe_str(_safe_quote(x))
+    elif isinstance(x, (int, float, bool)) or x is None:
         return x
     else:
         try:
@@ -58,27 +72,15 @@ def dict_to_md(data):
     meta = convert_data_encode(data.get("meta"))
     content = data.get("content").encode("utf-8")
     meta = {k.capitalize():v for k, v in meta.iteritems()}
-    meta = yaml.safe_dump(meta, default_flow_style=False, indent=2,
-                                allow_unicode=True)
-    # meta_template = "{key}:{value}"
-    #
-    # def make_str(value):
-    #     if isinstance(value, unicode):
-    #         value = value.encode("utf-8")
-    #     elif not isinstance(value, str):
-    #         value = repr(value)
-    #     return str(value)
-    #
-    # meta = [meta_template.format(key= k.capitalize(),
-    #                              value= make_str(v)+"\n")
-    #
-    #         for k, v in meta.iteritems()]
-    #
-    # meta = "".join(meta)
-
+    meta_str = yaml.safe_dump(meta, default_flow_style=False, indent=2,
+                                    allow_unicode=True)
+    quoted_regex = re.compile(r'(\'{3}(.*?)\'{3})', re.IGNORECASE)
+    for match, text in quoted_regex.findall(meta_str):
+        meta_str = meta_str.replace(match, '\''+text+'\'')
+    
     file_template = "/*\n{meta}*/\n{content}"
 
-    file = file_template.format(meta=meta, content=content)
+    file = file_template.format(meta=meta_str, content=content)
     return file
 
 
@@ -94,15 +96,6 @@ def md_to_dict(md_file):
     rv = dict()
     yaml_data = yaml.safe_load(meta_string)
     rv["meta"] = convert_data_decode(yaml_data)
-    # for item in meta:
-#         if item:
-#             t = item.split(":", 1)
-#             if len(t) == 2:
-#                 try:
-#                     tmp_obj = ast.literal_eval(t[1].strip())
-#                     rv['meta'][t[0].lower()] = convert_unicode(tmp_obj)
-#                 except Exception as e:
-#                     rv['meta'][t[0].lower()] = t[1].strip()
     rv['content'] = content
     return rv
 
