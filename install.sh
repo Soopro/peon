@@ -5,6 +5,7 @@ do
   if [ $arg = "-p" -o $arg = "--packages" ]
     then
       echo 'Setup Peon with reuiqred packages'
+      sudo gem install sass
       sudo pip install -r requirements.txt
       sudo npm install -g coffee-script jade less uglify-js
   fi
