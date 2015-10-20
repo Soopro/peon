@@ -3,7 +3,7 @@ from __future__ import absolute_import
 
 import os, time, shutil, re, sys
 import subprocess
-# import sass
+import sass
 from datetime import datetime
 
 from ..utlis import BeautifyPrint as bpcolor
@@ -147,11 +147,11 @@ class RenderHandler(object):
 
     
     def _sass_all(self):
-        sass_update_path = "{}:{}".format(self.src_dir, self.dest_dir)
+        # sass_update_path = "{}:{}".format(self.src_dir, self.dest_dir)
         try:
-            subprocess.check_output(["sass", "--sourcemap=none",
-                                     "--update", sass_update_path])
-            # sass.compile(dirname = (self.src_dir, self.dest_dir))
+            # subprocess.check_output(["sass", "--sourcemap=none",
+            #                          "--update", sass_update_path])
+            sass.compile(dirname = (self.src_dir, self.dest_dir))
         except Exception as e:
             self._raise_exception(RenderingError(e, 'sass all ↑'),
                                   self.src_dir)
@@ -159,10 +159,10 @@ class RenderHandler(object):
     
     def _sass(self, src_path, dest_path):
         try:
-            # result = sass.compile(filename = src_path)
-            # self._write_file(dest_path, result)
-            subprocess.check_output(["sass", "--sourcemap=none",
-                                     src_path, dest_path])
+            result = sass.compile(filename = src_path)
+            self._write_file(dest_path, result)
+            # subprocess.check_output(["sass", "--sourcemap=none",
+            #                          src_path, dest_path])
         except Exception as e:
             self._raise_exception(RenderingError(e, 'sass ↑'), src_path)
 
