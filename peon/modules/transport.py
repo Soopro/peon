@@ -108,9 +108,8 @@ def transport_download(cfg):
     site_data = {
         "meta": data.get("site_meta"),
         "menus": data.get("menus"),
-        "terms": data.get("terms"),
-        "content_types": data.get("content_types"),
-        # "files": data.get("files")
+        "taxonomies": data.get("taxonomies"),
+        "content_types": data.get("content_types")
     }   
     
     json_unicode = json.dumps(site_data,
@@ -179,7 +178,7 @@ def transport_upload(cfg):
         "site_meta":{},
         "menus":{},
         "content_types":{},
-        "terms":{},
+        "taxonomies":{},
         "files":[]
     }
     for dirpath, dirs, files in os.walk(cwd):
@@ -234,7 +233,7 @@ def transport_upload(cfg):
             payload["site_meta"] = site_data.get("meta",{})
             payload["content_types"] = site_data.get("content_types",{})
             payload["menus"] = site_data.get("menus",{})
-            payload["terms"] = site_data.get("terms",{})
+            payload["taxonomies"] = site_data.get("taxonomies",{})
         except Exception as e:
             raise Exception("Site data error:", e)
     
