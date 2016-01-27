@@ -35,8 +35,9 @@ class RenderHandler(object):
                     'html', 'htm', 'xml', 'xhtml', 'shtml',
                     'inc', 'tpl', 'incl', 'erb']
     
-    incl_regex = re.compile('(\s*)({%\s*include\s+'+\
-                            '["\']?\s*([\w\$\-\./\{\}\(\)]*)\s*["\']?\s*%})',
+    incl_regex = re.compile(r'(\s*)(\{%\s*(?:include|import)\s+'+\
+                            r'["\']?\s*([\w\$\-\./\{\}\(\)]*)\s*["\']?'+\
+                            r'\s*[^%\}]*%\})',
                             re.MULTILINE | re.DOTALL | re.IGNORECASE)
     
     
