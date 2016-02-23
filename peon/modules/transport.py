@@ -13,6 +13,7 @@ from .helpers import load_config, run_task
 
 # variables
 DEFAULT_CONTENT_DIR = "content"
+DEFAULT_UPLOADS_DIR = "uploads"
 DEFAULT_CONTENT_TYPE = "page"
 DEFAULT_SITE_FILE = 'site.json'
 
@@ -96,7 +97,7 @@ def transport_download(cfg):
     replace_rules = cfg.get("replace", [])
 
     if not os.path.isdir(dest):
-        os.mkdir(dest)
+        os.makedirs(dest)
     try:
         r = getData(url, params=params, headers=headers)
         data = r.json()
@@ -256,11 +257,11 @@ def transport_media(cfg):
     url = cfg.get("url")
     headers = cfg.get('headers')
     params = cfg.get('params')
-    dest = cfg.get("dest", DEFAULT_CONTENT_DIR)
+    dest = cfg.get("dest", DEFAULT_UPLOADS_DIR)
     dest = safe_paths(dest)
 
     if not os.path.isdir(dest):
-        os.mkdir(dest)
+        os.makedirs(dest)
     try:
         r = getData(url, params=params, headers=headers)
         data = r.json()
@@ -272,8 +273,8 @@ def transport_media(cfg):
 
     media_list = data
 
-    if isinstance(media_list, list):
-        raise Exception("Media list not list.")
+    if not isinstance(media_list, list):
+        raise Exception("Media list not a list.")
 
     for media in media_list:
         url = media.get("url")

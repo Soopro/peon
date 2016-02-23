@@ -53,7 +53,7 @@ class RenderHandler(object):
         self.replacement = opts.get('replacement', self.replacement)
 
         if not os.path.isdir(self.dest_dir):
-            os.mkdir(self.dest_dir)
+            os.makedirs(self.dest_dir)
         
         skips = opts.get('skip_includes')
         if isinstance(skips, (str, unicode)):
