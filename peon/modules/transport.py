@@ -1,11 +1,10 @@
 #coding=utf-8
 from __future__ import absolute_import
 
-import os, sys, traceback, re, yaml, json
+import os, sys, traceback, re, yaml, json, requests, subprocess
 import SimpleHTTPServer, SocketServer
 
 from StringIO import StringIO
-import subprocess
 
 from ..utlis import now, safe_paths, uploadData, getData, replace
 from .helpers import load_config, run_task
@@ -275,24 +274,25 @@ def transport_media(cfg):
 
     if not isinstance(media_list, list):
         raise Exception("Media list not a list.")
-
+    print media_list
     for media in media_list:
-        url = media.get("url")
+        file_src = media.get("src")
         filename = media.get("filename")
-        if not url or not filename:
+        if not file_src or not filename:
             print "Bad media file."
             continue
 
         try:
-            r = requests.get(url, timeout=30)
+            r = requests.get(file_src, timeout=30)
             assert r.status_code < 400
         except Exception as e:
-            print "Download media file filed:", media
+            print e
+            print "Download media file filed:", file_src
             continue
         
         file_path = os.path.join(dest, filename)
-        if os.path.isfile(file_dest):
-            os.remove(file_dest)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
 
         with open(file_path, 'wb') as f:
             for chunk in r.iter_content(1024):
