@@ -158,10 +158,15 @@ def transport_download(cfg):
             file_string = replace(rule.get("pattern"),
                                   rule.get("replacement"),
                                   file_string)
+
         file_path = os.path.join(file_dest, "{}.md".format(file_alias))
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+
         f = open(file_path, 'w')
         f.write(file_string.encode("utf-8"))
         f.close()
+
 
 
 def transport_upload(cfg):
@@ -246,14 +251,61 @@ def transport_upload(cfg):
             print "---------------------"
         raise e
     
-    
+
+def transport_media(cfg):
+    url = cfg.get("url")
+    headers = cfg.get('headers')
+    params = cfg.get('params')
+    dest = cfg.get("dest", DEFAULT_CONTENT_DIR)
+    dest = safe_paths(dest)
+
+    if not os.path.isdir(dest):
+        os.mkdir(dest)
+    try:
+        r = getData(url, params=params, headers=headers)
+        data = r.json()
+    except Exception as e:
+        if isinstance(e, ValueError):
+            print "Response is not JSON!"
+            print "---------------------"
+        raise e
+
+    media_list = data
+
+    if isinstance(media_list, list):
+        raise Exception("Media list not list.")
+
+    for media in media_list:
+        url = media.get("url")
+        filename = media.get("filename")
+        if not url or not filename:
+            print "Bad media file."
+            continue
+
+        try:
+            r = requests.get(url, timeout=30)
+            assert r.status_code < 400
+        except Exception as e:
+            print "Download media file filed:", media
+            continue
+        
+        file_path = os.path.join(dest, filename)
+        if os.path.isfile(file_dest):
+            os.remove(file_dest)
+
+        with open(file_path, 'wb') as f:
+            for chunk in r.iter_content(1024):
+                f.write(chunk)
+
+
 #-------------
 # main
 #-------------
 DEFAULT_ACTION = "transport"
 COMMANDS = {
     "upload": transport_upload,
-    "download": transport_download
+    "download": transport_download,
+    "media": transport_media
 }
 def transport(opts):
     peon_config = load_config(DEFAULT_ACTION)
