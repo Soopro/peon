@@ -274,14 +274,16 @@ def transport_media(cfg):
 
     if not isinstance(media_list, list):
         raise Exception("Media list not a list.")
-    print media_list
+
     for media in media_list:
         file_src = media.get("src")
         filename = media.get("filename")
+        print "--->", file_src
+        
         if not file_src or not filename:
             print "Bad media file."
             continue
-
+        
         try:
             r = requests.get(file_src, timeout=30)
             assert r.status_code < 400
