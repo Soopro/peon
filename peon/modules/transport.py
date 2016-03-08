@@ -86,6 +86,13 @@ def md_to_dict(md_file):
     rv['content'] = content
     return rv
 
+def add_src_suffix(src, suffix):
+    if not suffix:
+        return src
+    else:
+        pair = '&' if '?' in src else '?'
+        return "{0}{1}{2}".format(src, pair, suffix)
+
 
 def transport_download(cfg):
     url = cfg.get("url")
@@ -257,6 +264,7 @@ def transport_media(cfg):
     headers = cfg.get('headers')
     params = cfg.get('params')
     dest = cfg.get("dest", DEFAULT_UPLOADS_DIR)
+    suffix = cfg.get("suffix")
     dest = safe_paths(dest)
 
     if not os.path.isdir(dest):
@@ -277,6 +285,8 @@ def transport_media(cfg):
 
     for media in media_list:
         file_src = media.get("src")
+        if suffix:
+            file_src = add_src_suffix(file_src, suffix)
         filename = media.get("filename")
         print "--->", file_src
         

@@ -312,7 +312,7 @@ make sure there is `zip` task before, otherwise will get a error.
     "headers":{
       "SecretKey":"1d02aa814dc64db3a6494624ca35a03a"
     },
-    "url":"http://localhost:5000/ws/test/develop_theme",
+    "url":"http://localhost:5000/app/test/develop/theme",
     "data":null,
     "params":null
   }
@@ -420,7 +420,7 @@ Please make sure you have node npm harp kind stuff ...
 
 ## -t : Transport
 
-`peon` -t [upload] or `peon` -t [download]
+`peon` -t [upload] or `peon` -t [download] or `peon` -t [media]
 
 Trassport pyco content file and site data to supmice system
 
@@ -433,32 +433,40 @@ Trassport pyco content file and site data to supmice system
       "cwd":".",
       "replace": [
         {
-          "pattern":"/$uploads/", 
+          "pattern":"[%uploads%]", 
           "replacement":"http://localstatic:5050/apps/redy/123123/uploads/"
         }
       ],
       "headers":{
         "SecretKey":"1d02aa814dc64db3a6494624ca35a03a"
       },
-      "url":"http://localhost:5000/ws/123123/develop_sync_sitedata"
+      "url":"http://localhost:5000/app/123123/develop/sitedata"
     },
     "download":{
       "dest":".",
       "replace": [
         {
           "pattern":"http://localstatic:5050/apps/redy/123123/uploads/", 
-          "replacement":"/$uploads/"
+          "replacement":"[%uploads%]"
         }
       ],
       "headers":{
         "SecretKey":"1d02aa814dc64db3a6494624ca35a03a"
       },
-      "url":"http://localhost:5000/ws/123123/develop_sync_sitedata"
+      "url":"http://localhost:5000/app/123123/develop/sitedata"
+    }
+    "media": {
+      "dest":"test/uploads",
+      "suffix": null,
+      "headers":{
+        "SecretKey":"1d02aa814dc64db3a6494624ca35a03a"
+      },
+      "url":"http://api.sup.farm/app/website/develop/media"
     }
   }
 ```
 
-`replace` for replace content and meta markers. etc., /$uploads/ to the uploads folder you know.
+`replace` for replace content and meta markers. etc., [%uploads%] is the shortcode for **pyco** uploads folder.
 
 `url` upload api
 
@@ -467,6 +475,9 @@ Trassport pyco content file and site data to supmice system
 `dest` the content folder you want download to, for download only.
 
 `headers` request headers
+
+`suffix` is for **media** only, sometime you want add suffix after the media src to get specific type. etc., 'original' suffix will get the original media.
+'thumbnail' will get thumbnail.
 
 
 *** Content sample ***
