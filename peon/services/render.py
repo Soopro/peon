@@ -33,7 +33,7 @@ class RenderHandler(object):
     }
     render_types = ['coffee', 'jade', 'less', 'sass', 'scss', 
                     'html', 'htm', 'xml', 'xhtml', 'shtml',
-                    'inc', 'tpl', 'incl', 'erb']
+                    'inc', 'tpl', 'incl', 'injs', 'erb']
     
     incl_regex = re.compile(r'(\s*)(\{%\s*(?:include|import)\s+'+\
                             r'["\']?\s*([\w\$\-\./\{\}\(\)]*)\s*["\']?'+\
