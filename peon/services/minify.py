@@ -212,6 +212,7 @@ class MinifyHandler(object):
             os.remove(tmp_path)
         except Exception as e:
             print e
+            print "Make it sure uglifyjs is installed!"
             raise CompressError('js')
         return minifed
     
