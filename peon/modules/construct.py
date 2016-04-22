@@ -275,13 +275,13 @@ def compress(cfg):
         path_list = helper_find_path_list(files, cwd)
 
         if minify_type == 'html':
-            minify.html(path_list)
+            minify.html(path_list, minify_beautify)
         elif minify_type == 'css':
-            minify.css(path_list, minify_output)
+            minify.css(path_list, minify_output, minify_beautify)
         elif minify_type == 'js':
-            minify.js(path_list, minify_output)
+            minify.js(path_list, minify_output, minify_beautify)
         elif minify_type == 'process_html':
-            minify.process_html(path_list, minify_process)
+            minify.process_html(path_list, minify_process, minify_beautify)
         elif minify_type == 'inline_angular_templates':
             minify.concat_angular_template(path_list,
                                            minify_output,

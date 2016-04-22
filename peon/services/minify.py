@@ -89,7 +89,7 @@ class MinifyHandler(object):
         return filename.startswith(self.incl_mark) \
                    or filename.endswith(self.incl_mark)
     
-    def _process_html(self, file_path, minify=True, inner=False):
+    def _process_html(self, file_path, minify=True, beautify=False):
         print "peon: Minify HTML process start"
         
         build_regex = self.build_regex
@@ -120,7 +120,7 @@ class MinifyHandler(object):
                 replist = []
                 for repl in comment_regex.findall(text):
                     replist.append(repl)
-                replacement = '\n'.join(replist)
+                replacement = u'\n'.join(replist)
 
             elif comp_type == 'css':
                 if minify:
@@ -133,8 +133,11 @@ class MinifyHandler(object):
                             _path = os.path.join(curr_dir, href)
                     
                         css_series.append(self._read_file(_path))
-                
-                    css_source = self._css('\n'.join(css_series))
+                    
+                    if beautify:
+                        css_source = u'\n'.join(css_series)
+                    else
+                        css_source = self._css(u'\n'.join(css_series))
                     self._output(comp_file_path, css_source)
                 
                 new_css_tpl = u'<link rel="stylesheet" href="{}">'
@@ -151,8 +154,11 @@ class MinifyHandler(object):
                             _path = os.path.join(curr_dir, src)
                         
                         js_series.append(self._read_file(_path))
-
-                    js_source = self._uglifyjs('\n'.join(js_series))
+                    
+                    if beautify:
+                        js_source = u'\n'.join(js_series)
+                    else:
+                        js_source = self._uglifyjs(u'\n'.join(js_series))
                     self._output(comp_file_path, js_source)
                 
                 new_js_tpl = u'<script src="{}"></script>'
@@ -191,10 +197,12 @@ class MinifyHandler(object):
             print "--------------------"
         
         return content
+
     
     def _output(self, dest_path, content):
         self._write_file(dest_path, content)
         return dest_path
+
     
     def _css(self, source):
         try:
@@ -203,6 +211,7 @@ class MinifyHandler(object):
             print e
             raise CompressError('css')
         return minifed
+
     
     def _uglifyjs(self, source):
         try:
@@ -215,7 +224,8 @@ class MinifyHandler(object):
             print "Make it sure uglifyjs is installed!"
             raise CompressError('js')
         return minifed
-    
+
+
     def _js(self, source):
         try:
             minifed = jsmin.jsmin(source)
@@ -223,7 +233,8 @@ class MinifyHandler(object):
             print e
             raise CompressError('js')
         return minifed
-    
+
+
     def _html(self, source):
         try:
             # Remove comments found in HTML. Individual comments can be 
@@ -238,21 +249,24 @@ class MinifyHandler(object):
             raise CompressError('html')
         return minifed
     
+    
     def _make_ng_tpl(self, tmpl_id, tmpl_content, beautify=False):
         if beautify:
-            new_line = '\n'
+            new_line = u'\n'
         else:
             tmpl_content = self._html(tmpl_content)
             new_line = ''
         template = u'<script type="text/ng-template" id="{}">{}{}{}</script>'
         return template.format(tmpl_id, new_line, tmpl_content, new_line)
+  
     
     def _inject_ng_tpl(self, tmpl_content, inject_path):
         inject_source = self._read_file(inject_path)
         tmpl_content = u"\n{}".format(tmpl_content)
         return re.sub(self.tmpl_regex, tmpl_content, inject_source, 1)
+
     
-    def css(self, src_paths, output):
+    def css(self, src_paths, output, beautify=False):
         css_series = []
         for path in src_paths:
             if os.path.isfile(path):
@@ -268,11 +282,17 @@ class MinifyHandler(object):
             output_path = os.path.join(self.cwd_dir, output)
         except:
             raise CompressError('css output not found')
-        css_source = self._css('\n'.join(css_series))
+            
+        if beautify:
+            css_source = u'\n'.join(css_series)
+        else:
+            css_source = self._css(u'\n'.join(css_series))
+
         self._output(output_path, css_source)
         print "peon: CSS minifed -> {}".format(output_path)
 
-    def js(self, src_paths, output):
+
+    def js(self, src_paths, output, beautify=False):
         js_series = []
         for path in src_paths:
             if os.path.isfile(path):
@@ -287,11 +307,16 @@ class MinifyHandler(object):
             output_path = os.path.join(self.cwd_dir, output)
         except:
             raise CompressError('js output not found')
-            
-        js_source = self._uglifyjs('\n'.join(js_series))
+
+        if beautify:
+            js_source = u'\n'.join(js_series)
+        else:
+            js_source = self._uglifyjs(u'\n'.join(js_series))
+
         self._output(output_path, js_source)
         print "peon: JS minifed -> {}".format(output_path)
-        
+
+
     def html(self, src_paths):
         # html doesn't need concat files
         for path in src_paths:
@@ -304,15 +329,16 @@ class MinifyHandler(object):
             else:
                 raise CompressError('html not found')
 
-    def process_html(self, src_paths, minify=True, inner=False):
+    def process_html(self, src_paths, minify=True, beautify=False, inner=False):
         for path in src_paths:
             if os.path.isfile(path):
-                html_source = self._process_html(path, minify, inner)
+                html_source = self._process_html(path, minify, beautify)
                 self._output(path, html_source)
                 print "peon: HTML processed -> {}".format(path)
             else:
                 raise CompressError('html not found')
-    
+
+
     def concat_angular_template(self, src_paths, output, 
                                       prefix='', beautify=False):
         if not output:
