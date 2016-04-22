@@ -136,7 +136,7 @@ class MinifyHandler(object):
                     
                     if beautify:
                         css_source = u'\n'.join(css_series)
-                    else
+                    else:
                         css_source = self._css(u'\n'.join(css_series))
                     self._output(comp_file_path, css_source)
                 
