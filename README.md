@@ -229,15 +229,24 @@ type [inline_angular_templates]:
 
 type [css, js]:
 
+- `type`: the type of file you want to process.
+- `cwd`: the root dir you work in.
+- `src`: the file you want minify will output it self.
 - `output`: the file name you want output to minified file.
+- `minify`: minify white process css or js.
 
 
 type [html]:
 
+- `type`: the type of file you want to process.
+- `cwd`: the root dir you work in.
 - `src`: the file you want minify will output it self.
+- `minify`: minify white process html.
 
 type [process_html]
 
+- `type`: the type of file you want to process.
+- `cwd`: the root dir you work in.
 - `src`: the file you want minify will output it self.
 - `minify`: minify white process html.
 
