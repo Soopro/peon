@@ -245,7 +245,6 @@ type [html]:
 - `src`: the file you want minify will output it self.
 
 
-
 type [process_html]
 
 - `type`: the type of file you want to process.
