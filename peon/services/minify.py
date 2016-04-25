@@ -5,6 +5,7 @@ import os, time, shutil, re, subprocess
 import htmlmin, jsmin, cssmin
 
 from ..utlis import BeautifyPrint as bpcolor
+from ..utlis import base
 
 # exception
 class CompressError(Exception):
@@ -277,9 +278,9 @@ class MinifyHandler(object):
                 css_series.append(self._read_file(path))
             else:
                 raise CompressError('css not found')
-        
         try:
             output_path = os.path.join(self.cwd_dir, output)
+            base.ensure_dir(output_path, True)
         except:
             raise CompressError('css output not found')
             
@@ -305,7 +306,9 @@ class MinifyHandler(object):
                 raise CompressError('js not found')
         try:
             output_path = os.path.join(self.cwd_dir, output)
-        except:
+            base.ensure_dir(output_path, True)
+        except Exception as e:
+            print e
             raise CompressError('js output not found')
 
         if beautify:
