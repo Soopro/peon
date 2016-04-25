@@ -222,8 +222,8 @@ Compress task include multiple groups. The group's key can be custom to any lati
 type [inline_angular_templates]: 
 
 - `prefix`: define ng templates id prefix, etc., '/'. this is for match the template reference.
-- `beautify`: define output templates is minifed or readable.
 - `allow_includes`: set it true will concat include files (starts or ends with '_'), default is False.
+- `beautify`: define output templates is minifed or readable.
 - `output`: file you want fill template script into. `<!-- ng-templates -->` mark must somewhere in this file.
 
 
@@ -232,23 +232,26 @@ type [css, js]:
 - `type`: the type of file you want to process.
 - `cwd`: the root dir you work in.
 - `src`: the file you want minify will output it self.
+- `beautify`: define output file is minifed or readable.
 - `output`: the file name you want output to minified file.
-- `minify`: minify white process css or js.
 
 
 type [html]:
 
+*html don't need output or beautify, if beautify just same as it self.*
+
 - `type`: the type of file you want to process.
 - `cwd`: the root dir you work in.
 - `src`: the file you want minify will output it self.
-- `minify`: minify white process html.
+
+
 
 type [process_html]
 
 - `type`: the type of file you want to process.
 - `cwd`: the root dir you work in.
 - `src`: the file you want minify will output it self.
-- `minify`: minify white process html.
+- `beautify`: define output file is minifed or readable.
 
 ##### task: Rev
 

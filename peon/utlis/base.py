@@ -1,13 +1,20 @@
 #coding=utf-8
 from __future__ import absolute_import
-import os, re, time, hashlib, shutil
+import os
+import re
+import time
+import hashlib
+import shutil
+
 
 def now():
     return int(time.time())
 
+
 def gen_md5():
     md5 = hashlib.md5(str(now())).hexdigest()
     return md5[:10]
+
 
 def copy_tree(src, dest):
     try:
@@ -25,7 +32,8 @@ def copy_tree(src, dest):
     except Exception as e:
         print('peon: Error -> %s' % e)
         raise e
- 
+
+
 def copy_file(src, dest):
     try:
         shutil.copy2(src, dest)
@@ -43,6 +51,7 @@ def copy_file(src, dest):
         print('peon: Error -> %s' % e)
         raise e
 
+
 def remove_file(path):
     try:
         os.remove(path)
@@ -56,6 +65,7 @@ def remove_file(path):
         print('peon: Error -> %s' % e)
         raise e
 
+
 def child_of_path(path, path2):
     _path = os.path.normpath(path)
     _path_splits = _path.split(os.path.sep)
@@ -63,6 +73,7 @@ def child_of_path(path, path2):
         return True
     else:
         return False
+
 
 def grounded_paths(cwd=".", *args):
     grounded_error_msg = "peon: Error -> Path [{}] is grounded."
@@ -89,6 +100,7 @@ def grounded_paths(cwd=".", *args):
             p_list.append(None)
     return p_list
 
+
 def safe_paths(*args):
     if len(args) == 0:
         return None
@@ -106,17 +118,18 @@ def safe_paths(*args):
 
     return p_list
 
-def ensure_dir(path, is_file = False):
+
+def ensure_dir(path, is_file=False):
     if is_file:
         dirname = os.path.dirname(path)
         if dirname and not os.path.isdir(dirname):
             os.makedirs(dirname)
             print('peon: Create dir -> %s' % dirname)
-    
     else:
         if not os.path.isdir(path):
             os.makedirs(path)
             print('peon: Create dir -> %s' % path)
+
 
 def remove_dir(path):
     try:
@@ -135,6 +148,7 @@ def remove_dir(path):
     except Exception as e:
         print('peon: Error -> %s' % e)
         raise e
+
 
 def replace(pattern, replacement, content):
     if isinstance(pattern, (str, unicode)):
