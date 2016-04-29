@@ -44,10 +44,10 @@ def help_find_nested_files(nested, pattern, cwd_pattern):
 def helper_find_path_list(src, cwd):
     if not isinstance(src, list):
         src = [src]
-    
+
     cwd = safe_paths(cwd)
     path_list = []
-    
+
     for file in src:
         if file.startswith('!'):
             continue
@@ -65,7 +65,7 @@ def helper_find_path_list(src, cwd):
                 continue
             if not path in path_list:
                 path_list.append(path)
-                
+
     for file in src:
         if not file.startswith('!'):
             continue
@@ -76,11 +76,11 @@ def helper_find_path_list(src, cwd):
             paths = help_find_nested_files(nested, file, file_path_pattern)
         else:
             paths = glob.glob(file_path_pattern)
-        
+
         for path in paths:
             if path in path_list:
                 path_list.remove(path)
-    
+
     return [path for path in path_list if grounded_paths(cwd, path)]
 
 # methods
@@ -136,14 +136,14 @@ def replace(cfg):
             os.remove(path)
         os.rename(TEMP_FILE, path)
         print "peon: Replaced --> " + path
-    
+
     if os.path.isfile(TEMP_FILE):
         os.remove(TEMP_FILE)
-        
+
     print "peon: Work work ...(replace)"
-    
-    
-    
+
+
+
 def rev(cfg):
     if not cfg.get('pattern'):
         print "peon: Failed -> rev (no pattern)"
@@ -178,7 +178,7 @@ def rev(cfg):
 
     if os.path.isfile(TEMP_FILE):
         os.remove(TEMP_FILE)
-        
+
     print "peon: Work work ...(rev)"
 
 
@@ -189,11 +189,11 @@ def copy(cfg):
         force = rule.get('force', True)
         cwd, dest = safe_paths(rule.get('cwd', ''),
                               rule.get('dest', ''))
-        
+
         files = rule.get('src', [])
         path_list = helper_find_path_list(files, cwd)
         ensure_dir(dest)
-        
+
         for path in path_list:
             if is_flatten:
                 dest_path = dest
@@ -207,12 +207,12 @@ def copy(cfg):
             if os.path.isdir(path):
                 ensure_dir(dest_path)
                 continue
-            
+
             if force or not os.path.isfile(dest_path):
                 copy_file(path, dest_path)
             else:
                 continue
-    
+
     print "peon: Work work ...(copy)"
 
 
@@ -267,15 +267,15 @@ def compress(cfg):
         minify_type = rule.get('type')
         minify_output = safe_paths(rule.get('output'))
         # safe_paths('') will generate '.' which I don't want here.
-        
+
         minify_process = rule.get('minify', True)
-        minify_prefix = rule.get('prefix', '') 
+        minify_prefix = rule.get('prefix', '')
         minify_beautify = rule.get('beautify', False)
-        
+
         path_list = helper_find_path_list(files, cwd)
 
         if minify_type == 'html':
-            minify.html(path_list, minify_beautify)
+            minify.html(path_list)
         elif minify_type == 'css':
             minify.css(path_list, minify_output, minify_beautify)
         elif minify_type == 'js':
@@ -287,7 +287,7 @@ def compress(cfg):
                                            minify_output,
                                            minify_prefix,
                                            minify_beautify)
-    
+
     print "peon: Work work ...(compress)"
 
 
@@ -314,7 +314,7 @@ def construct(opts):
     peon_config = load_config(config_type)
 
     run_task(peon_config, COMMANDS)
-    
+
     print "peon: finish construct ..."
 
 
@@ -324,8 +324,8 @@ if __name__ == '__main__':
     # command line options
     parser = argparse.ArgumentParser(
                     description='Options of run Peon dev server.')
-                        
-    parser.add_argument('-c', '--construct', 
+
+    parser.add_argument('-c', '--construct',
                         dest='construct',
                         action='store',
                         nargs='?',
@@ -334,5 +334,5 @@ if __name__ == '__main__':
                         help='Run Peon construct to build files.')
 
     opts, unknown = parser.parse_known_args()
-    
+
     construct(opts)
