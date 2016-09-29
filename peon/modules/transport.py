@@ -19,7 +19,7 @@ DEFAULT_SITE_FILE = 'site.json'
 # mathods
 def convert_data_decode(x):
     if isinstance(x, dict):
-        return dict((k.lower(), convert_data_decode(v)) 
+        return dict((k.lower(), convert_data_decode(v))
                      for k, v in x.iteritems())
     elif isinstance(x, list):
         return list([convert_data_decode(i) for i in x])
@@ -39,7 +39,7 @@ def convert_data_decode(x):
 
 def convert_data_encode(x):
     if isinstance(x, dict):
-        return dict((k.lower(), convert_data_encode(v)) 
+        return dict((k.lower(), convert_data_encode(v))
                      for k, v in x.iteritems())
     elif isinstance(x, list):
         return list([convert_data_encode(i) for i in x])
@@ -117,8 +117,8 @@ def transport_download(cfg):
         "menus": data.get("menus"),
         "taxonomies": data.get("taxonomies"),
         "content_types": data.get("content_types")
-    }   
-    
+    }
+
     json_unicode = json.dumps(site_data,
                               indent=2,
                               sort_keys=True,
@@ -129,36 +129,34 @@ def transport_download(cfg):
         json_unicode = replace(rule.get("pattern"),
                                rule.get("replacement"),
                                json_unicode)
-    
+
     site_file_path = os.path.join(dest, DEFAULT_SITE_FILE)
     site_file = open(site_file_path, 'w')
     site_file.write(json_unicode.encode("utf-8"))
     site_file.close()
-    
+
     files = data.get("files")
     for file in files:
         file_type = file.get("content_type")
-        file_alias = file.get("alias")
+        file_slug = file.get("slug")
         file_dest = dest
-        if not file_type or not file_alias:
+        if not file_type or not file_slug:
             print "Write file filed:", file
             continue
         elif file_type != DEFAULT_CONTENT_TYPE:
             file_dest = os.path.join(dest, file_type)
-            
+
         if not os.path.isdir(file_dest):
             os.mkdir(file_dest)
-        
+
         new_file = {}
         new_file["meta"] = file.get("meta")
         new_file["content"] = file.get("content")
-        new_file["meta"]["status"] = file.get("status")
-        new_file["meta"]["priority"] = file.get("priority")
-        
+
         try:
             file_string = dict_to_md(new_file).decode("utf-8")
         except Exception as e:
-            print "Current alias: {}".format(file_alias)
+            print "Current slug: {}".format(file_slug)
             raise e
 
         for rule in replace_rules:
@@ -166,14 +164,13 @@ def transport_download(cfg):
                                   rule.get("replacement"),
                                   file_string)
 
-        file_path = os.path.join(file_dest, "{}.md".format(file_alias))
+        file_path = os.path.join(file_dest, "{}.md".format(file_slug))
         if os.path.isfile(file_path):
             os.remove(file_path)
 
         f = open(file_path, 'w')
         f.write(file_string.encode("utf-8"))
         f.close()
-
 
 
 def transport_upload(cfg):
@@ -183,15 +180,15 @@ def transport_upload(cfg):
     cwd = cfg.get("cwd", DEFAULT_CONTENT_DIR)
     cwd = safe_paths(cwd)
     replace_rules = cfg.get("replace", [])
-    
+
     if not os.path.isdir(cwd):
         raise Exception("Transport upload dir dose not exist.")
     payload = {
-        "site_meta":{},
-        "menus":{},
-        "content_types":{},
-        "taxonomies":{},
-        "files":[]
+        "site_meta": {},
+        "menus": {},
+        "content_types": {},
+        "taxonomies": {},
+        "files": []
     }
     for dirpath, dirs, files in os.walk(cwd):
         dirname = dirpath.split(cwd)[-1].strip(os.path.sep)
@@ -199,7 +196,7 @@ def transport_upload(cfg):
             content_type = DEFAULT_CONTENT_TYPE
         else:
             content_type = dirname
-        
+
         for file in files:
             if file.endswith('.md'):
                 filename = file[0:-3]
@@ -215,21 +212,11 @@ def transport_upload(cfg):
                 except Exception as e:
                     print "Current file: {}".format(file_path)
                     raise e
-                file_data["alias"] = filename
+                file_data["slug"] = filename
                 meta = file_data["meta"]
-                
-                file_data["content_type"] = meta.get("type", content_type)
-                meta.pop("type", None)
-                
-                file_data["status"] = meta.get("status", 1)
-                meta.pop("status", None)
-                
-                file_data["priority"] = meta.get("priority", 0)
-                meta.pop("priority", None)
-                
-                file_data["meta"] = meta
+                file_data["content_type"] = meta.pop("type", content_type)
                 payload['files'].append(file_data)
-    
+
     site_path = os.path.join(cwd, DEFAULT_SITE_FILE)
     if os.path.isfile(site_path):
         try:
@@ -242,13 +229,13 @@ def transport_upload(cfg):
 
             site_data = json.loads(site_file_source)
 
-            payload["site_meta"] = site_data.get("meta",{})
-            payload["content_types"] = site_data.get("content_types",{})
-            payload["menus"] = site_data.get("menus",{})
-            payload["taxonomies"] = site_data.get("taxonomies",{})
+            payload["site_meta"] = site_data.get("meta", {})
+            payload["content_types"] = site_data.get("content_types", {})
+            payload["menus"] = site_data.get("menus", {})
+            payload["taxonomies"] = site_data.get("taxonomies", {})
         except Exception as e:
             raise Exception("Site data error:", e)
-    
+
     try:
         r = uploadData(url, data=payload, params=params, headers=headers)
         print r.json()
@@ -257,7 +244,7 @@ def transport_upload(cfg):
             print "Response is not JSON!"
             print "---------------------"
         raise e
-    
+
 
 def transport_media(cfg):
     url = cfg.get("url")
@@ -289,11 +276,11 @@ def transport_media(cfg):
             file_src = add_src_suffix(file_src, suffix)
         filename = media.get("filename")
         print "--->", file_src
-        
+
         if not file_src or not filename:
             print "Bad media file."
             continue
-        
+
         try:
             r = requests.get(file_src, timeout=30)
             assert r.status_code < 400
@@ -301,7 +288,7 @@ def transport_media(cfg):
             print e
             print "Download media file filed:", file_src
             continue
-        
+
         file_path = os.path.join(dest, filename)
         if os.path.isfile(file_path):
             os.remove(file_path)
@@ -324,24 +311,24 @@ def transport(opts):
     peon_config = load_config(DEFAULT_ACTION)
     cmd = opts.transport
     if cmd:
-        peon_config = [{cmd:task[cmd]} for task in peon_config 
+        peon_config = [{cmd:task[cmd]} for task in peon_config
                                        if task.get(cmd)]
 
     if peon_config:
         run_task(peon_config, COMMANDS)
     else:
         raise Exception("Transport config does not exist.")
-    
+
     print "peon: finish transport ..."
-    
+
 
 if __name__ == "__main__":
     import argparse
     # command line options
     parser = argparse.ArgumentParser(
                     description='Options of run Peon transport.')
-    
-    parser.add_argument('-t', '--transport', 
+
+    parser.add_argument('-t', '--transport',
                         dest='transport',
                         action='store',
                         nargs='?',
@@ -349,5 +336,5 @@ if __name__ == "__main__":
                         help='Start Peon transport mode. upload or download')
 
     opts, unknown = parser.parse_known_args()
-    
+
     transport(opts)

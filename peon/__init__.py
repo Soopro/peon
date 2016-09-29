@@ -1,16 +1,17 @@
-#coding=utf-8
+# coding=utf-8
 from __future__ import absolute_import
 import argparse
 
 from .modules import (construct, backup, transport, packing, watch, server)
 
-__version_info__ = ('0', '4', '6')
+__version_info__ = ('0', '5', '0')
 __version__ = '.'.join(__version_info__)
+
 
 def command_options():
 
     parser = argparse.ArgumentParser(
-                        description='Options of run Peon dev server.')
+        description='Options of run Peon dev server.')
 
     parser.add_argument('-v', '--version',
                         dest='version',
@@ -88,7 +89,6 @@ def command_options():
                         const=True,
                         help='Clean dest folder before take actions.')
 
-
     # Construct
     parser.add_argument('-c', '--construct',
                         dest='construct',
@@ -97,7 +97,6 @@ def command_options():
                         type=str,
                         const='release',
                         help='Run Peon construct to build files.')
-
 
     # Packing
     parser.add_argument('-z', '--zip',
