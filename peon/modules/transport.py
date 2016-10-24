@@ -1,12 +1,13 @@
-#coding=utf-8
+# coding=utf-8
 from __future__ import absolute_import
 
-import os, sys, traceback, re, yaml, json, requests, subprocess
-import SimpleHTTPServer, SocketServer
+import os
+import re
+import yaml
+import json
+import requests
 
-from StringIO import StringIO
-
-from ..utlis import now, safe_paths, uploadData, getData, replace
+from ..utlis import safe_paths, uploadData, getData, replace
 from .helpers import load_config, run_task
 
 
@@ -16,11 +17,12 @@ DEFAULT_UPLOADS_DIR = "uploads"
 DEFAULT_CONTENT_TYPE = "page"
 DEFAULT_SITE_FILE = 'site.json'
 
+
 # mathods
 def convert_data_decode(x):
     if isinstance(x, dict):
-        return dict((k.lower(), convert_data_decode(v))
-                     for k, v in x.iteritems())
+        return {k.lower(): convert_data_decode(v)
+                for k, v in x.iteritems()}
     elif isinstance(x, list):
         return list([convert_data_decode(i) for i in x])
     elif isinstance(x, str):
@@ -37,10 +39,11 @@ def convert_data_decode(x):
             pass
     return x
 
+
 def convert_data_encode(x):
     if isinstance(x, dict):
-        return dict((k.lower(), convert_data_encode(v))
-                     for k, v in x.iteritems())
+        return {k.lower(): convert_data_encode(v)
+                for k, v in x.iteritems()}
     elif isinstance(x, list):
         return list([convert_data_encode(i) for i in x])
     elif isinstance(x, unicode):
@@ -61,12 +64,13 @@ def convert_data_encode(x):
 def dict_to_md(data):
     meta = convert_data_encode(data.get("meta"))
     content = data.get("content").encode("utf-8")
-    meta = {k.capitalize():v for k, v in meta.iteritems()}
-    meta_str = yaml.safe_dump(meta, default_flow_style=False, indent=2,
-                                    allow_unicode=True)
+    meta = {k.capitalize(): v for k, v in meta.iteritems()}
+    meta_str = yaml.safe_dump(meta,
+                              default_flow_style=False,
+                              indent=2,
+                              allow_unicode=True)
 
     file_template = "/*\n{meta}*/\n{content}"
-
     file = file_template.format(meta=meta_str, content=content)
     return file
 
@@ -77,7 +81,7 @@ def md_to_dict(md_file):
     m = md_pattern.match(md_file)
     if not m:
         return None
-    content = m.group("content").replace("\n","")
+    content = m.group("content").replace("\n", "")
     meta_string = m.group("meta")
 
     rv = dict()
@@ -85,6 +89,7 @@ def md_to_dict(md_file):
     rv["meta"] = convert_data_decode(yaml_data)
     rv['content'] = content
     return rv
+
 
 def add_src_suffix(src, suffix):
     if not suffix:
@@ -116,7 +121,8 @@ def transport_download(cfg):
         "meta": data.get("site_meta"),
         "menus": data.get("menus"),
         "taxonomies": data.get("taxonomies"),
-        "content_types": data.get("content_types")
+        "content_types": data.get("content_types"),
+        "segments": data.get("segments"),
     }
 
     json_unicode = json.dumps(site_data,
@@ -233,6 +239,7 @@ def transport_upload(cfg):
             payload["content_types"] = site_data.get("content_types", {})
             payload["menus"] = site_data.get("menus", {})
             payload["taxonomies"] = site_data.get("taxonomies", {})
+            payload["segments"] = site_data.get("segments", [])
         except Exception as e:
             raise Exception("Site data error:", e)
 
@@ -298,21 +305,21 @@ def transport_media(cfg):
                 f.write(chunk)
 
 
-#-------------
 # main
-#-------------
 DEFAULT_ACTION = "transport"
 COMMANDS = {
     "upload": transport_upload,
     "download": transport_download,
     "media": transport_media
 }
+
+
 def transport(opts):
     peon_config = load_config(DEFAULT_ACTION)
     cmd = opts.transport
     if cmd:
-        peon_config = [{cmd:task[cmd]} for task in peon_config
-                                       if task.get(cmd)]
+        peon_config = [{cmd: task[cmd]}
+                       for task in peon_config if task.get(cmd)]
 
     if peon_config:
         run_task(peon_config, COMMANDS)
@@ -326,7 +333,7 @@ if __name__ == "__main__":
     import argparse
     # command line options
     parser = argparse.ArgumentParser(
-                    description='Options of run Peon transport.')
+        description='Options of run Peon transport.')
 
     parser.add_argument('-t', '--transport',
                         dest='transport',
