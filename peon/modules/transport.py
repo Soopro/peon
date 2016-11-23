@@ -117,8 +117,12 @@ def transport_download(cfg):
             print "Response is not JSON!"
             print "---------------------"
         raise e
+
     site_data = {
-        "meta": data.get("site_meta"),
+        "id": data.get("id"),
+        "slug": data.get("slug"),
+        "type": data.get("type"),
+        "meta": data.get("meta"),
         "menus": data.get("menus"),
         "taxonomies": data.get("taxonomies"),
         "content_types": data.get("content_types"),
@@ -190,10 +194,12 @@ def transport_upload(cfg):
     if not os.path.isdir(cwd):
         raise Exception("Transport upload dir dose not exist.")
     payload = {
-        "site_meta": {},
+        "locale": u'',
+        "meta": {},
         "menus": {},
         "content_types": {},
         "taxonomies": {},
+        "segments": [],
         "files": []
     }
     for dirpath, dirs, files in os.walk(cwd):
@@ -235,9 +241,10 @@ def transport_upload(cfg):
 
             site_data = json.loads(site_file_source)
 
-            payload["site_meta"] = site_data.get("meta", {})
-            payload["content_types"] = site_data.get("content_types", {})
+            payload["locale"] = site_data.get("locale", {})
+            payload["meta"] = site_data.get("meta", {})
             payload["menus"] = site_data.get("menus", {})
+            payload["content_types"] = site_data.get("content_types", {})
             payload["taxonomies"] = site_data.get("taxonomies", {})
             payload["segments"] = site_data.get("segments", [])
         except Exception as e:
