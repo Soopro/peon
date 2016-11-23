@@ -122,6 +122,7 @@ def transport_download(cfg):
         "id": data.get("id"),
         "slug": data.get("slug"),
         "type": data.get("type"),
+        "locale": data.get("locale"),
         "meta": data.get("meta"),
         "menus": data.get("menus"),
         "taxonomies": data.get("taxonomies"),
