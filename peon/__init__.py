@@ -4,7 +4,7 @@ import argparse
 
 from .modules import (construct, backup, transport, packing, watch, server)
 
-__version_info__ = ('0', '5', '2')
+__version_info__ = ('0', '5', '3')
 __version__ = '.'.join(__version_info__)
 
 
@@ -56,6 +56,13 @@ def command_options():
                         const=9527,
                         help='Start Peon dev server at port.')
 
+    # Watcher
+    parser.add_argument('-w', '--watcher',
+                        dest='watcher',
+                        action='store_const',
+                        const=True,
+                        help='Run Peon watcher file changes.')
+
     parser.add_argument('--pyco',
                         dest='pyco',
                         action='store',
@@ -63,25 +70,6 @@ def command_options():
                         type=str,
                         const='pyco',
                         help='Start Pyco dev server by path.')
-
-    parser.add_argument('--http',
-                        dest='http_server',
-                        action='store_const',
-                        const=True,
-                        help='Start Peon with simplehttp server.')
-
-    parser.add_argument('--harp',
-                        dest='harp_server',
-                        action='store_const',
-                        const=True,
-                        help='Start Peon with harp server.')
-
-    # Watcher
-    parser.add_argument('-w', '--watcher',
-                        dest='watcher',
-                        action='store_const',
-                        const=True,
-                        help='Run Peon watcher file changes.')
 
     parser.add_argument('--clean',
                         dest='clean',
@@ -137,7 +125,7 @@ def command_options():
 def run():
     opts = command_options()
     if opts.version:
-        print "Peon - Version:", __version__
+        print 'Peon - Version:', __version__
     elif opts.watcher:
         watch(opts)
     elif opts.construct:

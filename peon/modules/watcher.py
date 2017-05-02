@@ -1,8 +1,10 @@
-#coding=utf-8
+# coding=utf-8
 from __future__ import absolute_import
 
-import os, subprocess, time
-from watchdog.observers import Observer  
+import os
+import subprocess
+import time
+from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
 from ..services import RenderHandler
@@ -14,32 +16,34 @@ DEFAULT_SRC_DIR = 'src'
 DEFAULT_DEST_DIR = 'build'
 
 # handlers
+
+
 class WatchPatternsHandler(PatternMatchingEventHandler):
-    
+
     def __init__(self, render_handler,
-                       include_mark = None,
-                       patterns = None,
-                       ignore_patterns = None,
-                       ignore_directories = False,
-                       case_sensitive = False):
+                 include_mark=None,
+                 patterns=None,
+                 ignore_patterns=None,
+                 ignore_directories=False,
+                 case_sensitive=False):
 
         super(PatternMatchingEventHandler, self).__init__()
         self._patterns = patterns
         self._ignore_patterns = ignore_patterns
         self._ignore_directories = ignore_directories
         self._case_sensitive = case_sensitive
-        
+
         if isinstance(render_handler, RenderHandler):
             self.render = render_handler
         else:
-            raise Exception("Render is invalid.")
-        
+            raise Exception('Render is invalid.')
+
         self.incl_mark = include_mark
-    
+
     def _find_end_path(self, path):
         if not path:
             return None
-        tmp_path_list = path.rsplit(os.path.sep,1)
+        tmp_path_list = path.rsplit(os.path.sep, 1)
         if len(tmp_path_list) > 0:
             return tmp_path_list[1]
         else:
@@ -47,33 +51,32 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
 
     def on_created(self, event):
         self.render.render(event.src_path)
-    
+
     def on_modified(self, event):
         self.render.render(event.src_path)
-    
+
     def on_moved(self, event):
         end_src_path = self._find_end_path(event.src_path)
         end_dest_path = self._find_end_path(event.dest_path)
         if end_src_path != end_dest_path:
             self.render.move(event.src_path, event.dest_path)
-    
+
     def on_deleted(self, event):
         self.render.delete(event.src_path)
-    
 
 
-#-------------
+# -------------
 # main
-#-------------
+# -------------
 DEFAULT_ACTION = 'watch'
 
 
 def watch(opts):
     peon_config = load_config(DEFAULT_ACTION, force=False, multiple=False)
-    
-    print "------------"
-    print "Peon Wacther started"
-    print "------------"
+
+    print '------------'
+    print 'Peon Wacther started'
+    print '------------'
 
     if peon_config:
         src_dir = peon_config.get('src', DEFAULT_SRC_DIR)
@@ -92,46 +95,44 @@ def watch(opts):
         server_port = opts.port
         pyco_server = opts.pyco
 
-    
     if dest_dir == DEFAULT_SRC_DIR:
         dest_dir = DEFAULT_DEST_DIR
-    
+
     render_opts = {
-        "src": src_dir,
-        "dest": dest_dir,
-        "skip_includes": skip_includes,
+        'src': src_dir,
+        'dest': dest_dir,
+        'skip_includes': skip_includes,
     }
     render = RenderHandler(render_opts)
-    
+
     if clean_dest:
         render.clean()
         render.render_all()
-    
+
     if server:
         if pyco_server:
             # args = ['python', '{}{}pyco.py'.format(pyco_server, os.path.sep)]
             # pyco_progress = subprocess.Popen(args)
-            # live reload will be stop if chdir inside pyco, 
+            # live reload will be stop if chdir inside pyco,
             # that's why switch to shell=True.
-            args = 'cd '+pyco_server+' && python pyco.py'
-            pyco_progress = subprocess.Popen(args, shell=True)
+            args = 'cd ' + pyco_server + ' && python pyco.py'
+            subprocess.Popen(args, shell=True)
         else:
             try:
                 port = str(server_port)
-            except:
+            except Exception:
                 port = ''
 
             if port:
-                args = ['peon', '-s', port, '--http', '--dir', dest_dir]
+                args = ['peon', '-s', port, '--dir', dest_dir]
             else:
-                args = ['peon', '-s', '--http', '--dir', dest_dir]
+                args = ['peon', '-s', '--dir', dest_dir]
 
-            server_progress = subprocess.Popen(args)
-    
-    
+            subprocess.Popen(args)
+
     observer = Observer()
-    watcher = WatchPatternsHandler(render_handler = render,
-                                   ignore_patterns = ['*/.*'])
+    watcher = WatchPatternsHandler(render_handler=render,
+                                   ignore_patterns=['*/.*'])
 
     observer.schedule(watcher, src_dir, recursive=True)
     observer.start()
@@ -140,46 +141,45 @@ def watch(opts):
             time.sleep(SLEEP_TIME)
     except KeyboardInterrupt:
         observer.stop()
-        print "------------"
-        print "Peon Wacther stoped"
-        print "------------"
-        
+        print '------------'
+        print 'Peon Wacther stoped'
+        print '------------'
+
     observer.join()
-    
 
 
 if __name__ == '__main__':
     import argparse
     # command line options
     parser = argparse.ArgumentParser(
-                        description='Options of run Peon watcher.')
-    
+        description='Options of run Peon watcher.')
+
     parser.add_argument('--dest',
                         dest='dest_dir',
                         action='store',
                         nargs='?',
                         const='build',
                         help='Define operation dest dir.')
-    
-    parser.add_argument('--src', 
+
+    parser.add_argument('--src',
                         dest='src_dir',
                         action='store',
                         nargs='?',
                         const='src',
                         help='Define operation src dir.')
-    
+
     parser.add_argument('--clean',
                         dest='clean',
                         action='store_const',
                         const=True,
                         help='Clean dest folder before take actions.')
-    
+
     parser.add_argument('--skip',
                         dest='skip_includes',
                         action='append',
                         type=str,
                         help='Skip type of include files with rendering.')
-    
+
     parser.add_argument('-w', '--watcher',
                         dest='watcher',
                         action='store_const',
