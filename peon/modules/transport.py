@@ -54,7 +54,7 @@ def convert_data_encode(x):
         return x
     else:
         try:
-            x = str(x).encode('utf-8')
+            x = str(x)
         except Exception as e:
             print e
             pass
