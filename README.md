@@ -1,6 +1,6 @@
 # Puss In Boots 靴貓
 
-![Pussy](/../snapshots/banner.png?raw=true)
+![Pussy](/../assets/banner.png?raw=true)
 
 ### 让前端回归田园时代...
 
