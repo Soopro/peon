@@ -17,17 +17,18 @@ The project is call Puss in boots...(PIB in short). Obviously the name idea is f
 
 Features for now:
 
-1. Start develop server with SimpleHTTPServer or `Pyco`. 启动基于Python SimpleHTTPServer的开发服务器（或者启动Pyco，不知道的话，先别问这是什么...）。
-2. Automaticlly watch and build files, etc., html, css, coffee, less, sass... 自动监控和构建需要的项目文件，例如：html, css, coffee, less, sass...
-3. Combine and compress project by configurable tasks. 通过配置文件组合和压缩项目。
-4. Packing theme and upload to target api. 打包主题并且上传到指定的API.
+1. Start develop server with SimpleHTTPServer or `Pyco`.
+2. Automaticlly watch and build files. etc., html, css, coffee, less, sass...
+3. Combine and compress project by configurable tasks.
+4. Packing theme and upload to target api.
 
 
 現有特性：
-1. 啟動基於Python SimpleHTTPServer 的開發服务器（或者啟動Pyco，不知道這是什麼的話，先別問了...）。
-2. 自動監控和構建項目文件，例如：html, css, coffee, less, sass...
+1. 啟動基於 Python SimpleHTTPServer 的開發服务器（或者啟動Pyco，不知道這是什麼的話，先別問了...）。
+2. 自動監控和構建項目文件。例如：html, css, coffee, less, sass...
 3. 通過配置文件組合和壓縮項目。
 4. 打包主題並且可以上傳到指定的API。
+
 
 Planning to do:
 * Automatically create project folders, like or not.
