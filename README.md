@@ -1,6 +1,7 @@
 # Peon
 
-A front-end project develop helper.
+让前端开发回归田园时代...
+Let the front development back to the pastoral era...
 
 1. Start dev server with SimpleHTTPServer or Harp.
 2. Watching file changes for coffee less sass and jade.
@@ -168,7 +169,7 @@ Render files from source dir to dest dir
 
 `clean`: clean a dest folder before rendering
 
-`skip_includes`: skip those file types from include rendring. If the type is 'html', 
+`skip_includes`: skip those file types from include rendring. If the type is 'html',
 the {% include ... %} will not effect.
 
 
@@ -219,7 +220,7 @@ Compress task include multiple groups. The group's key can be custom to any lati
 
 `type`: define compress type. `html` `css` `js` `process_html` `inline_angular_templates`.
 
-type [inline_angular_templates]: 
+type [inline_angular_templates]:
 
 - `prefix`: define ng templates id prefix, etc., '/'. this is for match the template reference.
 - `allow_includes`: set it true will concat include files (starts or ends with '_'), default is False.
@@ -287,7 +288,7 @@ You can also chose upload to a restapi.
 
 ##### task: Zip
 
-*** This cmd can runing with our peon.json tasks. 
+*** This cmd can runing with our peon.json tasks.
 
 ***cli:*** `--exclude` for exclude files pattern.
 
@@ -313,7 +314,7 @@ You can also chose upload to a restapi.
 
 ##### task: Upload
 
-*** This cmd can only work with peon.json tasks. 
+*** This cmd can only work with peon.json tasks.
 make sure there is `zip` task before, otherwise will get a error.
 
 ```
@@ -444,7 +445,7 @@ Trassport pyco content file and site data to supmice system
       "cwd":".",
       "replace": [
         {
-          "pattern":"[%uploads%]", 
+          "pattern":"[%uploads%]",
           "replacement":"http://localstatic:5050/apps/redy/123123/uploads/"
         }
       ],
@@ -457,7 +458,7 @@ Trassport pyco content file and site data to supmice system
       "dest":".",
       "replace": [
         {
-          "pattern":"http://localstatic:5050/apps/redy/123123/uploads/", 
+          "pattern":"http://localstatic:5050/apps/redy/123123/uploads/",
           "replacement":"[%uploads%]"
         }
       ],
@@ -502,7 +503,7 @@ Trassport pyco content file and site data to supmice system
     error_404.md
     somepage.md
     ...
-    
+
 ```
 
 *** Site.json smaple ***
