@@ -1,20 +1,21 @@
-# Peon
+# Puss In Boots
 
-![Alt text](/../snapshots/snapshot.png?raw=true "Optional Title")
+![Pussy](/../snapshots/banner.png?raw=true)
 
-让前端开发回归田园时代...
-Let the front development back to the pastoral era...
+### 让前端开发回归田园时代...
 
-1. Start dev server with SimpleHTTPServer or Harp.
-2. Watching file changes for coffee less sass and jade.
-3. Build/Compress static files by task config.
-4. Create backups.
-5. Packing and uploads (for our platform only).
-6. Transport data so supmice system (for our platform only).
+### Let the front development back to the pastoral era...
+
+
+1. Start dev server with SimpleHTTPServer or `Pyco`.
+2. Automaticly watching files change, etc., html, css, coffee less sass...
+3. Build or Compress project files by configurable tasks.
+4. Packing theme and upload to api.
 
 ==============
-Becuase grunt or gulp always can't full fill our needs, and custom nodejs scripts is too hard for me,
-but python is much more easier...
+
+## Why Puss In Boots
+Becuase Nodejs sucks, Python is much more easier...
 
 Some basic node srcipt is call by subprocess, such as coffee-script jade less uglify-js.
 
@@ -31,10 +32,10 @@ You can run ```sh setup.sh -p``` to install all required packages once for all.
 without ```-p``` param, packages will skiped.
 
 ## Usage
-You have to place a 'peon.json' intro the project root folder first.
-* peon.json: Config peon's tasks, see the example.
+You have to place a 'puss.json' intro the project root folder first.
+* puss.json: Config puss's tasks, see the example.
 
-`peon [-s] [-c] [-w] [-t] [-z]`
+`puss [-s] [-c] [-w] [-t] [-z]`
 
 =======================
 ### -c: Construct
