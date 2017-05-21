@@ -2,9 +2,9 @@
 
 ![Pussy](/../assets/banner.png?raw=true)
 
-### 让前端回归田园时代...
+### Let the front development back to the pastoral era ...
 
-### Let the front development back to the pastoral era...
+### 讓前端開發回歸田園時代 ...
 
 <br>
 <br>
@@ -13,24 +13,42 @@
 
 The project is call Puss in boots...(PIB in short). Obviously the name idea is form a famous cat. PIB is for build, watching and packing web base front-end project while in develop.
 
-這個項目叫做靴貓... 很顯然，這個名字來自電影裡面那隻拿劍的貓。靴猫可以用来构建、监控和打包基于网页的前端项目，非常适合开发使用。
+這個項目叫做靴貓... 很顯然，這個名字來自電影裡面那隻拿劍的貓。靴貓適用於網頁前端項目開發，它能夠用來構建、監控和打包前端項目。
 
-Features for now 现有特性:
+Features for now:
 
 1. Start develop server with SimpleHTTPServer or `Pyco`. 启动基于Python SimpleHTTPServer的开发服务器（或者启动Pyco，不知道的话，先别问这是什么...）。
-2. Automaticly watch and build files, etc., html, css, coffee, less, sass... 自动监控和构建需要的项目文件，例如：html, css, coffee, less, sass...
+2. Automaticlly watch and build files, etc., html, css, coffee, less, sass... 自动监控和构建需要的项目文件，例如：html, css, coffee, less, sass...
 3. Combine and compress project by configurable tasks. 通过配置文件组合和压缩项目。
 4. Packing theme and upload to target api. 打包主题并且上传到指定的API.
 
+
+現有特性：
+1. 啟動基於Python SimpleHTTPServer 的開發服务器（或者啟動Pyco，不知道這是什麼的話，先別問了...）。
+2. 自動監控和構建項目文件，例如：html, css, coffee, less, sass...
+3. 通過配置文件組合和壓縮項目。
+4. 打包主題並且可以上傳到指定的API。
+
+Planning to do:
+* Automatically create project folders, like or not.
+* Automatically translate ES7 to ES6 to ES5 ... very two.
+
+計畫中的新特性：
+* 自動生成我認為好的前端項目結構，愛用不用吧 ...
+* 自動把ES7轉ES6轉ES5 ... 好二 ...
+
 ============================
 
-## Why PIB
+## Why PIB? 為什麼用靴貓？
 
-Becuase Nodejs sucks, Python is much more easier...
+Becuase Nodejs might install hundreds related package before write any code, PIB is much more easier cheap and effective ...
 
-Some basic node srcipt is call by subprocess, such as coffee-script jade less uglify-js.
+Some basic js package will call by subprocess, such as coffee-script less and uglify-js.
 
-BTW, may not suppport ***Windows***.
+BTW, PIB may not suppport ***Windows***, It's untested.
+
+如果你不想開發一個前端項目就要拽一百多個依賴庫，不想一個源的版本跟錯誤導致啟動失敗，不想動不動冒出來一個自稱是“未來”的項目就要把項目重寫，不想像個二貨那樣要ES7轉ES6轉ES5，那麼希望這個項目能夠幫你的前端開發工作專注在交互和呈現上。
+
 
 ## Installation
 ```sudo python setup.py install```
