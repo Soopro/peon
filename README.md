@@ -1,20 +1,28 @@
-# Puss In Boots
+# Puss In Boots 靴貓
 
 ![Pussy](/../snapshots/banner.png?raw=true)
 
-### 让前端开发回归田园时代...
+### 让前端回归田园时代...
 
 ### Let the front development back to the pastoral era...
 
+## Concept 概念
 
-1. Start dev server with SimpleHTTPServer or `Pyco`.
-2. Automaticly watching files change, etc., html, css, coffee less sass...
-3. Build or Compress project files by configurable tasks.
-4. Packing theme and upload to api.
+The project is call Puss in boots...(PIB in short). Obviously the name idea is form a famous cat. PIB is for build, watching and packing web base front-end project while in develop.
 
-==============
+這個項目叫做靴貓... 很顯然，這個名字來自電影裡面那隻拿劍的貓。靴猫可以用来构建、监控和打包基于网页的前端项目，非常适合开发使用。
 
-## Why Puss In Boots
+Features for now 现有特性:
+
+1. Start develop server with SimpleHTTPServer or `Pyco`. 启动基于Python SimpleHTTPServer的开发服务器（或者启动Pyco，不知道的话，先别问这是什么...）。
+2. Automaticly watch and build files, etc., html, css, coffee, less, sass... 自动监控和构建需要的项目文件，例如：html, css, coffee, less, sass...
+3. Combine and compress project by configurable tasks. 通过配置文件组合和压缩项目。
+4. Packing theme and upload to target api. 打包主题并且上传到指定的API.
+
+============================
+
+## Why PIB
+
 Becuase Nodejs sucks, Python is much more easier...
 
 Some basic node srcipt is call by subprocess, such as coffee-script jade less uglify-js.
