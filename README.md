@@ -1,4 +1,4 @@
-# Puss In Boots 靴貓
+# Puss In Boots
 
 ![Pussy](/../assets/banner.png?raw=true)
 
