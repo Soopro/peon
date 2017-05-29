@@ -78,7 +78,7 @@ class RenderHandler(object):
         self.rendering_all = False
 
     def _raise_exception(self, err, src_path):
-        sys.stdout.write("\a")
+        sys.stdout.write('\a')
         print '--------------------'
         print '[{}Exception{}]: {}'.format(bpcolor.FAIL, bpcolor.ENDC, err)
         print '[src_path]: {}'.format(src_path)

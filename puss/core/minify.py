@@ -1,8 +1,8 @@
-#coding=utf-8
+# coding=utf-8
 from __future__ import absolute_import
 
 import os
-import time
+
 import shutil
 import re
 import subprocess
@@ -34,8 +34,8 @@ class MinifyHandler(object):
 
     tmpl_regex = re.compile('<\!--\s*ng\-templates\s*-->', re.IGNORECASE)
 
-    build_regex = re.compile('(<\!--\s*build:\s*(\[?\s*[\w-]+\s*\]?)' + \
-                             '\s+([\w\$\-\./\{\}\(\)]*)(\?.*?)*\s*-->' + \
+    build_regex = re.compile('(<\!--\s*build:\s*(\[?\s*[\w-]+\s*\]?)' +
+                             '\s+([\w\$\-\./\{\}\(\)]*)(\?.*?)*\s*-->' +
                              '(.*?)<\!--\s*/build\s*-->)',
                              re.MULTILINE | re.DOTALL | re.IGNORECASE)
 
@@ -58,13 +58,13 @@ class MinifyHandler(object):
             return True
         else:
             _colored = bpcolor.OKBLUE + file_path + bpcolor.ENDC
-            print "peon: Minify skip file ---> {}".format(_colored)
+            print 'peon: Minify skip file ---> {}'.format(_colored)
             return False
 
     def _read_file(self, file_path):
         try:
             file = open(file_path)
-            file_source = file.read().decode("utf-8")
+            file_source = file.read().decode('utf-8')
             file.close()
             return file_source
         except Exception as e:
@@ -77,7 +77,7 @@ class MinifyHandler(object):
         try:
             tmp = open(self.temp_file, 'w')
             if isinstance(file_source, unicode):
-                file_source = file_source.encode("utf-8")
+                file_source = file_source.encode('utf-8')
             tmp.write(file_source)
             tmp.close()
         except Exception as e:
@@ -86,7 +86,7 @@ class MinifyHandler(object):
         if os.path.isfile(file_path):
             os.remove(file_path)
         os.rename(self.temp_file, file_path)
-        print "peon: Minify writed ---> {}".format(file_path)
+        print 'peon: Minify writed ---> {}'.format(file_path)
         return file_path
 
     def includes_gateway(self, path):
@@ -95,8 +95,8 @@ class MinifyHandler(object):
         filepath, ext = os.path.splitext(path)
         filepath = filepath.rsplit(os.path.sep, 1)
         filename = filepath[1]
-        return filename.startswith(self.incl_mark) \
-                   or filename.endswith(self.incl_mark)
+        return filename.startswith(self.incl_mark) or \
+            filename.endswith(self.incl_mark)
 
     def _process_html(self, file_path, minify=True, beautify=False):
         print "peon: Minify HTML process start"
@@ -182,7 +182,8 @@ class MinifyHandler(object):
                     attr_name = search_attr.group(1)
                 if not attr_name:
                     continue
-                pattern = r'({}=["\']?\s*([^"\']+)\s*["\']?)'.format(attr_name)
+                _r_str = r'({}=["\']?\s*([^"\']+)\s*["\']?)'
+                pattern = _r_str.format(attr_name)
                 comp_attr_regex = re.compile(pattern, re.IGNORECASE)
                 replacement = re.sub(comment_regex, u'', text)
 
@@ -191,8 +192,8 @@ class MinifyHandler(object):
                         _src_path = os.path.join(self.cwd_dir, attr[1:])
                     else:
                         _src_path = os.path.join(curr_dir, attr)
-                    if minify and self._isfile(_src_path) \
-                    and _src_path != comp_file_path:
+                    if minify and self._isfile(_src_path) and \
+                       _src_path != comp_file_path:
                         ensure_dir(comp_file_path, True)
                         shutil.copy2(_src_path, comp_file_path)
                     new_attr = '{}="{}"'.format(attr_name,
@@ -204,12 +205,12 @@ class MinifyHandler(object):
 
             content = content.replace(match, replacement)
 
-            print "peon: processe_html {}".format(comp_type)
-            print "--------------------"
+            print 'peon: processe_html {}'.format(comp_type)
+            print '--------------------'
             print text.replace('\n', '').replace('  ', ' ')
-            print "--->"
+            print '--->'
             print replacement.replace('\n', '').replace('  ', ' ')
-            print "--------------------"
+            print '--------------------'
 
         return content
 
@@ -247,10 +248,12 @@ class MinifyHandler(object):
 
     def _html(self, source):
         try:
-            # Remove comments found in HTML. Individual comments can be
-            # maintained by putting a ! as the first character inside the
-            # comment.
-            # <!-- FOO --> <!--! BAR --> become to <!-- BAR -->
+            """
+            Remove comments found in HTML. Individual comments can be
+            maintained by putting a ! as the first character inside the
+            comment.
+            <!-- FOO --> <!--! BAR --> become to <!-- BAR -->
+            """
             minifed = htmlmin.minify(source,
                                      remove_comments=True,
                                      remove_empty_space=True)
@@ -297,7 +300,7 @@ class MinifyHandler(object):
             css_source = self._css(u'\n'.join(css_series))
 
         self._output(output_path, css_source)
-        print "peon: CSS minifed -> {}".format(output_path)
+        print 'peon: CSS minifed -> {}'.format(output_path)
 
     def js(self, src_paths, output, beautify=False):
         js_series = []
@@ -323,7 +326,7 @@ class MinifyHandler(object):
             js_source = self._uglifyjs(u'\n'.join(js_series))
 
         self._output(output_path, js_source)
-        print "peon: JS minifed -> {}".format(output_path)
+        print 'peon: JS minifed -> {}'.format(output_path)
 
     def html(self, src_paths):
         # html doesn't need concat files
@@ -333,7 +336,7 @@ class MinifyHandler(object):
                     continue
                 html_source = self._html(self._read_file(path))
                 self._output(path, html_source)
-                print "peon: HTML minifed -> {}".format(path)
+                print 'peon: HTML minifed -> {}'.format(path)
             else:
                 raise CompressError('html not found')
 
@@ -342,12 +345,12 @@ class MinifyHandler(object):
             if os.path.isfile(path):
                 html_source = self._process_html(path, minify, beautify)
                 self._output(path, html_source)
-                print "peon: HTML processed -> {}".format(path)
+                print 'peon: HTML processed -> {}'.format(path)
             else:
                 raise CompressError('html not found')
 
     def concat_angular_template(self, src_paths, output,
-                                      prefix='', beautify=False):
+                                prefix='', beautify=False):
         if not output:
             output = 'index.html'
 
@@ -377,4 +380,4 @@ class MinifyHandler(object):
                                             inject_path)
 
         self._output(inject_path, inject_source)
-        print "peon: Angular Template concated -> {}".format(path)
+        print 'peon: Angular Template concated -> {}'.format(path)
