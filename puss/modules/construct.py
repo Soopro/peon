@@ -234,9 +234,8 @@ def scrap(cfg):
     print 'peon: Work work ...(scrap)'
 
 
-def compress(cfg):
-    for key in cfg:
-        rule = cfg[key]
+def compress(rules):
+    for rule in rules:
         cwd = safe_paths(rule.get('cwd', DEFAULT_DIST_DIR))
         allow_includes = rule.get('allow_includes', False)
         minify = MinifyHandler(cwd, allow_includes)
@@ -265,7 +264,7 @@ def compress(cfg):
                                            minify_prefix,
                                            minify_beautify)
 
-    print "peon: Work work ...(compress)"
+    print 'peon: Work work ...(compress)'
 
 
 # -------------
@@ -273,18 +272,20 @@ def compress(cfg):
 # -------------
 MODES = ('release', 'init', 'build')
 COMMANDS = {
-    'copy': copy,
     'clean': clean,
-    'scrap': scrap,
-    'replace': replace,
+    'copy': copy,
     'render': render,
     'compress': compress,
+    'replace': replace,
+    'scrap': scrap,
     'rev': rev,
 }
 
 
 def construct(opts):
-    # Allowed actions: 'release', 'init', 'build'
+    """
+    Construct actions: `release` ad default, `init`, `build`
+    """
     if opts.construct not in MODES:
         opts.construct = None
 
