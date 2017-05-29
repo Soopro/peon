@@ -7,8 +7,8 @@ import time
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
-from ..services import RenderHandler
-from .helpers import load_config
+from ..core import RenderHandler
+from ..helpers import load_config
 
 
 # variables

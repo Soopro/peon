@@ -4,8 +4,8 @@ from __future__ import absolute_import
 import os
 
 from ..utlis import makeZip, uploadFile, safe_paths
-from ..config import CONFIG_FILE
-from .helpers import load_config, run_task
+from ..helpers import load_config
+
 
 # variables
 DEFAULT_PATH = '.'
@@ -62,14 +62,10 @@ def packzip(cfg):
 
     # parse config
     include_hidden = cfg.get('include_hidden')
-    include_cfg = cfg.get('include_config')
     exclude_list = cfg.get('excludes')
 
     if not isinstance(exclude_list, list):
         exclude_list = []
-
-    if not include_cfg:
-        exclude_list.append(CONFIG_FILE)
 
     makeZip(DEFAULT_PATH,
             filename,

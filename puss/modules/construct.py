@@ -6,10 +6,10 @@ import re
 import glob
 import fnmatch
 
-from ..services import RenderHandler, MinifyHandler
+from ..core import RenderHandler, MinifyHandler
 from ..utlis import (gen_md5, copy_file, safe_paths, grounded_paths,
                      child_of_path, ensure_dir, remove_dir, remove_file)
-from .helpers import load_config
+from ..helpers import load_config
 
 
 # variables
@@ -90,6 +90,7 @@ def _find_path_list(src, cwd):
 # methods
 def copy(rules):
     for rule in rules:
+        print rule
         is_flatten = rule.get('flatten', False)
         force = rule.get('force', True)
         cwd, dest = safe_paths(rule.get('cwd', ''), rule.get('dest', ''))
@@ -120,17 +121,13 @@ def copy(rules):
 
 
 def rev(cfg):
-    if not cfg.get('pattern'):
-        print 'peon: Failed -> rev (no pattern)'
-        return
-    pattern = str(cfg['pattern'])
-    find = cfg.get('find')
-    if find:
-        find = str(find)
-    else:
-        find = pattern
-    pattern = find.replace(pattern, gen_md5())
-    replacements = {find: pattern}
+    try:
+        find_str = cfg.get('find')
+    except Exception:
+        find_str = '?md5=<rev>'
+
+    rev_str = find_str.replace('<rev>', gen_md5())
+
     cwd = safe_paths(cfg.get('cwd', ''))
     files = cfg.get('src', [])
     path_list = _find_path_list(files, cwd)
@@ -139,12 +136,15 @@ def rev(cfg):
         file = open(path)
         if os.path.isfile(TEMP_FILE):
             os.remove(TEMP_FILE)
-        tmp = open(TEMP_FILE, 'w')
-        for line in file:
-            for src, target in replacements.iteritems():
-                line = line.replace(src, target)
-            tmp.write(line)
-        tmp.close()
+        with open(TEMP_FILE, 'w') as tmp:
+            for line in file:
+                try:
+                    line = line.replace(find_str, rev_str)
+                except Exception as e:
+                    print 'line:', type(line), type(find_str), type(rev_str)
+                    raise e
+                tmp.write(line)
+
         file.close()
         if os.path.isfile(path):
             os.remove(path)
@@ -173,7 +173,7 @@ def render(cfg):
 def replace(cfg):
     files = cfg.get('src', [])
     cwd = safe_paths(cfg.get('cwd', ''))
-    replacements = cfg.get('replacements', [])
+    replacing = cfg.get('replacing', [])
     path_list = _find_path_list(files, cwd)
     for path in path_list:
         file = open(path)
@@ -181,11 +181,11 @@ def replace(cfg):
             os.remove(TEMP_FILE)
         tmp = open(TEMP_FILE, 'w')
         for line in file:
-            for replace_rule in replacements:
-                pattern = replace_rule.get('pattern')
-                replace = replace_rule.get('replace')
+            for _rule in replacing:
+                pattern = _rule.get('from')
+                replace = _rule.get('to')
                 if pattern is None or replace is None:
-                    print 'peon: Failed -> replace (no pattern)'
+                    print 'peon: Failed -> replace is no pattern'
                     continue
                 if isinstance(pattern, unicode):
                     pattern = pattern.encode('utf-8')
@@ -290,7 +290,7 @@ def construct(opts):
         opts.construct = None
 
     cmd_cfg = load_config(opts.construct or 'release')
-    if not isinstance('cmd_cfg', list):
+    if not isinstance(cmd_cfg, list):
         cmd_cfg = [cmd_cfg]
 
     for task in cmd_cfg:

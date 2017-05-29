@@ -1,11 +1,11 @@
 # coding=utf-8
 
 from setuptools import setup, find_packages
-import pussy
+import puss
 
 setup(
     name='puss',
-    version=pussy.__version__,
+    version=puss.__version__,
     packages=find_packages(),
     install_requires=[
         'watchdog>=0.8.3',
