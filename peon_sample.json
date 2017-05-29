@@ -1,165 +1,170 @@
 {
-  "init":[
-    {
-      "install":["bower","npm"],
-      "copy": {
-        "libs":{
-          "flatten": true,
-          "src":[
-            "lodash/dist/lodash.js",
-            "angular/angular.js",
-            "angular-cookies/angular-cookies.js",
-            "angular-resource/angular-resource.js",
-            "angular-route/angular-route.js",
-            "angular-sanitize/angular-sanitize.js",
-            "danialfarid-angular-file-upload/dist/angular-file-upload.js",
-            "danialfarid-angular-file-upload/dist/angular-file-upload-shim.js"
-          ],
-          "cwd":"bower_components/",
-          "dest":"/xxx"
-        }
+  "init": {
+    "copy": [
+      {
+        "name": "libs",
+        "flatten": true,
+        "src":[
+          "angular/angular.js",
+          "angular-cookies/angular-cookies.js",
+          "angular-resource/angular-resource.js",
+          "angular-animate/angular-animate.js",
+          "angular-messages/angular-messages.js",
+          "angular-aria/angular-aria.js",
+          "angular-material/angular-material.js",
+          "angular-route/angular-route.js",
+          "angular-sanitize/angular-sanitize.js",
+          "ng-file-upload/ng-file-upload.js"
+        ],
+        "cwd":"bower_components",
+        "dest":"/src/scripts/libs/"
+      },
+      {
+        "name": "css",
+        "flatten": true,
+        "src":[
+          "angular-material/angular-material.css"
+        ],
+        "cwd":"bower_components",
+        "dest":"/src/styles/"
       }
+    ]
+  },
+  "watch":{
+    "src": "src",
+    "dest": "pyco/themes/default",
+    "clean": true,
+    "server": true,
+    "pyco": "pyco",
+    "skip_includes": "html"
+  },
+  "build": {
+    "clean": "build",
+    "render":{
+      "cwd": "src",
+      "dest": "build"
     }
-  ],
-  
-  "release":[
+  },
+  "release": [
     {
-      "clean": "dist",
-      "copy":{
-        "dist":{
+      "clean": ["dist", "build"],
+      "render": {
+        "cwd": "src",
+        "dest": "build"
+      },
+      "copy": [
+        {
+          "name": "dist",
           "src": [
-            "*",
-            "*/*",
-            "*/*/*"
+            "**/*",
+            "!**/_*",
+            "!_*"
+          ],
+          "cwd": "build",
+          "dest": "dist"
+        },
+        {
+          "name": "assets",
+          "flatten": true,
+          "src": [
+            "**/*.ttf",
+            "**/*.woff*",
+            "**/*.png",
+            "**/*.jpg",
+            "**/*.svg"
           ],
           "cwd": "build",
           "dest": "dist"
         }
-      },
-      "compress": {
-        "angular_template":{
-          "type": "angular_template",
-          "src": "*.html",
+
+      ],
+      "compress": [
+        {
+          "type": "inline_angular_templates",
+          "src": [
+            "blueprints/**/*.html",
+            "common/**/*.html",
+            "modals/**/*.html",
+            "navs/**/*.html",
+            "matters/**/*.html",
+            "panels/**/*.html",
+            "!**/_*.html"
+          ],
           "cwd": "dist",
           "prefix": "",
           "beautify": false,
-          "output":"index.html"
+          "allow_includes": false,
+          "output": "index.html"
         },
-        "process_html":{
+        {
           "type": "process_html",
           "cwd": "dist",
-          "src": "index.html"
+          "src": "*.html"
         },
-        "html":{
+        {
           "type": "html",
           "cwd": "dist",
-          "src": "index.html"
+          "src": "*.html"
         }
-      },
+      ],
       "replace": {
-        "src": "*.min.*",
+        "src": [
+          "*.min.*",
+          "*.html"
+        ],
         "cwd": "dist",
-        "replacements": [
+        "replacing": [
           {
-            "pattern": "/styles/icons/svg",
-            "replace": "svg"
+            "from": "/styles/icons/svg",
+            "to": "svg"
+          },
+          {
+            "from": "icons/ico",
+            "to": "ico"
+          },
+          {
+            "from": "styles/logo.svg",
+            "to": "logo.svg"
           }
         ]
       },
       "scrap": {
-        "src":[
-          "*.js",
-          "*.html",
-          "styles/*.png",
+        "src": [
+          "*",
+          "!*.html",
           "!*.min.*",
+          "!server_conf.js",
           "!*.png",
-          "!index.html"
+          "!*.jpg",
+          "!*.svg",
+          "!*.ttf",
+          "!*.woff*"
         ],
-        "cwd":"dist"
+        "cwd": "dist"
       },
-      "rev":{
-        "src":"*.html",
-        "cwd":"dist",
-        "find":"?md5=null",
-        "pattern":"null"
+      "rev": {
+        "src": "*.html",
+        "cwd": "dist",
+        "find": "?md5=<rev>"
       }
     }
   ],
-  "backup":{
-    "redis":{
-      "src":"/Users/redy/dump.rdb",
-      "dbhost":null,
-      "port":null,
-      "user":null,
-      "pwd":null,
-      "dest":null
+  "packing": {
+    "zip": {
+      "cwd": null,
+      "file": null,
+      "include_hidden":false,
+      "excludes":[]
     },
-    "mongodb":{
-      "dbname":"dev",
-      "dbhost":null,
-      "port":null,
-      "user":null,
-      "pwd":null,
-      "src":null,
-      "dest":null
-    },
-    "files":{
-      "src":[
-        "/Users/redy/deployment_data/",
-        "/Users/redy/etc/nginx/sites-available/"
-      ]
-    }
-  },
-  "packing":[
-    {
-      "zip":{
-        "cwd":null,
-        "file":null,
-        "include_hidden":false,
-        "include_peon_config":false,
-        "excludes":[]
-      },
-      "upload":{
-        "cwd":null,
-        "file":null,
-        "headers":{
-          "SecretKey":"1d02aa814dc64db3a6494624ca35a03a"
-        },
-        "url":"http://localhost:5000/ws/test/develop_theme",
-        "data":null,
-        "params":null
-      }
-    }
-  ],
-  "transport":{
     "upload":{
-      "type":"upload",
-      "cwd":"content",
-      "replace": [
-        {
-          "pattern":"/$uploads/", 
-          "replacement":"http://localstatic:5050/apps/redy/123123/uploads/"
-        }
-      ],
-      "headers":{
-        "content-type": "application/json",
-        "SecretKey":"1d02aa814dc64db3a6494624ca35a03a"
-      },
-      "url":"http://localhost:5000/ws/123123/develop_sync_sitedata"
-    },
-    "download":{
-      "type":"download",
-      "dest":"content",
-      "replace": [
-        {
-          "pattern":"http://localstatic:5050/apps/redy/123123/uploads/", 
-          "replacement":"/$uploads/"
-        }
-      ],
+      "cwd":null,
+      "file":null,
       "headers":{
         "SecretKey":"1d02aa814dc64db3a6494624ca35a03a"
       },
-      "url":"http://localhost:5000/ws/123123/develop_sync_sitedata"
+      "url":"http://localhost:5000/app/<app_slug>/develop/theme",
+      "data": null,
+      "params": null
     }
   }
 }

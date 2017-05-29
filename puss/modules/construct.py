@@ -126,6 +126,8 @@ def rev(cfg):
     except Exception:
         find_str = '?md5=<rev>'
 
+    if isinstance(find_str, unicode):
+        find_str = find_str.encode('utf-8')
     rev_str = find_str.replace('<rev>', gen_md5())
 
     cwd = safe_paths(cfg.get('cwd', ''))
@@ -141,7 +143,7 @@ def rev(cfg):
                 try:
                     line = line.replace(find_str, rev_str)
                 except Exception as e:
-                    print 'line:', type(line), type(find_str), type(rev_str)
+                    print 'line:', line, find_str, rev_str
                     raise e
                 tmp.write(line)
 
