@@ -90,7 +90,6 @@ def _find_path_list(src, cwd):
 # methods
 def copy(rules):
     for rule in rules:
-        print rule
         is_flatten = rule.get('flatten', False)
         force = rule.get('force', True)
         cwd, dest = safe_paths(rule.get('cwd', ''), rule.get('dest', ''))
@@ -143,7 +142,10 @@ def rev(cfg):
                 try:
                     line = line.replace(find_str, rev_str)
                 except Exception as e:
-                    print 'line:', line, find_str, rev_str
+                    print '---------->'
+                    print 'line:', line,
+                    print 'find:', find_str
+                    print 'rev:', rev_str
                     raise e
                 tmp.write(line)
 
