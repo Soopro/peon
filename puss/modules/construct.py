@@ -17,7 +17,7 @@ TEMP_FILE = '_construct_temp_.tmp'
 DEFAULT_SRC_DIR = 'src'
 DEFAULT_BUILD_DIR = 'build'
 DEFAULT_DIST_DIR = 'dist'
-nested_regex = re.compile('[\*/]*\*\*/([\*]*.*)$', re.IGNORECASE)
+nested_regex = re.compile(r'[\*/]*\*\*/([\*]*.*)$', re.IGNORECASE)
 
 
 # helpers
