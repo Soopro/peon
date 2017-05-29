@@ -10,14 +10,14 @@ from watchdog.events import PatternMatchingEventHandler
 from ..services import RenderHandler
 from .helpers import load_config
 
+
 # variables
 SLEEP_TIME = 1
 DEFAULT_SRC_DIR = 'src'
 DEFAULT_DEST_DIR = 'build'
 
+
 # handlers
-
-
 class WatchPatternsHandler(PatternMatchingEventHandler):
 
     def __init__(self, render_handler,
@@ -68,11 +68,8 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
 # -------------
 # main
 # -------------
-DEFAULT_ACTION = 'watch'
-
-
 def watch(opts):
-    peon_config = load_config(DEFAULT_ACTION, force=False, multiple=False)
+    peon_config = load_config('watch')
 
     print '------------'
     print 'Peon Wacther started'
@@ -146,46 +143,3 @@ def watch(opts):
         print '------------'
 
     observer.join()
-
-
-if __name__ == '__main__':
-    import argparse
-    # command line options
-    parser = argparse.ArgumentParser(
-        description='Options of run Peon watcher.')
-
-    parser.add_argument('--dest',
-                        dest='dest_dir',
-                        action='store',
-                        nargs='?',
-                        const='build',
-                        help='Define operation dest dir.')
-
-    parser.add_argument('--src',
-                        dest='src_dir',
-                        action='store',
-                        nargs='?',
-                        const='src',
-                        help='Define operation src dir.')
-
-    parser.add_argument('--clean',
-                        dest='clean',
-                        action='store_const',
-                        const=True,
-                        help='Clean dest folder before take actions.')
-
-    parser.add_argument('--skip',
-                        dest='skip_includes',
-                        action='append',
-                        type=str,
-                        help='Skip type of include files with rendering.')
-
-    parser.add_argument('-w', '--watcher',
-                        dest='watcher',
-                        action='store_const',
-                        const=True,
-                        help='Run Peon watcher file changes.')
-
-    opts, unknown = parser.parse_known_args()
-
-    watch(opts)

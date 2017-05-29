@@ -7,7 +7,7 @@ import SocketServer
 
 
 # handlers
-class PeonServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+class PiServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
     REWRITE_ROOT = 'index'
     REWRITE_EXT = 'html'
@@ -50,19 +50,12 @@ DEFAULT_PORT = 9527
 
 
 def server(opts):
-    if isinstance(opts.port, int):
-        port = opts.port
-    else:
-        port = DEFAULT_PORT
-
-    if opts.dir:
-        os.chdir(opts.dir)
-
+    port = opts.port if isinstance(opts.port, int) else DEFAULT_PORT
     simplehttp(port)
 
 
 def simplehttp(port):
-    httpd = SocketServer.TCPServer(('', port), PeonServerHandler, False)
+    httpd = SocketServer.TCPServer(('', port), PiServerHandler, False)
     httpd.allow_reuse_address = True
     httpd.server_bind()
     httpd.server_activate()
@@ -77,30 +70,3 @@ def simplehttp(port):
         httpd.serve_forever()
     except (KeyboardInterrupt, SystemExit):
         httpd.shutdown()
-
-
-if __name__ == '__main__':
-    import argparse
-    # command line options
-    parser = argparse.ArgumentParser(
-        description='Options of run Peon dev server.')
-
-    parser.add_argument('-s', '--server',
-                        dest='port',
-                        action='store',
-                        nargs='?',
-                        type=int,
-                        const=9527,
-                        help='Start Peon dev server at port.')
-
-    parser.add_argument('--dir',
-                        dest='dir',
-                        action='store',
-                        nargs='?',
-                        type=str,
-                        const=None,
-                        help='Define operation dir.')
-
-    opts, unknown = parser.parse_known_args()
-
-    server(opts)
