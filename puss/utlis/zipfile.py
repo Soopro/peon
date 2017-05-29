@@ -1,7 +1,8 @@
-#coding=utf-8
+# coding=utf-8
 from __future__ import absolute_import
 
-import os, fnmatch
+import os
+import fnmatch
 from zipfile import ZipFile, ZIP_DEFLATED
 
 TEMP_ZIP = '._tmp_zip'
@@ -20,8 +21,8 @@ def _zipdir(path, zip, excludes=None, include_hidden=False):
         for file in files:
             is_exclude = False
             for exclude in exclude_list:
-                if isinstance(exclude, (str, unicode)) \
-                and fnmatch.fnmatch(file, exclude):
+                if isinstance(exclude, (str, unicode)) and \
+                   fnmatch.fnmatch(file, exclude):
                     is_exclude = True
 
             if file != TEMP_ZIP and not is_exclude:
@@ -29,7 +30,7 @@ def _zipdir(path, zip, excludes=None, include_hidden=False):
 
 
 def makeZip(target_path, zip_filename, excludes=None, include_hidden=False):
-    print "excludes:", excludes
+    print 'excludes:', excludes
     zfile = ZipFile(TEMP_ZIP, 'w', ZIP_DEFLATED)
     _zipdir(target_path, zfile, excludes, include_hidden)
     zfile.close()

@@ -1,4 +1,4 @@
-#coding=utf-8
+# coding=utf-8
 from __future__ import absolute_import
 import os
 import re
@@ -19,7 +19,7 @@ def gen_md5():
 def copy_tree(src, dest):
     try:
         shutil.copytree(src, dest)
-        print "peon: Copied -> " + src
+        print 'peon: Copied -> ' + src
     # eg. src and dest are the same file
     except shutil.Error as e:
         print('peon: shutil Error -> %s' % e)
@@ -37,7 +37,7 @@ def copy_tree(src, dest):
 def copy_file(src, dest):
     try:
         shutil.copy2(src, dest)
-        print "peon: Copied {} ---> {}".format(src, dest)
+        print 'peon: Copied {} ---> {}'.format(src, dest)
     # eg. src and dest are the same file
     except shutil.Error as e:
         print('peon: shutil Error -> %s' % e)
@@ -55,7 +55,7 @@ def copy_file(src, dest):
 def remove_file(path):
     try:
         os.remove(path)
-        print "peon: Removed ---> " + path
+        print 'peon: Removed ---> ' + path
     # eg. source or destination doesn't exist
     except IOError as e:
         print('peon: IOError -> %s' % e.strerror)
@@ -75,8 +75,8 @@ def child_of_path(path, path2):
         return False
 
 
-def grounded_paths(cwd=".", *args):
-    grounded_error_msg = "peon: Error -> Path [{}] is grounded."
+def grounded_paths(cwd='.', *args):
+    grounded_error_msg = 'peon: Error -> Path [{}] is grounded.'
     if len(args) == 0:
         return None
     cwd_abs_dir = os.path.normpath(os.path.join(os.getcwd(), cwd))
@@ -135,7 +135,7 @@ def remove_dir(path):
     try:
         dir_path = safe_paths(path)
         shutil.rmtree(dir_path)
-        print "peon: Removed dir -> " + dir_path
+        print 'peon: Removed dir -> ' + dir_path
     # eg. src and dest are the same file
     except shutil.Error as e:
         print('peon: shutil Error -> %s' % e)

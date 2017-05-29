@@ -1,6 +1,9 @@
-#coding=utf-8
+# coding=utf-8
 from __future__ import absolute_import
-import os, json, requests
+
+import json
+import requests
+
 
 def getData(url, params=None, headers=None, is_json=True):
     request_headers = {'content-type': 'application/json'} if is_json else {}
@@ -12,15 +15,16 @@ def getData(url, params=None, headers=None, is_json=True):
                          headers=request_headers)
         r.raise_for_status()
     except requests.RequestException as e:
-        print "========== Requests =========="
+        print '========== Requests =========='
         print e
-        print "------------------------------"
+        print '------------------------------'
         if r is not None:
             print r.json()
-        print "=============================="
+        print '=============================='
         raise e
-    
+
     return r
+
 
 def uploadData(url, data=None, params=None, headers=None, is_json=True):
     r = None
@@ -34,21 +38,22 @@ def uploadData(url, data=None, params=None, headers=None, is_json=True):
                           headers=request_headers)
         r.raise_for_status()
     except requests.RequestException as e:
-        print "========== Requests =========="
+        print '========== Requests =========='
         print e
-        print "------------------------------"
+        print '------------------------------'
         if r is not None:
             print r.json()
-        print "=============================="
+        print '=============================='
         raise e
     return r
+
 
 def uploadFile(file_path, url, data=None, params=None, headers=None):
     try:
         files = {'file': open(file_path, 'rb')}
     except Exception as e:
         raise e
-    
+
     r = None
     try:
         r = requests.post(url,
@@ -58,12 +63,12 @@ def uploadFile(file_path, url, data=None, params=None, headers=None):
                           headers=headers)
         r.raise_for_status()
     except requests.RequestException as e:
-        print "========== Requests =========="
+        print '========== Requests =========='
         print e
-        print "------------------------------"
+        print '------------------------------'
         if r is not None:
             print r.json()
-        print "=============================="
+        print '=============================='
         raise e
-    
+
     return r
