@@ -75,22 +75,13 @@ def watch(opts):
     print 'Peon Wacther started'
     print '------------'
 
-    if peon_config:
-        src_dir = peon_config.get('src', DEFAULT_SRC_DIR)
-        dest_dir = peon_config.get('dest', DEFAULT_DEST_DIR)
-        skip_includes = peon_config.get('skip_includes', [])
-        clean_dest = peon_config.get('clean', True)
-        server = peon_config.get('server', False)
-        server_port = peon_config.get('port', '')
-        pyco_server = peon_config.get('pyco')
-    else:
-        src_dir = opts.src_dir or DEFAULT_SRC_DIR
-        dest_dir = opts.dest_dir or DEFAULT_DEST_DIR
-        skip_includes = opts.skip_includes or []
-        clean_dest = opts.clean
-        server = bool(opts.port)
-        server_port = opts.port
-        pyco_server = opts.pyco
+    src_dir = peon_config.get('src', DEFAULT_SRC_DIR)
+    dest_dir = peon_config.get('dest', DEFAULT_DEST_DIR)
+    skip_includes = peon_config.get('skip_includes', [])
+    clean_dest = peon_config.get('clean', True)
+    server = peon_config.get('server', True)
+    server_port = peon_config.get('port', '')
+    pyco_server = peon_config.get('pyco')
 
     if dest_dir == DEFAULT_SRC_DIR:
         dest_dir = DEFAULT_DEST_DIR

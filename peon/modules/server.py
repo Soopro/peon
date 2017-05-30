@@ -7,7 +7,7 @@ import SocketServer
 
 
 # handlers
-class PiServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+class PeonServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
     REWRITE_ROOT = 'index'
     REWRITE_EXT = 'html'
@@ -51,11 +51,15 @@ DEFAULT_PORT = 9527
 
 def server(opts):
     port = opts.port if isinstance(opts.port, int) else DEFAULT_PORT
+
+    if opts.dir:
+        os.chdir(opts.dir)
+
     simplehttp(port)
 
 
 def simplehttp(port):
-    httpd = SocketServer.TCPServer(('', port), PiServerHandler, False)
+    httpd = SocketServer.TCPServer(('', port), PeonServerHandler, False)
     httpd.allow_reuse_address = True
     httpd.server_bind()
     httpd.server_activate()
