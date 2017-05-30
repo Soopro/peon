@@ -1,6 +1,6 @@
 # Peon
 
-![Peon](/../assets/banner.png?raw=true)
+![Peon](/../assets/banner.jpg?raw=true)
 
 ### Let the front development back to the pastoral era ...
 
