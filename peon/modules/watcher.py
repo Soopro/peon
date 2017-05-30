@@ -86,12 +86,7 @@ def watch(opts):
     if dest_dir == DEFAULT_SRC_DIR:
         dest_dir = DEFAULT_DEST_DIR
 
-    render_opts = {
-        'src': src_dir,
-        'dest': dest_dir,
-        'skip_includes': skip_includes,
-    }
-    render = RenderHandler(render_opts)
+    render = RenderHandler(src_dir, dest_dir, skip_includes)
 
     if clean_dest:
         render.clean()

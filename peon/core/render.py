@@ -35,51 +35,36 @@ class RenderHandler(object):
         'scss': 'css',
     }
     render_types = ['coffee', 'less', 'sass', 'scss',
-                    'html', 'htm', 'xml', 'xhtml', 'shtml', 'tpl', 'tmpl']
+                    'html', 'htm', 'tpl', 'tmpl']
 
     incl_regex = re.compile(r'(\s*)(\{%\s*(?:include|import)\s+' +
                             r'["\']?\s*([\w\$\-\./\{\}\(\)]*)\s*["\']?' +
                             r'\s*[^%\}]*%\})',
                             re.MULTILINE | re.DOTALL | re.IGNORECASE)
 
-    def __init__(self, opts={}):
-
-        if not isinstance(opts, dict):
-            raise Exception('Render options is invalid. (opts)')
+    def __init__(self, src_dir='.', dest_dir='.', skips=None):
 
         self.root_dir = os.getcwd()
-        self.src_dir = opts.get('src', '.').strip(os.path.sep)
-        self.dest_dir = opts.get('dest', '.').strip(os.path.sep)
-
-        self.replacement = opts.get('replacement', self.replacement)
+        self.src_dir = src_dir.strip(os.path.sep)
+        self.dest_dir = dest_dir.strip(os.path.sep)
 
         if not os.path.isdir(self.dest_dir):
             os.makedirs(self.dest_dir)
 
-        skips = opts.get('skip_includes')
-        if isinstance(skips, (str, unicode)):
+        if isinstance(skips, basestring):
             skips = [skips]
         elif not isinstance(skips, list):
             skips = []
 
-        self.skip_includes = []
-        for incl in skips:
-            try:
-                incl = str(incl)
-            except Exception:
-                continue
-            self.skip_includes.append(incl.lower())
-
+        self.skip_includes = [str(incl).lower() for incl in (skips or [])]
         print 'Skiped include types: {}'.format(self.skip_includes)
 
-        include_marks = opts.get('include_marks', {})
-
-        self.incl_mark = include_marks.get('current', '_')
-        self.incl_parent_mark = include_marks.get('parent', '__')
-        self.incl_global_mark = include_marks.get('global', '_g_')
-        self.incl_root_mark = include_marks.get('root', '_r_')
-        self.incl_init_mark = include_marks.get('init', '__init__')
-        self.incl_init_filename = '{}.{}'.format(self.incl_init, 'htx')
+        self.incl_mark = '_'  # current
+        self.incl_parent_mark = '__'  # parent
+        self.incl_global_mark = '_g_'  # global
+        self.incl_root_mark = '_r_'  # root
+        self.incl_init_mark = '__init__'  # root and equals
+        self._incl_tmpl_file = 'tmpl'
         self.rendering_all = False
 
     def _raise_exception(self, err, src_path):
@@ -167,15 +152,17 @@ class RenderHandler(object):
         else:
             return os.path.normpath(os.path.join(base, path))
 
-    def _process_html_includes(self, src_path):
+    def _process_html_includes(self, src_path, ext):
         if os.path.isdir(src_path):
-            src_path = os.path.join(src_path, self.incl_init_filename)
+            _init_filename = '{}.{}'.format(self.incl_init_mark, ext)
+            src_path = os.path.join(src_path, _init_filename)
+
         content = self._read_file(src_path)
         regex_result = self.incl_regex.findall(content)
         for space, match, include_path in regex_result:
             sub_path = self._relative_path(os.path.dirname(src_path),
                                            include_path)
-            sub_content = self._process_html_includes(sub_path)
+            sub_content = self._process_html_includes(sub_path, ext)
             sub_splits = sub_content.splitlines()
             _line = u'{}'.format(space)
             # because the regex is match after spaces,
@@ -183,7 +170,7 @@ class RenderHandler(object):
             content = content.replace(match, _line.join(sub_splits))
         return content
 
-    def _html(self, src_path, dest_path):
+    def _html(self, src_path, dest_path, ext):
         try:
             if os.path.isfile(src_path):
                 if not os.path.exists(os.path.dirname(dest_path)):
@@ -193,7 +180,7 @@ class RenderHandler(object):
                 if self._in_skip_includes(ext.lower()):
                     html_content = self._read_file(src_path)
                 else:
-                    html_content = self._process_html_includes(src_path)
+                    html_content = self._process_html_includes(src_path, ext)
                 self._write_file(dest_path, html_content)
         except Exception as e:
             self._raise_exception(RenderingError(e, 'html'), src_path)
@@ -211,8 +198,7 @@ class RenderHandler(object):
         if path.startswith(self.src_dir):
             path = path.replace(self.src_dir, '', 1).lstrip(os.path.sep)
         filepath, ext = os.path.splitext(path)
-        ext = ext[1:].lower()
-        comp_ext = self.replacement.get(ext, ext)
+        comp_ext = ext[1:].lower()
         compile_path = '{}{}{}'.format(self.dest_dir, os.path.sep, filepath)
         if comp_ext:
             compile_path = '{}.{}'.format(compile_path, comp_ext)
@@ -261,9 +247,9 @@ class RenderHandler(object):
     def is_include_file(self, filename, ext):
         if self._in_skip_includes(ext.lower()):
             return False
-        is_incl_file = filename.startswith(self.incl_mark) or \
-            filename.endswith(self.incl_mark)
-        return is_incl_file
+        if self._incl_tmpl_file == ext:
+            return True
+        return filename.startswith(self.incl_mark)
 
     def clean(self):
         if self.src_dir != self.dest_dir:
@@ -325,6 +311,7 @@ class RenderHandler(object):
         if self.is_include_file(filename, ext):
             if ext not in self.render_types:
                 return
+
             if filename.startswith(self.incl_root_mark) or \
                filename == self.incl_init_mark:
                 path = None
@@ -340,6 +327,13 @@ class RenderHandler(object):
                 recursive = False
 
             files = self.find_files(path, ext, recursive)
+
+            if self._incl_tmpl_file == ext:
+                files += [
+                    f for f in self.find_files(self.src_dir, recursive=False)
+                    if not os.path.isdir(f)
+                ]
+
             for f in files:
                 self.render(f)
             return
@@ -356,7 +350,7 @@ class RenderHandler(object):
                 self._sass(src_path, dest_path)
 
             elif ext in ('html', 'tpl'):
-                self._html(src_path, dest_path)
+                self._html(src_path, dest_path, ext)
 
             elif self.src_dir != self.dest_dir:
                 self._copy(src_path, dest_path)

@@ -162,12 +162,10 @@ def rev(cfg):
 
 
 def render(cfg):
-    render_opts = {
-        'src': cfg.get('cwd', DEFAULT_SRC_DIR),
-        'dest': cfg.get('dest', DEFAULT_BUILD_DIR),
-        'skip_includes': cfg.get('skip_includes', []),
-    }
-    render = RenderHandler(render_opts)
+    src_dir = cfg.get('cwd', DEFAULT_SRC_DIR)
+    dest_dir = cfg.get('dest', DEFAULT_BUILD_DIR)
+    skip_includes = cfg.get('skip_includes', [])
+    render = RenderHandler(src_dir, dest_dir, skip_includes)
     if cfg.get('clean') is True:
         render.clean()
     render.render_all()
