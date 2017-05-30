@@ -11,7 +11,7 @@
 
 ## Concept 概念
 
-The project is call Peon. Obviously the name idea is form a famous cat. Peon is for build, watching and packing web base front-end project while in develop.
+Peon is for build, watching and packing web base front-end project while in develop.
 
 這個項目叫做苦工... 很顯然，這個名字來自著名游戏裡面那种农民。苦工適用於網頁前端項目開發，它能夠用來構建、監控和打包前端項目。
 
