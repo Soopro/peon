@@ -28,6 +28,14 @@ def command_options():
                         const=9527,
                         help='Start dev server at port.')
 
+    parser.add_argument('--dir',
+                        dest='dir',
+                        action='store',
+                        nargs='?',
+                        type=str,
+                        const=None,
+                        help='Define dev server operation dir.')
+
     # Watcher
     parser.add_argument('-w', '--watcher',
                         dest='watcher',
