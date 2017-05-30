@@ -1,6 +1,6 @@
-# Puss In Boots
+# Peon
 
-![Pussy](/../assets/banner.png?raw=true)
+![Peon](/../assets/banner.png?raw=true)
 
 ### Let the front development back to the pastoral era ...
 
@@ -11,9 +11,9 @@
 
 ## Concept 概念
 
-The project is call Puss in boots...(PIB in short). Obviously the name idea is form a famous cat. PIB is for build, watching and packing web base front-end project while in develop.
+The project is call Peon. Obviously the name idea is form a famous cat. Peon is for build, watching and packing web base front-end project while in develop.
 
-這個項目叫做靴貓... 很顯然，這個名字來自電影裡面那隻拿劍的貓。靴貓適用於網頁前端項目開發，它能夠用來構建、監控和打包前端項目。
+這個項目叫做苦工... 很顯然，這個名字來自著名游戏裡面那种农民。苦工適用於網頁前端項目開發，它能夠用來構建、監控和打包前端項目。
 
 Features for now:
 
@@ -40,15 +40,17 @@ Planning to do:
 
 ============================
 
-## Why PIB? 為什麼用靴貓？
+## Why Peon?
 
-Becuase Nodejs might install hundreds related package before write any code, PIB is much more easier cheap and effective ...
+Basically Nodejs might install hundreds related package before write any code, Peon is much more easier cheap and effective ...
 
 Some basic js package will call by subprocess, such as coffee-script less and uglify-js.
 
-BTW, PIB may not suppport ***Windows***, It's untested.
+BTW, Peon may not suppport ***Windows***, It's untested, also not supported by python 3.0.
 
-如果你不想開發一個前端項目就要拽一百多個依賴庫，不想一個源的版本跟錯誤導致啟動失敗，不想動不動冒出來一個自稱是“未來”的項目就要把項目重寫，不想像個二貨那樣要ES7轉ES6轉ES5，那麼希望這個項目能夠幫你的前端開發工作專注在交互和呈現上。
+## 為什麼用苦工？
+
+如果你不想開發一個前端項目就要拽一百多個依賴庫，不想因為一個源版本跟錯誤導致啟動失敗，不想動不動就要面對一個冒出來將會是“未來”的項目，那麼希望這個項目能夠幫你的前端開發工作專注在交互和呈現上。
 
 
 ## Installation
@@ -62,10 +64,10 @@ You can run ```sh setup.sh -p``` to install all required packages once for all.
 without ```-p``` param, packages will skiped.
 
 ## Usage
-You have to place a 'puss.json' intro the project root folder first.
-* puss.json: Config puss's tasks, see the example.
+You have to place a 'peon.json' intro the project root folder first.
+* peon.json: Config peon's tasks, see the example.
 
-`puss [-s] [-c] [-w] [-t] [-z]`
+`peon [-s] [-c] [-w] [-t] [-z]`
 
 =======================
 ### -c: Construct
@@ -100,22 +102,14 @@ cwd: Root dir of file path.
 dest: Dest for copy files.
 
 
-##### task: Install
-Run bower install/update or npm install/update.
-It's take long time, and the remote source may block by GFW.
-I'ts better have people do it maunally.
-
-```
-  "install":["bower","npm"]
-```
-
 ##### task: Copy
 
 Copy files from src to dest.
 
 ```
-  "copy": {
-    "libs":{
+  "copy": [
+    {
+      "name": "libs"
       "flatten": true,
       "src":[
         "lodash/dist/lodash.js",
@@ -126,7 +120,7 @@ Copy files from src to dest.
       "cwd":"bower_components/",
       "dest":"src/libs"
     }
-  }
+  ]
 ```
 copy: The key of task options.
 
@@ -173,10 +167,10 @@ Replace string with pattern
   "replace": {
     "src": "*.min.*",
     "cwd": "dist",
-    "replacements": [
+    "replacing": [
       {
-        "pattern": "/styles/icons/svg",
-        "replace": "svg"
+        "from": "/styles/icons/svg",
+        "to": "svg"
       }
     ]
   }
@@ -211,8 +205,8 @@ the {% include ... %} will not effect.
 Compress files, minify css js html, and process html, and able to concat angular templates.
 
 ```
-  "compress": {
-    "inline_angular_templates":{
+  "compress": [
+    {
       "type": "inline_angular_templates",
       "src": [
         "blueprints/**/*.html",
@@ -225,25 +219,25 @@ Compress files, minify css js html, and process html, and able to concat angular
       "allow_includes": false,
       "output":"index.html"
     },
-    "process_html":{
+    {
       "type": "process_html",
       "minify": true,
       "cwd": "dist",
       "src": "*.html"
     },
-    "html":{
+    {
       "type": "html",
       "cwd": "dist",
       "src": "*.html"
     }
-  }
+  ]
 
 ```
 
 Compress task include multiple groups. The group's key can be custom to any latin name.
 
 ```
-  "<group>":{
+  {
     "type": "process_html",
     "cwd": "dist",
     "src": "*.html"
@@ -295,8 +289,7 @@ Use it after grunt relese, because grunt litte bit hard to convert md5 filename.
   "rev":{
     "src":"/*.html",
     "cwd":"release/",
-    "find":"?md5=null",
-    "pattern":"null"
+    "find":"?md5=<rev>"
   }
 ```
 rev: The key of task options.
@@ -305,11 +298,7 @@ src: Source file path.
 
 cwd: Root dir of file path.
 
-pattern: Replacement pattern, peon will replace those string intro md5 code.
-
-[optional]
-
-find:  Specify the exact scope of a pattern. Peon will find those string and  replace pattern with that string.
+find: Peon will find those string and replace `<rev>` with that string.
 
 
 
@@ -326,7 +315,7 @@ You can also chose upload to a restapi.
 ***cli:*** `--exclude` for exclude files pattern.
 
 ```
-  "zip":{
+  "zip": {
     "cwd":null,
     "file":null,
     "include_hidden":false,
@@ -351,7 +340,7 @@ You can also chose upload to a restapi.
 make sure there is `zip` task before, otherwise will get a error.
 
 ```
-  "upload":{
+  "upload": {
     "cwd":null,
     "file":null,
     "headers":{
@@ -375,40 +364,6 @@ make sure there is `zip` task before, otherwise will get a error.
 
 `params` request params
 
-
-## -b: Backup
-Backup file and db.
-
-```
-  "backup":{
-    "redis":{
-      "src":"/Users/redy/dump.rdb",
-      "dbname":"dev",
-      "dbhost":null,
-      "port":null,
-      "user":null,
-      "pwd":null,
-      "dest":null
-    },
-    "mongodb":{
-      "dbname":"dev",
-      "dbhost":null,
-      "port":null,
-      "user":null,
-      "pwd":null,
-      "src":null,
-      "dest":null
-    },
-    "files":{
-      "src":[
-        "/Users/redy/deployment_data/",
-        "/Users/redy/etc/nginx/sites-available/",
-        "/Users/redy/etc/supervisor/conf.d/"
-      ]
-    }
-  }
-
-```
 
 ## -w: Watcher
 ```
@@ -460,156 +415,3 @@ files start or end with undescore '_' is changed will compile all files but it s
 
 `peon` -s --harp, start server with harp directly (no recommand, but you can do that if you need).
 Please make sure you have node npm harp kind stuff ...
-
-
-
-## -t : Transport
-
-`peon` -t [upload] or `peon` -t [download] or `peon` -t [media]
-
-Trassport pyco content file and site data to supmice system
-
-'dest' or 'cwd' is define the content folder for upload or download.
-
-
-```
-  "transport":{
-    "upload":{
-      "cwd":".",
-      "replace": [
-        {
-          "pattern":"[%uploads%]",
-          "replacement":"http://localstatic:5050/apps/redy/123123/uploads/"
-        }
-      ],
-      "headers":{
-        "SecretKey":"1d02aa814dc64db3a6494624ca35a03a"
-      },
-      "url":"http://localhost:5000/app/123123/develop/sitedata"
-    },
-    "download":{
-      "dest":".",
-      "replace": [
-        {
-          "pattern":"http://localstatic:5050/apps/redy/123123/uploads/",
-          "replacement":"[%uploads%]"
-        }
-      ],
-      "headers":{
-        "SecretKey":"1d02aa814dc64db3a6494624ca35a03a"
-      },
-      "url":"http://localhost:5000/app/123123/develop/sitedata"
-    }
-    "media": {
-      "dest":"test/uploads",
-      "suffix": null,
-      "headers":{
-        "SecretKey":"1d02aa814dc64db3a6494624ca35a03a"
-      },
-      "url":"http://api.sup.farm/app/website/develop/media"
-    }
-  }
-```
-
-`replace` for replace content and meta markers. etc., [%uploads%] is the shortcode for **pyco** uploads folder.
-
-`url` upload api
-
-`cwd` the content folder you want upload, for upload only.
-
-`dest` the content folder you want download to, for download only.
-
-`headers` request headers
-
-`suffix` is for **media** only, sometime you want add suffix after the media src to get specific type. etc., 'original' suffix will get the original media.
-'thumbnail' will get thumbnail.
-
-
-*** Content sample ***
-```
-  content/
-    content_type/
-      somepage.md
-      ...
-    site.json
-    index.md
-    error_404.md
-    somepage.md
-    ...
-
-```
-
-*** Site.json smaple ***
-```
-{
-  "meta": {
-    "author": "redy",
-    "copyright": "2015 © Soopro tech Co., Ltd.",
-    "description": "...",
-    "license": "#license",
-    "locale": "en_US",
-    "logo": null,
-    "register": {
-      "placeholder": "Email address for register",
-      "text": "Free Register",
-      "url": ""
-    },
-    "title": "Soopro",
-    "translates": {
-      "en_US": {
-        "name": "English",
-        "url": "#"
-      },
-      "zh_CN": {
-        "name": "汉语",
-        "url": "#"
-      }
-    }
-  },
-  "content_types": {
-    "_feature": "Features",
-    "_gallery": "Gallery",
-    "page": "Pages"
-  },
-  "menus": {
-    "primary": [
-      {
-        "alias": "home",
-        "meta": {},
-        "nodes": [],
-        "title": "Back to home",
-        "url": "/"
-      },
-      {
-        "alias": "video",
-        "meta": {},
-        "nodes": [],
-        "title": "Watch Video",
-        "url": "/video"
-      }
-    ]
-  },
-  "terms": {
-    "category": [
-      {
-        "alias": "inneral",
-        "meta": {
-          "parent": "",
-          "pic": ""
-        },
-        "priority": 0,
-        "title": "INNERAL"
-      },
-      {
-        "alias": "forign",
-        "meta": {
-          "parent": "",
-          "pic": ""
-        },
-        "priority": 0,
-        "title": "FORGIN"
-      }
-    ]
-  }
-}
-```

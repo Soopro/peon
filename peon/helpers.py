@@ -19,6 +19,6 @@ def load_config(command):
         raise e
 
     print '--------------------------------------------'
-    print 'puss: Ready to work.'
+    print 'Peon: Ready to work.'
     print '--------------------------------------------'
     return config

@@ -60,8 +60,7 @@ def command_options():
 def run():
     opts = command_options()
     if opts.version:
-        print 'Project: Puss in boots'
-        print 'Version:', __version__
+        print 'Peon:', __version__
     elif opts.watcher:
         watch(opts)
     elif opts.construct:
