@@ -1,26 +1,29 @@
-#coding=utf-8
+# coding=utf-8
 from __future__ import absolute_import
 
-import os, time, shutil, re, sys
+import os
+import shutil
+import re
+import sys
 import subprocess
 import sass
 from datetime import datetime
 
 from ..utlis import BeautifyPrint as bpcolor
 
+
 # exception
 class RenderingError(Exception):
     status_msg = 'RenderingError'
     affix_msg = None
 
-    def __init__(self, error = None, message = None):
+    def __init__(self, error=None, message=None):
         self.error = error
         self.affix_msg = message
 
     def __str__(self):
-        return '{}:{} => \n{}'.format(self.status_msg,
-                              bpcolor.FAIL+self.affix_msg+bpcolor.ENDC,
-                              self.error)
+        colored = bpcolor.FAIL + self.affix_msg + bpcolor.ENDC
+        return '{}:{} => \n{}'.format(self.status_msg, colored, self.error)
 
 
 # handlers
@@ -32,7 +35,7 @@ class RenderHandler(object):
         'scss': 'css',
     }
     render_types = ['coffee', 'less', 'sass', 'scss',
-                    'html', 'htm', 'xml', 'xhtml', 'shtml', 'tpl']
+                    'html', 'htm', 'xml', 'xhtml', 'shtml', 'tpl', 'tmpl']
 
     incl_regex = re.compile(r'(\s*)(\{%\s*(?:include|import)\s+' +
                             r'["\']?\s*([\w\$\-\./\{\}\(\)]*)\s*["\']?' +
@@ -71,10 +74,12 @@ class RenderHandler(object):
 
         include_marks = opts.get('include_marks', {})
 
-        self.incl_mark = include_marks.get('base', '_')
+        self.incl_mark = include_marks.get('current', '_')
         self.incl_parent_mark = include_marks.get('parent', '__')
         self.incl_global_mark = include_marks.get('global', '_g_')
         self.incl_root_mark = include_marks.get('root', '_r_')
+        self.incl_init_mark = include_marks.get('init', '__init__')
+        self.incl_init_filename = '{}.{}'.format(self.incl_init, 'htx')
         self.rendering_all = False
 
     def _raise_exception(self, err, src_path):
@@ -163,6 +168,8 @@ class RenderHandler(object):
             return os.path.normpath(os.path.join(base, path))
 
     def _process_html_includes(self, src_path):
+        if os.path.isdir(src_path):
+            src_path = os.path.join(src_path, self.incl_init_filename)
         content = self._read_file(src_path)
         regex_result = self.incl_regex.findall(content)
         for space, match, include_path in regex_result:
@@ -317,10 +324,9 @@ class RenderHandler(object):
 
         if self.is_include_file(filename, ext):
             if ext not in self.render_types:
-                # this cheat for some file not render to dest,
-                # not really a includes
                 return
-            if filename.startswith(self.incl_root_mark):
+            if filename.startswith(self.incl_root_mark) or \
+               filename == self.incl_init_mark:
                 path = None
                 recursive = False
             elif filename.startswith(self.incl_global_mark):
