@@ -64,7 +64,7 @@ class RenderHandler(object):
         self.incl_global_mark = '_g_'  # global
         self.incl_root_mark = '_r_'  # root
         self.incl_init_mark = '__init__'  # root and equals
-        self._incl_tmpl_file = 'tmpl'
+        self.incl_tmpl_file = 'tmpl'
         self.rendering_all = False
 
     def _raise_exception(self, err, src_path):
@@ -198,7 +198,8 @@ class RenderHandler(object):
         if path.startswith(self.src_dir):
             path = path.replace(self.src_dir, '', 1).lstrip(os.path.sep)
         filepath, ext = os.path.splitext(path)
-        comp_ext = ext[1:].lower()
+        ext = ext[1:].lower()
+        comp_ext = self.replacement.get(ext, ext)
         compile_path = '{}{}{}'.format(self.dest_dir, os.path.sep, filepath)
         if comp_ext:
             compile_path = '{}.{}'.format(compile_path, comp_ext)
@@ -247,7 +248,7 @@ class RenderHandler(object):
     def is_include_file(self, filename, ext):
         if self._in_skip_includes(ext.lower()):
             return False
-        if self._incl_tmpl_file == ext:
+        if self.incl_tmpl_file == ext:
             return True
         return filename.startswith(self.incl_mark)
 
@@ -328,7 +329,7 @@ class RenderHandler(object):
 
             files = self.find_files(path, ext, recursive)
 
-            if self._incl_tmpl_file == ext:
+            if self.incl_tmpl_file == ext:
                 files += [
                     f for f in self.find_files(self.src_dir, recursive=False)
                     if not os.path.isdir(f)
