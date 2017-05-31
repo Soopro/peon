@@ -272,7 +272,7 @@ def compress(rules):
 # -------------
 # main
 # -------------
-MODES = ('release', 'init', 'build')
+alias = ('release', 'init', 'build')
 COMMANDS = {
     'clean': clean,
     'copy': copy,
@@ -286,12 +286,12 @@ COMMANDS = {
 
 def construct(opts):
     """
-    Construct actions: `release` ad default, `init`, `build`
+    Construct actions: `construct` as default, `init`, `build`, `release`
     """
-    if opts.construct not in MODES:
-        opts.construct = None
+    if opts.construct not in alias:
+        opts.construct = 'construct'
 
-    cmd_cfg = load_config(opts.construct or 'release')
+    cmd_cfg = load_config(opts.construct)
     if not isinstance(cmd_cfg, list):
         cmd_cfg = [cmd_cfg]
 

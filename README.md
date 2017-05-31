@@ -83,7 +83,7 @@ Allow action params
 * 'build'
 * 'release'
 
-Default is ```release``` (because this action is most often.)
+Default is `construct`
 
 action is not related with task, you can run any task in any type aciton.
 As I said action is only help you define what you want to do.
