@@ -154,19 +154,16 @@ class RenderHandler(object):
         else:
             return os.path.normpath(os.path.join(base, path))
 
-    def _process_html_includes(self, src_path, ext):
+    def _process_html_includes(self, src_path):
         if os.path.isdir(src_path):
-            init_filename = '{}.{}'.format(self.incl_init_mark, ext)
-            init_path = os.path.join(src_path, init_filename)
-            if os.path.isfile(init_path):
-                src_path = init_path
+            src_path = os.path.join(src_path, self.incl_init_mark)
 
         content = self._read_file(src_path)
         regex_result = self.incl_regex.findall(content)
         for space, match, include_path in regex_result:
             sub_path = self._relative_path(os.path.dirname(src_path),
                                            include_path)
-            sub_content = self._process_html_includes(sub_path, ext)
+            sub_content = self._process_html_includes(sub_path)
             # sub_splits = sub_content.splitlines()
             # _lines = u'{}'.format(space).join(sub_splits)
             """
@@ -184,7 +181,8 @@ class RenderHandler(object):
             tmpl_series = [u'<!-- Begin Templates -->']
             for path in self.find_files(self.src_dir, file_ext=tmpl_ext):
                 if os.path.isfile(path) and path != self_path:
-                    tmpl_series.append(self._read_file(path))
+                    _content = self._process_html_includes(path)
+                    tmpl_series.append(_content)
             tmpl_series.append(u'<!-- End Templates -->')
             content = content.replace(match, '\n'.join(tmpl_series))
         return content
@@ -199,7 +197,7 @@ class RenderHandler(object):
                 if self._in_skip_includes(ext.lower()):
                     _content = self._read_file(src_path)
                 else:
-                    _content = self._process_html_includes(src_path, ext)
+                    _content = self._process_html_includes(src_path)
                 html_content = self._aggregate_templates(_content, src_path)
                 self._write_file(dest_path, html_content)
         except Exception as e:
@@ -379,7 +377,7 @@ class RenderHandler(object):
             elif ext in ('sass', 'scss'):
                 self._sass(src_path, dest_path)
 
-            elif ext in ('html', 'tpl', 'tmpl'):
+            elif ext in ('html', 'tpl'):
                 self._html(src_path, dest_path, ext)
 
             elif self.src_dir != self.dest_dir:
