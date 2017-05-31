@@ -41,6 +41,10 @@ class RenderHandler(object):
                             r'["\']?\s*([\w\$\-\./\{\}\(\)]*)\s*["\']?' +
                             r'\s*[^%\}]*%\})',
                             re.MULTILINE | re.DOTALL | re.IGNORECASE)
+    agg_regex = re.compile(r'(\s*)(\{%\s*(?:aggregate)\s+' +
+                           r'["\']?\s*([\w\$\-\./\{\}\(\)]*)\s*["\']?' +
+                           r'\s*[^%\}]*%\})',
+                           re.MULTILINE | re.DOTALL | re.IGNORECASE)
 
     def __init__(self, src_dir='.', dest_dir='.', skips=None):
 
@@ -64,7 +68,7 @@ class RenderHandler(object):
         self.incl_global_mark = '_g_'  # global
         self.incl_root_mark = '_r_'  # root
         self.incl_init_mark = '__init__'  # root and equals
-        self.incl_tmpl_file = 'tmpl'
+        self.tmpl_file_type = 'tmpl'
         self.rendering_all = False
 
     def _raise_exception(self, err, src_path):
@@ -101,8 +105,8 @@ class RenderHandler(object):
             os.rename(src_path, dest_path)
         return src_path
 
-    def _in_skip_includes(self, file_type):
-        return any(x in self.skip_includes for x in ['*', file_type])
+    def _in_skip_includes(self, file_ext):
+        return any(x in self.skip_includes for x in ['*', file_ext])
 
     def _coffee_all(self):
         try:
@@ -154,8 +158,10 @@ class RenderHandler(object):
 
     def _process_html_includes(self, src_path, ext):
         if os.path.isdir(src_path):
-            _init_filename = '{}.{}'.format(self.incl_init_mark, ext)
-            src_path = os.path.join(src_path, _init_filename)
+            init_filename = '{}.{}'.format(self.incl_init_mark, ext)
+            init_path = os.path.join(src_path, init_filename)
+            if os.path.isfile(init_path):
+                src_path = init_path
 
         content = self._read_file(src_path)
         regex_result = self.incl_regex.findall(content)
@@ -163,11 +169,25 @@ class RenderHandler(object):
             sub_path = self._relative_path(os.path.dirname(src_path),
                                            include_path)
             sub_content = self._process_html_includes(sub_path, ext)
-            sub_splits = sub_content.splitlines()
-            _line = u'{}'.format(space)
-            # because the regex is match after spaces,
-            # so only add spaces for other lines.
-            content = content.replace(match, _line.join(sub_splits))
+            # sub_splits = sub_content.splitlines()
+            # _lines = u'{}'.format(space).join(sub_splits)
+            """
+            splitlines then join will cause multiple empty lines.
+            also file shall not too larget.
+            that's why it's ok not process by lines.
+            """
+            content = content.replace(match, sub_content)
+        return content
+
+    def _aggregate_templates(self, content, self_path):
+        regex_result = self.agg_regex.findall(content)
+        for space, match, agg_ext in regex_result:
+            tmpl_series = [u'<!-- Begin Templates -->']
+            for path in self.find_files(self.src_dir, file_ext=agg_ext):
+                if os.path.isfile(path) and path != self_path:
+                    tmpl_series.append(self._read_file(path))
+            tmpl_series.append(u'<!-- End Templates -->')
+            content = content.replace(match, '\n'.join(tmpl_series))
         return content
 
     def _html(self, src_path, dest_path, ext):
@@ -180,7 +200,9 @@ class RenderHandler(object):
                 if self._in_skip_includes(ext.lower()):
                     html_content = self._read_file(src_path)
                 else:
-                    html_content = self._process_html_includes(src_path, ext)
+                    _content = self._process_html_includes(src_path, ext)
+                    html_content = self._aggregate_templates(_content,
+                                                             src_path)
                 self._write_file(dest_path, html_content)
         except Exception as e:
             self._raise_exception(RenderingError(e, 'html'), src_path)
@@ -215,7 +237,7 @@ class RenderHandler(object):
             filepath_split.insert(0, '')
         return filepath_split[0], filepath_split[1], ext[1:].lower()
 
-    def find_files(self, path='.', file_type=None, recursive=True):
+    def find_files(self, path='.', file_ext=None, recursive=True):
         results = []
 
         def add_files(files, dirpath):
@@ -226,7 +248,7 @@ class RenderHandler(object):
                    self.is_include_file(filename, ext):
                     continue
 
-                if ext == file_type or not file_type:
+                if ext == file_ext or not file_ext:
                     results.append(os.path.join(dirpath, f))
 
         def add_dirs(dirs, dirpath):
@@ -242,14 +264,14 @@ class RenderHandler(object):
             for dirpath, dirs, files in os.walk(path):
                 add_dirs(dirs, dirpath)
                 add_files(files, dirpath)
-
         return results
+
+    def is_tmpl_file(self, filename, ext):
+        return self.tmpl_file_type == ext
 
     def is_include_file(self, filename, ext):
         if self._in_skip_includes(ext.lower()):
             return False
-        if self.incl_tmpl_file == ext:
-            return True
         return filename.startswith(self.incl_mark)
 
     def clean(self):
@@ -309,7 +331,14 @@ class RenderHandler(object):
         if not replace and os.path.isfile(dest_path):
             return
 
-        if self.is_include_file(filename, ext):
+        if self.is_tmpl_file(filename, ext):
+            # tmpl file on render root files
+            files = [f for f in self.find_files(self.src_dir, recursive=False)
+                     if not os.path.isdir(f)]
+            for f in files:
+                self.render(f)
+
+        elif self.is_include_file(filename, ext):
             if ext not in self.render_types:
                 return
 
@@ -328,13 +357,6 @@ class RenderHandler(object):
                 recursive = False
 
             files = self.find_files(path, ext, recursive)
-
-            if self.incl_tmpl_file == ext:
-                files += [
-                    f for f in self.find_files(self.src_dir, recursive=False)
-                    if not os.path.isdir(f)
-                ]
-
             for f in files:
                 self.render(f)
             return
