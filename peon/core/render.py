@@ -37,6 +37,13 @@ class RenderHandler(object):
     render_types = ['coffee', 'less', 'sass', 'scss',
                     'html', 'htm', 'tpl', 'tmpl']
 
+    incl_mark = '_'  # current
+    incl_parent_mark = '__'  # parent
+    incl_global_mark = '_g_'  # global
+    incl_root_mark = '_r_'  # root
+    incl_init_mark = '__init__'  # root and equals
+    tmpl_file_type = 'tmpl'
+
     incl_regex = re.compile(r'(\s*)(\{%\s*(?:include|import)\s+' +
                             r'["\']?\s*([\w\$\-\./\{\}\(\)]*)\s*["\']?' +
                             r'\s*[^%\}]*%\})',
@@ -61,12 +68,6 @@ class RenderHandler(object):
         self.skip_includes = [str(incl).lower() for incl in (skips or [])]
         print 'Skiped include types: {}'.format(self.skip_includes)
 
-        self.incl_mark = '_'  # current
-        self.incl_parent_mark = '__'  # parent
-        self.incl_global_mark = '_g_'  # global
-        self.incl_root_mark = '_r_'  # root
-        self.incl_init_mark = '__init__'  # root and equals
-        self.tmpl_file_type = 'tmpl'
         self.rendering_all = False
 
     def _raise_exception(self, err, src_path):
@@ -333,7 +334,10 @@ class RenderHandler(object):
             return
 
         if self.is_include_file(filename, ext):
-            if ext not in self.render_types:
+            if ext and ext not in self.render_types:
+                # no ext file will render every file matched path,
+                # such as `__init__` will render files form root dir.
+                # `_g_` will render all file from root dir and every sub dir.
                 return
 
             if filename.startswith(self.incl_root_mark) or \
