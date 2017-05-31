@@ -402,6 +402,14 @@ files start or end with undescore '_' is changed will compile all files but it s
 
 `_r_` Root files, Render all files from root folder.
 
+`__init__` Init files, Render all files from root folder.
+
+#### Tmpl file ext
+
+`.tmpl` Render all files from root folder while changed.
+
+
+
 
 ## -s: Server
 
