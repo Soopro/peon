@@ -198,11 +198,10 @@ class RenderHandler(object):
 
                 _, _, ext = self.split_file_path(src_path)
                 if self._in_skip_includes(ext.lower()):
-                    html_content = self._read_file(src_path)
+                    _content = self._read_file(src_path)
                 else:
                     _content = self._process_html_includes(src_path, ext)
-                    html_content = self._aggregate_templates(_content,
-                                                             src_path)
+                html_content = self._aggregate_templates(_content, src_path)
                 self._write_file(dest_path, html_content)
         except Exception as e:
             self._raise_exception(RenderingError(e, 'html'), src_path)
@@ -240,6 +239,11 @@ class RenderHandler(object):
     def find_files(self, path='.', file_ext=None, recursive=True):
         results = []
 
+        if isinstance(file_ext, basestring):
+            file_ext = (file_ext)
+        elif isinstance(file_ext, list):
+            file_ext = set(file_ext)
+
         def add_files(files, dirpath):
             for f in files:
                 _, filename, ext = self.split_file_path(f)
@@ -248,7 +252,7 @@ class RenderHandler(object):
                    self.is_include_file(filename, ext):
                     continue
 
-                if ext == file_ext or not file_ext:
+                if not file_ext or ext in file_ext:
                     results.append(os.path.join(dirpath, f))
 
         def add_dirs(dirs, dirpath):
@@ -331,14 +335,7 @@ class RenderHandler(object):
         if not replace and os.path.isfile(dest_path):
             return
 
-        if self.is_tmpl_file(filename, ext):
-            # tmpl file on render root files
-            files = [f for f in self.find_files(self.src_dir, recursive=False)
-                     if not os.path.isdir(f)]
-            for f in files:
-                self.render(f)
-
-        elif self.is_include_file(filename, ext):
+        if self.is_include_file(filename, ext):
             if ext not in self.render_types:
                 return
 
@@ -357,6 +354,17 @@ class RenderHandler(object):
                 recursive = False
 
             files = self.find_files(path, ext, recursive)
+
+            for f in files:
+                self.render(f)
+            return
+
+        elif self.is_tmpl_file(filename, ext):
+            # when tmpl file chagned render all root files once
+            root_files = self.find_files(self.src_dir,
+                                         ('html', 'htm', 'tpl'),
+                                         recursive=False)
+            files = [rf for rf in root_files if not os.path.isdir(rf)]
             for f in files:
                 self.render(f)
             return
@@ -372,7 +380,7 @@ class RenderHandler(object):
             elif ext in ('sass', 'scss'):
                 self._sass(src_path, dest_path)
 
-            elif ext in ('html', 'tpl'):
+            elif ext in ('html', 'tpl', 'tmpl'):
                 self._html(src_path, dest_path, ext)
 
             elif self.src_dir != self.dest_dir:
@@ -398,7 +406,8 @@ class RenderHandler(object):
         dest_moved_path, _ = self.find_dest_path(move_to_path)
         _, moved_filename, moved_ext = self.split_file_path(move_to_path)
 
-        if self.is_include_file(moved_filename, moved_ext):
+        if self.is_include_file(moved_filename, moved_ext) or \
+           self.is_tmpl_file(moved_filename, moved_ext):
             try:
                 if os.path.isfile(dest_path):
                     os.remove(dest_path)
