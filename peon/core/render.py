@@ -283,47 +283,47 @@ class RenderHandler(object):
             shutil.rmtree(self.dest_dir.lstrip(os.path.sep))
 
     def render_all(self):
-        self._print_message('Rendering all: {}/**/*'.format(self.src_dir,
-                                                            self.dest_dir))
+        print '\n<--- Rendering: {}/**/* --->\n'.format(self.src_dir)
+
         self.rendering_all = True
         has_coffee = False
         has_sass = False
         # lessc cli not support output to folder
 
         all_files = self.find_files(self.src_dir)
-        excludes = []
+        excludes = set(self.find_files(self.src_dir, self.tmpl_file_type))
         for f in all_files:
             _, _, ext = self.split_file_path(f)
 
             if ext == 'coffee':
                 has_coffee = True
-                excludes.append(f)
+                excludes.add(f)
             elif ext in ['sass', 'scss']:
                 has_sass = True
-                excludes.append(f)
+                excludes.add(f)
 
         if has_coffee:
             self._coffee_all()
         if has_sass:
             self._sass_all()
 
-        _files = [f for f in all_files if f not in excludes]
-        for f in _files:
+        for f in [f for f in all_files if f not in excludes]:
             self.render(f)
 
         self.rendering_all = False
 
+        # Seems there no resone clean after rendering,
+        # the clean task already take care of it.
         # clean up invalid files in dest folder
-        all_dest_path = [self.find_dest_path(f, False) for f in all_files]
+        # all_dest_path = [self.find_dest_path(f, False) for f in all_files]
 
-        for dirpath, dirs, files in os.walk(self.dest_dir):
-            for f in files:
-                f_path = os.path.join(dirpath, f)
-                if f_path not in all_dest_path:
-                    os.remove(f_path)
+        # for dirpath, dirs, files in os.walk(self.dest_dir):
+        #     for f in files:
+        #         f_path = os.path.join(dirpath, f)
+        #         if f_path not in all_dest_path:
+        #             os.remove(f_path)
 
-        self._print_message('Rendered all: {}/**/*'.format(self.src_dir,
-                                                           self.dest_dir))
+        print '\n<--- Rendered to: {}/**/* --->\n'.format(self.dest_dir)
 
     def render(self, src_path, replace=True):
         if os.path.isdir(src_path):
