@@ -41,10 +41,8 @@ class RenderHandler(object):
                             r'["\']?\s*([\w\$\-\./\{\}\(\)]*)\s*["\']?' +
                             r'\s*[^%\}]*%\})',
                             re.MULTILINE | re.DOTALL | re.IGNORECASE)
-    agg_regex = re.compile(r'(\s*)(\{%\s*(?:aggregate)\s+' +
-                           r'["\']?\s*([\w\$\-\./\{\}\(\)]*)\s*["\']?' +
-                           r'\s*[^%\}]*%\})',
-                           re.MULTILINE | re.DOTALL | re.IGNORECASE)
+    tmpl_regex = re.compile(r'(\s*)(\{%\s*templates\s*%\})',
+                            re.MULTILINE | re.DOTALL | re.IGNORECASE)
 
     def __init__(self, src_dir='.', dest_dir='.', skips=None):
 
@@ -180,10 +178,11 @@ class RenderHandler(object):
         return content
 
     def _aggregate_templates(self, content, self_path):
-        regex_result = self.agg_regex.findall(content)
-        for space, match, agg_ext in regex_result:
+        regex_result = self.tmpl_regex.findall(content)
+        tmpl_ext = self.tmpl_file_type
+        for space, match in regex_result:
             tmpl_series = [u'<!-- Begin Templates -->']
-            for path in self.find_files(self.src_dir, file_ext=agg_ext):
+            for path in self.find_files(self.src_dir, file_ext=tmpl_ext):
                 if os.path.isfile(path) and path != self_path:
                     tmpl_series.append(self._read_file(path))
             tmpl_series.append(u'<!-- End Templates -->')
