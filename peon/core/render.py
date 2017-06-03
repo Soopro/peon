@@ -57,8 +57,7 @@ class RenderHandler(object):
         self.src_dir = src_dir.strip(os.path.sep)
         self.dest_dir = dest_dir.strip(os.path.sep)
 
-        if not os.path.isdir(self.dest_dir):
-            os.makedirs(self.dest_dir)
+        self.dirs(self.dest_dir)
 
         if isinstance(skips, basestring):
             skips = [skips]
@@ -90,6 +89,7 @@ class RenderHandler(object):
     def _write_file(self, file_path, file_source):
         if os.path.isfile(file_path):
             os.remove(file_path)
+        self.dirs(os.path.dirname(file_path))
         tmp = open(file_path, 'w')
         if isinstance(file_source, unicode):
             file_source = file_source.encode('utf-8')
@@ -191,9 +191,6 @@ class RenderHandler(object):
     def _html(self, src_path, dest_path, ext):
         try:
             if os.path.isfile(src_path):
-                if not os.path.exists(os.path.dirname(dest_path)):
-                    os.makedirs(os.path.dirname(dest_path))
-
                 _, _, ext = self.split_file_path(src_path)
                 if self._in_skip_includes(ext.lower()):
                     _content = self._read_file(src_path)
@@ -207,13 +204,12 @@ class RenderHandler(object):
     def _copy(self, src_path, dest_path):
         try:
             if os.path.isfile(src_path):
-                if not os.path.exists(os.path.dirname(dest_path)):
-                    os.makedirs(os.path.dirname(dest_path))
+                self.dirs(os.path.dirname(dest_path))
                 shutil.copy2(src_path, dest_path)
         except Exception as e:
             self._raise_exception(RenderingError(e, 'file'), src_path)
 
-    def find_dest_path(self, path, output_ext=True):
+    def find_dest_path(self, path):
         if path.startswith(self.src_dir):
             path = path.replace(self.src_dir, '', 1).lstrip(os.path.sep)
         filepath, ext = os.path.splitext(path)
@@ -222,10 +218,7 @@ class RenderHandler(object):
         compile_path = '{}{}{}'.format(self.dest_dir, os.path.sep, filepath)
         if comp_ext:
             compile_path = '{}.{}'.format(compile_path, comp_ext)
-        if output_ext:
-            return compile_path, comp_ext
-        else:
-            return compile_path
+        return compile_path, comp_ext
 
     def split_file_path(self, path):
         filepath, ext = os.path.splitext(path)
@@ -310,23 +303,13 @@ class RenderHandler(object):
 
         self.rendering_all = False
 
-        # Seems there no resone clean after rendering,
-        # the clean task already take care of it.
-        # clean up invalid files in dest folder
-        # all_dest_path = [self.find_dest_path(f, False) for f in all_files]
-
-        # for dirpath, dirs, files in os.walk(self.dest_dir):
-        #     for f in files:
-        #         f_path = os.path.join(dirpath, f)
-        #         if f_path not in all_dest_path:
-        #             os.remove(f_path)
-
         print '\n<--- Rendered to: {}/**/* --->\n'.format(self.dest_dir)
 
     def render(self, src_path, replace=True):
         if os.path.isdir(src_path):
             self.dirs(src_path)
             return
+
         filedir, filename, ext = self.split_file_path(src_path)
         dest_path, comp_ext = self.find_dest_path(src_path)
 
@@ -397,10 +380,9 @@ class RenderHandler(object):
 
         self._print_message('Rendered: {} --> {}'.format(src_path, dest_path))
 
-    def dirs(self, src_path):
-        dest_path, _ = self.find_dest_path(src_path)
-        if os.path.isdir(src_path) and not os.path.isdir(dest_path):
-            os.makedirs(dest_path)
+    def dirs(self, dir_path):
+        if not os.path.isdir(dir_path):
+            os.makedirs(dir_path)
 
     def move(self, src_path, move_to_path):
         dest_path, comp_ext = self.find_dest_path(src_path)
