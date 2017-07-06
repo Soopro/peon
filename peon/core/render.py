@@ -231,7 +231,7 @@ class RenderHandler(object):
         results = []
 
         if isinstance(file_ext, basestring):
-            file_ext = (file_ext)
+            file_ext = set([file_ext])
         elif isinstance(file_ext, list):
             file_ext = set(file_ext)
 
@@ -243,7 +243,7 @@ class RenderHandler(object):
                    self.is_include_file(filename, ext):
                     continue
 
-                if not file_ext or ext in file_ext:
+                if not file_ext or (ext in file_ext):
                     results.append(os.path.join(dirpath, f))
 
         def add_dirs(dirs, dirpath):
