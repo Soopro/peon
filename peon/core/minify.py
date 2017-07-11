@@ -93,7 +93,7 @@ class MinifyHandler(object):
         if self.minify_includes:
             return False
         filepath, ext = os.path.splitext(path)
-        filename = filepath.rsplit(os.path.sep, 1)[:1]
+        filename = filepath.rsplit(os.path.sep, 1)[:1][0]
         return filename.startswith(self.incl_mark)
 
     def _process_html(self, file_path, minify=True, beautify=False):
