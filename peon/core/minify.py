@@ -46,12 +46,12 @@ class MinifyHandler(object):
     comment_regex = re.compile('<\!--\s*(.*?)\s*-->', re.IGNORECASE)
 
     incl_mark = '_'
-    allow_includes = False
+    minify_includes = False
     cwd_dir = 'dist'
 
-    def __init__(self, cwd, allow_includes=False):
+    def __init__(self, cwd, minify_includes=False):
         self.cwd_dir = cwd.strip(os.path.sep)
-        self.allow_includes = allow_includes
+        self.minify_includes = minify_includes
 
     def _isfile(self, file_path):
         if os.path.isfile(file_path):
@@ -89,14 +89,12 @@ class MinifyHandler(object):
         print 'peon: Minify writed ---> {}'.format(file_path)
         return file_path
 
-    def includes_gateway(self, path):
-        if self.allow_includes:
+    def is_include_file(self, path):
+        if self.minify_includes:
             return False
         filepath, ext = os.path.splitext(path)
-        filepath = filepath.rsplit(os.path.sep, 1)
-        filename = filepath[1]
-        return filename.startswith(self.incl_mark) or \
-            filename.endswith(self.incl_mark)
+        filename = filepath.rsplit(os.path.sep, 1)[:1]
+        return filename.startswith(self.incl_mark)
 
     def _process_html(self, file_path, minify=True, beautify=False):
         print "peon: Minify HTML process start"
@@ -273,14 +271,14 @@ class MinifyHandler(object):
 
     def _inject_ng_tpl(self, tmpl_content, inject_path):
         inject_source = self._read_file(inject_path)
-        tmpl_content = u"\n{}".format(tmpl_content)
+        tmpl_content = u'\n{}'.format(tmpl_content)
         return re.sub(self.tmpl_regex, tmpl_content, inject_source, 1)
 
     def css(self, src_paths, output, beautify=False):
         css_series = []
         for path in src_paths:
             if os.path.isfile(path):
-                if self.includes_gateway(path):
+                if self.is_include_file(path):
                     continue
                 if not output:
                     output = os.path.basename(path)
@@ -306,7 +304,7 @@ class MinifyHandler(object):
         js_series = []
         for path in src_paths:
             if os.path.isfile(path):
-                if self.includes_gateway(path):
+                if self.is_include_file(path):
                     continue
                 if not output:
                     output = os.path.basename(path)
@@ -332,7 +330,7 @@ class MinifyHandler(object):
         # html doesn't need concat files
         for path in src_paths:
             if os.path.isfile(path):
-                if self.includes_gateway(path):
+                if self.is_include_file(path):
                     continue
                 html_source = self._html(self._read_file(path))
                 self._output(path, html_source)
@@ -364,7 +362,7 @@ class MinifyHandler(object):
             if os.path.isfile(path):
                 if path == inject_path:
                     continue
-                if self.includes_gateway(path):
+                if self.is_include_file(path):
                     continue
                 tmpl_id = path.replace(self.cwd_dir + os.path.sep, prefix, 1)
                 tmpl_content = self._make_ng_tpl(tmpl_id,

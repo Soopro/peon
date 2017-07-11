@@ -4,7 +4,7 @@ import argparse
 
 from .modules import (construct, packing, watch, server)
 
-__version_info__ = ('1', '1', '4')
+__version_info__ = ('1', '1', '5')
 __version__ = '.'.join(__version_info__)
 
 
@@ -70,10 +70,10 @@ def run():
     if opts.version:
         print 'Peon:', __version__
     elif opts.watcher:
-        watch(opts)
+        watch()
     elif opts.construct:
         construct(opts)
     elif opts.zip:
-        packing(opts)
+        packing()
     else:
         server(opts)

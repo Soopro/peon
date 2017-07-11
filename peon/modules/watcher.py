@@ -75,7 +75,7 @@ def watch(opts):
     print 'Peon Wacther started'
     print '------------'
 
-    src_dir = peon_config.get('src', DEFAULT_SRC_DIR)
+    src_dir = peon_config.get('cwd', DEFAULT_SRC_DIR)
     dest_dir = peon_config.get('dest', DEFAULT_DEST_DIR)
     skip_includes = peon_config.get('skip_includes', [])
     clean_dest = peon_config.get('clean', True)

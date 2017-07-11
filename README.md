@@ -54,345 +54,383 @@ BTW, Peon may not suppport ***Windows***, It's untested, also not supported by p
 
 
 ## Installation
-```sudo python setup.py install```
+
+```sh setup.sh -p```
+All required packages will install once for all. without ```-p``` param, will skip all required packages.
 
 or
 
-```sh setup.sh```
+```sudo python setup.py install``` than install all required packages, both python pakcage and nodejs package manually.
 
-You can run ```sh setup.sh -p``` to install all required packages once for all.
-without ```-p``` param, packages will skiped.
 
 ## Usage
 You have to place a 'peon.json' intro the project root folder first.
 * peon.json: Config peon's tasks, see the example.
 
-`peon [-s] [-c] [-w] [-t] [-z]`
+`peon [-s] [-c] [-w] [-z]`
+
+### Config: peon.json
+
+The config file is a JSON file named as `peon.json`. It must placed in same folder where to run this peon.
+
+Most peon methods require this config file, but not all of it.
+
+##### Common options:
+
+src: source files path, could be a list. use 'glob' rules, with * or ? or Regex patterns.
+*** glob not support **/* to search for all subfolder, there is custom funciton do recursive search ***
+put ```!``` at first for exclude. make sure the exclude pattern is right level, because the reason above.
+
+cwd: from dir.
+
+dest: dest dir.
+
 
 =======================
 ### -c: Construct
 
-Must with a peon.json in same folder when run this command.
+**`peon.json` is required.**
 
-command with param could help define which action you want to run.
+The param is action alias to define which taks group should be run.
 
-Allow action params
+Allowed action aliaes:
 
-* 'construct'
 * 'init'
 * 'build'
 * 'release'
+* 'construct'
 
-Default is `construct`
+Default is `release`.
 
-action is not related with task, you can run any task in any type aciton.
-As I said action is only help you define what you want to do.
+If input action alias is not exists, then failback to 'construct'.
 
-
-======================
-
-##### common config options
-
-src: Source files path, could be a list. use 'glob' rules, with * or ? or Regex patterns.
-*** glob not support **/* to search for all subfolder, there is custom funciton do recursive search ***
-put ```!``` at first for exclude. make sure the exclude pattern is right level, because the reason above.
-
-cwd: Root dir of file path.
-
-dest: Dest for copy files.
-
-
-##### task: Copy
-
-Copy files from src to dest.
+Put action alias into `peon.json` as key to define a tasks group.
 
 ```
+{
+  "init": {},
+  "build": [],
+  "release": [],
+  "construct": {}
+}
+```
+
+The value of action alias could be **[ dict ]** or **[ list:dict ]**. Each action can host multiple tasks.
+
+#### Tasks:
+
+`clean`: **[ str ]** or **[ list:str ]** , remove all given dirs.
+
+`copy`: **[ list:dict ]**, copy files by given rules.
+  * cwd: **[ str ]** from folder.
+  * dest: **[ str ]** dest folder.
+  * src: **[ list:str ]** files name with relative path.
+  * flatten: copied files will place to dest folder as flatten.
+  # overwrite: overwrite copy if file is exists.
+
+`render`: **[ dict ]**, rendering files by given rules.
+  * cwd: **[ str ]** from folder.
+  * dest: **[ str ]** dest folder. default is 'build' folder.
+  * skip_includes: **[ list:str ]** file exts which will not process 'includes' behavior. for example, you don't want **jinja2** template includes be render by peon.
+  * clean: **[ bool ]** clean dest folder before rendering.
+
+`compress`: **[ list:dict ]**, compress rendered files.
+  * type: **[ str ]** type of compress.
+    1. `html`: compress html.
+    2. `css`: compress css.
+    3. `js`: compress js.
+    4. `process_html`: process html between
+    `<!-- build -->` and `<!-- /build -->`,
+    such as `<!-- build:css replacement.. -->`, `<!-- build:js replacement... -->`, `<!-- build:[any_attrs] replacement.. -->`.
+    5. `inline_angular_templates`: concat all ng templates into one file.
+  * cwd: **[ str ]** from folder. default is 'dist' forlder.
+  * src: **[ list:str ]** files name with relative path.
+  * output: **[ str ]** output file name.
+  * beautify: **[ bool ]** minify output file. default is `True`.
+  * minify: **[ bool ]** minify when use `process_html`. default is `True`.
+  * prefix: **[ str ]** prefix of ng template name,
+  for `inline_angular_templates` only. default is `''`.
+  * skip_includes: **[ bool ]** skip peon 'includes' files, default is `True`.
+  (file name starts with '_').
+
+`replace`: replace text.
+  * cwd: **[ str ]** from folder. default is 'dist' folder.
+  * src: **[ list:str ]** files name with relative path.
+  * replacing: **[ list:dict ]** replacing rules.
+    1. `form`: find this text.
+    2. `to`: replace to this text.
+
+`scrap`: remove files or dirs which is unnecessary.
+  * cwd: **[ str ]** from folder. default is 'dist' folder.
+  * src: **[ list:str ]** files name with relative path.
+
+`rev`: revision with md5.
+  * cwd: **[ str ]** from folder. default is 'dist' folder.
+  * src: **[ list:str ]** files name with relative path.
+  * find: **[ str ]** the revision pattern, must include text `<rev>`.
+
+
+#### Construct config examples:
+
+```
+"init": {
   "copy": [
     {
-      "name": "libs"
+      "name": "libs",
       "flatten": true,
-      "src":[
-        "lodash/dist/lodash.js",
-        "angular/angular.js",
-        "*/*/*.js",
-        "!*/*.html"
-      ],
-      "cwd":"bower_components/",
-      "dest":"src/libs"
-    }
-  ]
-```
-copy: The key of task options.
-
-<group>: A group name of copy files. 'libs' is group name in the sample above. usual define different package. You can define multiple groups with different options. and you have to make different group name by your self.
-
-`flatten`: Those files will not keep their folder while copy to the dest.
-
-`force`: Replace file if exist. default is True.
-
-##### task: Clean
-
-Clean folders before do anything else.
-
-```
-  "clean": ["dist"]
-
-```
-
-Put dir names into this option, could be single string or list contain strings.
-
-##### task: Scrap
-
-Detele files with rules. Use that after compress task to remove useless files or dirs.
-
-```
-  "scrap": {
-    "src":[
-      "*.js",
-      "*.html",
-      "styles/*.png",
-      "!*.min.*",
-      "!*.png",
-      "!index.html"
-    ],
-    "cwd":"dist"
-  }
-```
-
-##### task: Replace
-
-Replace string with pattern
-
-```
-  "replace": {
-    "src": "*.min.*",
-    "cwd": "dist",
-    "replacing": [
-      {
-        "from": "/styles/icons/svg",
-        "to": "svg"
-      }
-    ]
-  }
-
-```
-
-`replacements`: replace rules, support string only no regex yet.
-
-
-##### task: Render
-
-Render files from source dir to dest dir
-
-```
-  "render":{
-    "cwd": "src",
-    "dest": "build",
-    "clean": true,
-    "skip_includes":[]
-  }
-
-```
-
-`clean`: clean a dest folder before rendering
-
-`skip_includes`: skip those file types from include rendring. If the type is 'html',
-the {% include ... %} will not effect.
-
-
-##### task: Compress
-
-Compress files, minify css js html, and process html, and able to concat angular templates.
-
-```
-  "compress": [
-    {
-      "type": "inline_angular_templates",
       "src": [
-        "blueprints/**/*.html",
-        "modals/**/*.html",
-        "!**/_*.html"
+        "angular/angular.js",
+        "angular-cookies/angular-cookies.js",
+        "angular-resource/angular-resource.js",
+        "angular-animate/angular-animate.js",
+        "angular-messages/angular-messages.js",
+        "angular-aria/angular-aria.js",
+        "angular-material/angular-material.js",
+        "angular-route/angular-route.js",
+        "angular-sanitize/angular-sanitize.js",
+        "ng-file-upload/ng-file-upload.js"
       ],
-      "cwd": "dist",
-      "prefix": "",
-      "beautify": false,
-      "allow_includes": false,
-      "output":"index.html"
+      "cwd": "bower_components",
+      "dest": "/src/scripts/libs/"
     },
     {
-      "type": "process_html",
-      "minify": true,
-      "cwd": "dist",
-      "src": "*.html"
-    },
-    {
-      "type": "html",
-      "cwd": "dist",
-      "src": "*.html"
+      "name": "css",
+      "flatten": true,
+      "src": [
+        "angular-material/angular-material.css"
+      ],
+      "cwd": "bower_components",
+      "dest": "/src/styles/"
     }
   ]
-
-```
-
-Compress task include multiple groups. The group's key can be custom to any latin name.
-
-```
+},
+"build": {
+  "clean": "build",
+  "render": {
+    "cwd": "src",
+    "dest": "build"
+  }
+},
+"release": [
   {
-    "type": "process_html",
-    "cwd": "dist",
-    "src": "*.html"
+    "clean": ["dist", "build"],
+    "render": {
+      "cwd": "src",
+      "dest": "build"
+    },
+    "copy": [
+      {
+        "name": "dist",
+        "src": [
+          "**/*",
+          "!**/_*",
+          "!_*"
+        ],
+        "cwd": "build",
+        "dest": "dist"
+      },
+      {
+        "name": "assets",
+        "flatten": true,
+        "src": [
+          "**/*.ttf",
+          "**/*.woff*",
+          "**/*.png",
+          "**/*.jpg",
+          "**/*.svg"
+        ],
+        "cwd": "build",
+        "dest": "dist"
+      }
+    ],
+    "compress": [
+      {
+        "type": "inline_angular_templates",
+        "src": [
+          "blueprints/**/*.html",
+          "common/**/*.html",
+          "modals/**/*.html",
+          "navs/**/*.html",
+          "matters/**/*.html",
+          "panels/**/*.html",
+          "!**/_*.html"
+        ],
+        "cwd": "dist",
+        "prefix": "",
+        "beautify": false,
+        "minify_includes": false,
+        "output": "index.html"
+      },
+      {
+        "type": "process_html",
+        "cwd": "dist",
+        "src": "*.html",
+        "minify_includes": false
+      },
+      {
+        "type": "html",
+        "cwd": "dist",
+        "src": "*.html"
+      }
+    ],
+    "replace": {
+      "src": [
+        "*.min.*",
+        "*.html"
+      ],
+      "cwd": "dist",
+      "replacing": [
+        {
+          "from": "/styles/icons/svg",
+          "to": "svg"
+        },
+        {
+          "from": "icons/ico",
+          "to": "ico"
+        },
+        {
+          "from": "styles/logo.svg",
+          "to": "logo.svg"
+        }
+      ]
+    },
+    "scrap": {
+      "src": [
+        "*",
+        "!*.html",
+        "!*.min.*",
+        "!server_conf.js",
+        "!*.png",
+        "!*.jpg",
+        "!*.svg",
+        "!*.ttf",
+        "!*.woff*"
+      ],
+      "cwd": "dist"
+    },
+    "rev": {
+      "src": "*.html",
+      "cwd": "dist",
+      "find": "?md5=<rev>"
+    }
   }
-
+]
 ```
-
-`type`: define compress type. `html` `css` `js` `process_html` `inline_angular_templates`.
-
-type [inline_angular_templates]:
-
-- `prefix`: define ng templates id prefix, etc., '/'. this is for match the template reference.
-- `allow_includes`: set it true will concat include files (starts or ends with '_'), default is False.
-- `beautify`: define output templates is minifed or readable.
-- `output`: file you want fill template script into. `<!-- ng-templates -->` mark must somewhere in this file.
-
-
-type [css, js]:
-
-- `type`: the type of file you want to process.
-- `cwd`: the root dir you work in.
-- `src`: the file you want minify will output it self.
-- `beautify`: define output file is minifed or readable.
-- `output`: the file name you want output to minified file.
-
-
-type [html]:
-
-*html don't need output or beautify, if beautify just same as it self.*
-
-- `type`: the type of file you want to process.
-- `cwd`: the root dir you work in.
-- `src`: the file you want minify will output it self.
-
-
-type [process_html]
-
-- `type`: the type of file you want to process.
-- `cwd`: the root dir you work in.
-- `src`: the file you want minify will output it self.
-- `beautify`: define output file is minifed or readable.
-
-##### task: Rev
-
-Revision to md5 by 'pattern' find in given files.
-Use it after grunt relese, because grunt litte bit hard to convert md5 filename.
-
-```
-  "rev":{
-    "src":"/*.html",
-    "cwd":"release/",
-    "find":"?md5=<rev>"
-  }
-```
-rev: The key of task options.
-
-src: Source file path.
-
-cwd: Root dir of file path.
-
-find: Peon will find those string and replace `<rev>` with that string.
-
 
 
 =======================
-### -z:  Packing
+### -z: Packing
 
 Make a zip package for all files in current folder, or specific folder.
-You can also chose upload to a restapi.
+You can also chose upload to a url.
 
-##### task: Zip
+**`peon.json` is required.**
 
-*** This cmd can runing with our peon.json tasks.
+action alis:
 
-***cli:*** `--exclude` for exclude files pattern.
+* 'packing':
+  1. `zip`: pack files.
+  2. `upload`: upload package file.
+
+
+#### zip:
+
+`zip`: **[ dict ]** packing files form folder.
+  * cwd: **[ str ]** the folder need to be packing.
+  * dest: **[ str ]** the folder to put the package zip file.
+  * file: **[ str ]** the filename of zip file.
+  * excludes: **[ list:str ]** excludes files when packing.
+  * include_hidden: **[ bool ]** include hidden files or dir
+  (starts with '.').
+
+#### upload:
+
+`upload`: **[ dict ]** upload package file to a url.
+  * cwd: **[ str ]** the folder need to be packing.
+  * file: **[ str ]** the filename of zip file.
+  * headers: **[ dict ]** request headers.
+  * params: **[ dict ]** request params.
+  * data: **[ dict ]** request post data.
+  * url: **[ str ]** the upload url.
+  * delete: **[ str ]** delete the file after uploaded.
+
+
+#### Packing config examples:
 
 ```
+"packing": {
   "zip": {
-    "cwd":null,
-    "file":null,
-    "include_hidden":false,
-    "include_peon_config":false,
-    "excludes":[]
-  }
-
-```
-`cwd` the dir path you want to packing
-
-`file` file name you want to specific. default is current folder name.
-
-`include_hidden` include start with '.'.
-
-`include_peon_config` include 'peon.json'.
-
-`excludes` excludes files as list. pattern supported.
-
-##### task: Upload
-
-*** This cmd can only work with peon.json tasks.
-make sure there is `zip` task before, otherwise will get a error.
-
-```
+    "cwd": "src",
+    "dest": ".",
+    "file": "theme.zip"
+  },
   "upload": {
-    "cwd":null,
-    "file":null,
-    "headers":{
-      "SecretKey":"1d02aa814dc64db3a6494624ca35a03a"
+    "cwd": ".",
+    "file": "theme.zip",
+    "headers": {
+      "SecretKey": "the_key_is_here"
     },
-    "url":"http://localhost:5000/app/test/develop/theme",
-    "data":null,
-    "params":null
+    "url": "the_url_is_here",
+    "delete": true
   }
-
-```
-`cwd` the dir path you want to upload
-
-`file` file name you want to upload. default is current folder name.
-
-`headers` anything you need put intro headers.
-
-`url` request api url.
-
-`data` request data
-
-`params` request params
-
-
-## -w: Watcher
-```
-  "watch":{
-    "src": "src",
-    "dest": "build",
-    "skip_includes":[],
-    "init": true,
-    "server": true,
-    "port": 9527
-  }
+}
 ```
 
-`peon` -w [init] [-s port] [--src src_dir] [--dest dest_dir] [--skip file_type]
+=======================
 
-`-w init`: start watcher, with keyword 'init' will clean dest dir before watching start.
+### -w: Watcher
 
-`-s port`: start watcher will server. define port or default is 9527
+Watch and rendering changes of files, also support host with a web server.
 
-`--src src_dir`: watcher will get source file from src folder.
+**`peon.json` is required.**
 
-`--dest dest_dir`: watcher will render file into dest folder.
+action alis:
 
-`--skip`: watcher will skip a file type. this option can use multiple time for a list of file types.
+* 'watch'
 
-Wactching Coffee jade less. If it's changed than compile a new file.
-files start or end with undescore '_' is changed will compile all files but it self.
+#### watch:
 
-#### Prefix and settings
+`watch`: **[ dict ]** upload package file to a url.
+  * cwd: **[ str ]** the folder need to be watching.
+  * dest: **[ str ]** the folder to output rendered.
+  * clean: **[ bool ]** clean dest folder before watch.
+  * server: **[ bool ]** start http web server.
+  * port: **[ str ]** the port when start http web server.
+  * pyco: **[ str ]** the pyco folder, than starts with pyco.
+  * skip_includes: **[ list:str ]** file exts which will not process 'includes' behavior. for example, you don't want **jinja2** template
+
+
+#### Watch config examples:
+
+```
+"watch": {
+  "src": "src",
+  "dest": "pyco/themes/default",
+  "clean": true,
+  "server": false,
+  "pyco": "pyco",
+  "skip_includes": "html"
+}
+```
+
+=======================
+
+### -s: Server
+
+** cli **
+
+Start web server wich cli.
+
+`peon [-s port] [--dir dir]` or just `peon`
+
+`-s port`: server port. default is 9527
+
+`--dir dir`: folder you want start as server host. must be sub of current working dir.
+
+=======================
+
+
+### Include files pattern.
 
 `_` Local files, Render all files in same folder.
 
@@ -404,22 +442,11 @@ files start or end with undescore '_' is changed will compile all files but it s
 
 `__init__` Init files, Render all files from root folder.
 
-#### Tmpl file ext
 
-`.tmpl` Render all files from root folder while changed.
+=======================
 
+#### TMPL file
 
+files with `.tmpl` is TMPL file, those file will render to `{% templates %}`.
+Mostly for rich html application.
 
-
-## -s: Server
-
-`peon` [-s port]  [--dir dir] or just `peon`
-
-`-s port`: server port. default is 9527
-
-`--dir dir`: folder you want start as server host. must be sub of current working dir.
-
-`peon` -s --http, start server with simplehttp directly.
-
-`peon` -s --harp, start server with harp directly (no recommand, but you can do that if you need).
-Please make sure you have node npm harp kind stuff ...

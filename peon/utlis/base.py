@@ -81,7 +81,7 @@ def grounded_paths(cwd='.', *args):
         return None
     cwd_abs_dir = os.path.normpath(os.path.join(os.getcwd(), cwd))
     if len(args) == 1:
-        if isinstance(args[0], (str, unicode)):
+        if isinstance(args[0], (basestring)):
             path = os.path.normpath(args[0])
             _path = os.path.join(os.getcwd(), path)
             if cwd_abs_dir in os.path.normpath(_path):
@@ -105,12 +105,12 @@ def safe_paths(*args):
     if len(args) == 0:
         return None
     if len(args) == 1:
-        if isinstance(args[0], (str, unicode)):
+        if isinstance(args[0], (basestring)):
             return os.path.normpath(args[0]).strip(os.path.sep)
         return None
     p_list = []
     for path in args:
-        if isinstance(path, (str, unicode)):
+        if isinstance(path, (basestring)):
             path = os.path.normpath(path)
             p_list.append(path.strip(os.path.sep))
         else:
@@ -151,7 +151,7 @@ def remove_dir(path):
 
 
 def replace(pattern, replacement, content):
-    if isinstance(pattern, (str, unicode)):
+    if isinstance(pattern, (basestring)):
         pattern = re.escape(pattern)
     pattern = re.compile(pattern, re.IGNORECASE)
     content = re.sub(pattern, replacement, content)

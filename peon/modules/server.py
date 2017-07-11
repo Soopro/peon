@@ -43,20 +43,6 @@ class PeonServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         return
 
 
-# -------------
-# main
-# -------------
-DEFAULT_PORT = 9527
-
-
-def server(opts):
-    port = opts.port if isinstance(opts.port, int) else DEFAULT_PORT
-
-    if opts.dir:
-        os.chdir(opts.dir)
-
-    simplehttp(port)
-
 
 def simplehttp(port):
     httpd = SocketServer.TCPServer(('', port), PeonServerHandler, False)
@@ -74,3 +60,18 @@ def simplehttp(port):
         httpd.serve_forever()
     except (KeyboardInterrupt, SystemExit):
         httpd.shutdown()
+
+
+# -------------
+# main
+# -------------
+DEFAULT_PORT = 9527
+
+
+def server(opts):
+    port = opts.port if isinstance(opts.port, int) else DEFAULT_PORT
+
+    if opts.dir:
+        os.chdir(opts.dir)
+
+    simplehttp(port)

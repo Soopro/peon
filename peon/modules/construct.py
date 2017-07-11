@@ -91,7 +91,7 @@ def _find_path_list(src, cwd):
 def copy(rules):
     for rule in rules:
         is_flatten = rule.get('flatten', False)
-        force = rule.get('force', True)
+        overwrite = rule.get('overwrite', True)
         cwd, dest = safe_paths(rule.get('cwd', ''), rule.get('dest', ''))
 
         files = rule.get('src', [])
@@ -112,7 +112,7 @@ def copy(rules):
                 ensure_dir(dest_path)
                 continue
 
-            if force or not os.path.isfile(dest_path):
+            if overwrite or not os.path.isfile(dest_path):
                 copy_file(path, dest_path)
             else:
                 continue
@@ -129,7 +129,7 @@ def rev(cfg):
         find_str = find_str.encode('utf-8')
     rev_str = find_str.replace('<rev>', gen_md5())
 
-    cwd = safe_paths(cfg.get('cwd', ''))
+    cwd = safe_paths(cfg.get('cwd', DEFAULT_DIST_DIR))
     files = cfg.get('src', [])
     path_list = _find_path_list(files, cwd)
 
@@ -174,7 +174,7 @@ def render(cfg):
 
 def replace(cfg):
     files = cfg.get('src', [])
-    cwd = safe_paths(cfg.get('cwd', ''))
+    cwd = safe_paths(cfg.get('cwd', DEFAULT_DIST_DIR))
     replacing = cfg.get('replacing', [])
     path_list = _find_path_list(files, cwd)
     for path in path_list:
@@ -239,15 +239,11 @@ def scrap(cfg):
 def compress(rules):
     for rule in rules:
         cwd = safe_paths(rule.get('cwd', DEFAULT_DIST_DIR))
-        allow_includes = rule.get('allow_includes', False)
-        minify = MinifyHandler(cwd, allow_includes)
+        minify_includes = rule.get('minify_includes', False)
+        minify = MinifyHandler(cwd, minify_includes)
         files = rule.get('src', [])
         minify_type = rule.get('type')
         minify_output = safe_paths(rule.get('output'))
-        # safe_paths('') will generate '.' which I don't want here.
-
-        minify_process = rule.get('minify', True)
-        minify_prefix = rule.get('prefix', '')
         minify_beautify = rule.get('beautify', False)
 
         path_list = _find_path_list(files, cwd)
@@ -259,11 +255,12 @@ def compress(rules):
         elif minify_type == 'js':
             minify.js(path_list, minify_output, minify_beautify)
         elif minify_type == 'process_html':
-            minify.process_html(path_list, minify_process, minify_beautify)
+            process_minify = rule.get('minify', True)
+            minify.process_html(path_list, process_minify, minify_beautify)
         elif minify_type == 'inline_angular_templates':
             minify.concat_angular_template(path_list,
                                            minify_output,
-                                           minify_prefix,
+                                           rule.get('prefix', ''),
                                            minify_beautify)
 
     print 'peon: Work work ...(compress)'
@@ -272,7 +269,7 @@ def compress(rules):
 # -------------
 # main
 # -------------
-alias = ('release', 'init', 'build')
+alias = ('construct', 'release', 'init', 'build')
 COMMANDS = {
     'clean': clean,
     'copy': copy,
