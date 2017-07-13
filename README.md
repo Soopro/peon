@@ -23,7 +23,7 @@ Features for now:
 4. Packing theme and upload to target api.
 
 
-現有特性：
+功能特性：
 1. 啟動基於 Python SimpleHTTPServer 的開發服务器（或者啟動Pyco，不知道這是什麼的話，先別問了...）。
 2. 自動監控和構建項目文件。例如：html, css, coffee, less, sass...
 3. 通過配置文件組合和壓縮項目。
@@ -48,9 +48,9 @@ Some basic js package will call by subprocess, such as coffee-script less and ug
 
 BTW, Peon may not suppport ***Windows***, It's untested, also not supported by python 3.0.
 
-## 為什麼用苦工？
+## 為什麼用Peon？
 
-如果你不想開發一個前端項目就要拽一百多個依賴庫，不想因為一個源版本跟錯誤導致啟動失敗，不想動不動就要面對一個冒出來將會是“未來”的項目，那麼希望這個項目能夠幫你的前端開發工作專注在交互和呈現上。
+如果你不想开发一个前端项目时，碰了一下就要npm几百个依赖库；也不想因为某一个源版本依赖变化导致构建失败；不想动不动就要面对一个自称是“未来”，但过不多久又死掉的项目；那么这个项目能够帮你的前端开发工作免除这些烦恼。
 
 
 ## Installation
@@ -125,8 +125,9 @@ The value of action alias could be **[ dict ]** or **[ list:dict ]**. Each actio
   * cwd: **[ str ]** from folder.
   * dest: **[ str ]** dest folder.
   * src: **[ list:str ]** files name with relative path.
-  * flatten: copied files will place to dest folder as flatten.
-  # overwrite: overwrite copy if file is exists.
+  * flatten: **[ bool ]** copied files will place to dest folder as flatten.
+  Default is False.
+  * overwrite: **[ bool ]** overwrite copy if file is exists. default is True.
 
 `render`: **[ dict ]**, rendering files by given rules.
   * cwd: **[ str ]** from folder.
@@ -157,7 +158,7 @@ The value of action alias could be **[ dict ]** or **[ list:dict ]**. Each actio
   * cwd: **[ str ]** from folder. default is 'dist' folder.
   * src: **[ list:str ]** files name with relative path.
   * replacing: **[ list:dict ]** replacing rules.
-    1. `form`: find this text.
+    1. `from`: find this text.
     2. `to`: replace to this text.
 
 `scrap`: remove files or dirs which is unnecessary.
@@ -335,7 +336,7 @@ action alis:
 
 #### zip:
 
-`zip`: **[ dict ]** packing files form folder.
+`zip`: **[ dict ]** packing files from folder.
   * cwd: **[ str ]** the folder need to be packing.
   * dest: **[ str ]** the folder to put the package zip file.
   * file: **[ str ]** the filename of zip file.
