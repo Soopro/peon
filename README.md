@@ -60,7 +60,7 @@ All required packages will install once for all. without ```-p``` param, will sk
 
 or
 
-```sudo python setup.py install``` than install all required packages, both python pakcage and nodejs package manually.
+```sudo python setup.py install``` then install all required packages, both python pakcage and nodejs package manually.
 
 
 ## Usage
