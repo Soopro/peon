@@ -46,6 +46,8 @@ class MinifyHandler(object):
     comment_regex = re.compile('<\!--\s*(.*?)\s*-->', re.IGNORECASE)
 
     incl_mark = '_'
+    incl_dir_mark = '{}{}'.format(os.path.sep, incl_mark)
+
     minify_includes = False
     cwd_dir = 'dist'
 
@@ -92,9 +94,7 @@ class MinifyHandler(object):
     def is_include_file(self, path):
         if self.minify_includes:
             return False
-        filepath, ext = os.path.splitext(path)
-        filename = filepath.rsplit(os.path.sep, 1)[:1][0]
-        return filename.startswith(self.incl_mark)
+        return self.incl_dir_mark in path or path.startswith(self.incl_mark)
 
     def _process_html(self, file_path, minify=True, beautify=False):
         print "peon: Minify HTML process start"

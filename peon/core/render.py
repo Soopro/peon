@@ -42,7 +42,10 @@ class RenderHandler(object):
     incl_global_mark = '_g_'  # global
     incl_root_mark = '_r_'  # root
     incl_init_mark = '__init__'  # root and equals
+    incl_dir_mark = '{}{}'.format(os.path.sep, incl_mark)  # dir
+
     tmpl_file_type = 'tmpl'
+    base_file_type = 'html'
 
     incl_regex = re.compile(r'(\s*)(\{%\s*(?:include|import)\s+' +
                             r'["\']?\s*([\w\$\-\./\{\}\(\)]*)\s*["\']?' +
@@ -129,16 +132,6 @@ class RenderHandler(object):
             self._write_file(dest_path, result)
         except Exception as e:
             self._raise_exception(RenderingError(e, 'less ↑'), src_path)
-
-    def _sass_all(self):
-        # sass_update_path = "{}:{}".format(self.src_dir, self.dest_dir)
-        try:
-            # subprocess.check_output(["sass", "--sourcemap=none",
-            #                          "--update", sass_update_path])
-            sass.compile(dirname=(self.src_dir, self.dest_dir))
-        except Exception as e:
-            self._raise_exception(RenderingError(e, 'sass all ↑'),
-                                  self.src_dir)
 
     def _sass(self, src_path, dest_path):
         try:
@@ -230,7 +223,7 @@ class RenderHandler(object):
     def find_files(self, path='.', file_ext=None, recursive=True):
         results = []
 
-        if isinstance(file_ext, basestring):
+        if file_ext and isinstance(file_ext, basestring):  # ext could ''
             file_ext = set([file_ext])
         elif isinstance(file_ext, list):
             file_ext = set(file_ext)
@@ -238,11 +231,8 @@ class RenderHandler(object):
         def add_files(files, dirpath):
             for f in files:
                 _, filename, ext = self.split_file_path(f)
-
-                if filename.startswith('.') or \
-                   self.is_include_file(filename, ext):
+                if filename.startswith('.') or self.is_include_file(f, ext):
                     continue
-
                 if not file_ext or (ext in file_ext):
                     results.append(os.path.join(dirpath, f))
 
@@ -257,17 +247,18 @@ class RenderHandler(object):
             add_files(os.listdir(path), path)
         else:
             for dirpath, dirs, files in os.walk(path):
-                add_dirs(dirs, dirpath)
-                add_files(files, dirpath)
+                if self.incl_dir_mark not in dirpath:
+                    add_dirs(dirs, dirpath)
+                    add_files(files, dirpath)
         return results
 
     def is_tmpl_file(self, filename, ext):
         return self.tmpl_file_type == ext
 
-    def is_include_file(self, filename, ext):
+    def is_include_file(self, path, ext):
         if self._in_skip_includes(ext.lower()):
             return False
-        return filename.startswith(self.incl_mark)
+        return self.incl_dir_mark in path or path.startswith(self.incl_mark)
 
     def clean(self):
         if self.src_dir != self.dest_dir:
@@ -278,7 +269,6 @@ class RenderHandler(object):
 
         self.rendering_all = True
         has_coffee = False
-        has_sass = False
         # lessc cli not support output to folder
 
         all_files = self.find_files(self.src_dir)
@@ -289,14 +279,9 @@ class RenderHandler(object):
             if ext == 'coffee':
                 has_coffee = True
                 excludes.add(f)
-            elif ext in ['sass', 'scss']:
-                has_sass = True
-                excludes.add(f)
 
         if has_coffee:
             self._coffee_all()
-        if has_sass:
-            self._sass_all()
 
         for f in [f for f in all_files if f not in excludes]:
             self.render(f)
@@ -316,8 +301,11 @@ class RenderHandler(object):
         if not replace and os.path.isfile(dest_path):
             return
 
-        if self.is_include_file(filename, ext):
-            if ext and ext not in self.render_types:
+        if self.is_include_file(src_path, ext):
+            if not ext:
+                ext = self.base_file_type
+
+            if ext not in self.render_types:
                 # no ext file will render every file matched path,
                 # such as `__init__` will render files form root dir.
                 # `_g_` will render all file from root dir and every sub dir.
@@ -334,13 +322,15 @@ class RenderHandler(object):
                 path = filedir
                 recursive = True
             else:
-                path = filedir
+                path_pairs = filedir.split(self.incl_dir_mark)
+                path = path_pairs[0]
                 recursive = False
 
             files = self.find_files(path, ext, recursive)
 
             for f in files:
                 self.render(f)
+
             return
 
         elif self.is_tmpl_file(filename, ext):
@@ -389,7 +379,7 @@ class RenderHandler(object):
         dest_moved_path, _ = self.find_dest_path(move_to_path)
         _, moved_filename, moved_ext = self.split_file_path(move_to_path)
 
-        if self.is_include_file(moved_filename, moved_ext) or \
+        if self.is_include_file(move_to_path, moved_ext) or \
            self.is_tmpl_file(moved_filename, moved_ext):
             try:
                 if os.path.isfile(dest_path):
