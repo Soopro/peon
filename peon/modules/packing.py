@@ -43,11 +43,11 @@ def upload(cfg):
         uploadFile(file_path, url, data=data, params=params, headers=headers)
     except Exception as e:
         raise e
-    print 'uploaded -------------->', time.time() - start_time
+
     if delete:
         os.remove(file_path)
 
-    print 'peon: package is uploaded...'
+    print 'peon: package is uploaded...', time.time() - start_time
 
 
 def packzip(cfg):
