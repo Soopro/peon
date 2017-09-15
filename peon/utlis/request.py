@@ -48,7 +48,8 @@ def uploadData(url, data=None, params=None, headers=None, is_json=True):
     return r
 
 
-def uploadFile(file_path, url, data=None, params=None, headers=None):
+def uploadFile(file_path, url,
+               data=None, params=None, headers=None, timeout=30):
     try:
         files = {'file': open(file_path, 'rb')}
     except Exception as e:
@@ -60,7 +61,8 @@ def uploadFile(file_path, url, data=None, params=None, headers=None):
                           files=files,
                           data=data,
                           params=params,
-                          headers=headers)
+                          headers=headers,
+                          timeout=timeout)
         r.raise_for_status()
     except requests.RequestException as e:
         print '========== Requests =========='

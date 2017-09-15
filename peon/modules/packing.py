@@ -2,6 +2,7 @@
 from __future__ import absolute_import
 
 import os
+import time
 
 from ..utlis import makeZip, uploadFile, safe_paths
 from ..helpers import load_config
@@ -37,11 +38,12 @@ def upload(cfg):
     delete = cfg.get('delete')
     file_path = os.path.join(os.getcwd(), cwd, file)
     os.path.normpath(file_path)
+    start_time = time.time()
     try:
         uploadFile(file_path, url, data=data, params=params, headers=headers)
     except Exception as e:
         raise e
-
+    print 'uploaded -------------->', time.time() - start_time
     if delete:
         os.remove(file_path)
 

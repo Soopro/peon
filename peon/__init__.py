@@ -4,7 +4,7 @@ import argparse
 
 from .modules import (construct, packing, watch, server)
 
-__version_info__ = ('1', '1', '6')
+__version_info__ = ('1', '1', '7')
 __version__ = '.'.join(__version_info__)
 
 
