@@ -30,11 +30,12 @@ class RenderingError(Exception):
 class RenderHandler(object):
     replacement = {
         'coffee': 'js',
+        'decaf': 'js',  # `decaf` is coffeescript without header and wrapper.
         'less': 'css',
         'sass': 'css',
         'scss': 'css',
     }
-    render_types = ['coffee', 'less', 'sass', 'scss',
+    render_types = ['coffee', 'decaf', 'less', 'sass', 'scss',
                     'html', 'htm', 'tpl', 'tmpl']
 
     incl_mark = '_'  # current
@@ -123,6 +124,24 @@ class RenderHandler(object):
         try:
             subprocess.check_output(['coffee', '-c', '-o',
                                      os.path.dirname(dest_path), src_path])
+        except Exception as e:
+            self._raise_exception(RenderingError(e, 'coffee ↑'), src_path)
+
+    def _decaf_all(self):
+        try:
+            subprocess.check_output([
+                'coffee', '-c', '-o', self.dest_dir, self.src_dir,
+                '-b', '--no-header'
+            ])
+        except Exception as e:
+            self._raise_exception(RenderingError(e, 'coffee all ↑'),
+                                  self.src_dir)
+
+    def _decaf(self, src_path, dest_path):
+        try:
+            subprocess.check_output(['coffee', '-c', '-o',
+                                     os.path.dirname(dest_path), src_path,
+                                     '-b', '--no-header'])
         except Exception as e:
             self._raise_exception(RenderingError(e, 'coffee ↑'), src_path)
 
@@ -269,6 +288,7 @@ class RenderHandler(object):
 
         self.rendering_all = True
         has_coffee = False
+        has_decaf = False
         # lessc cli not support output to folder
 
         all_files = self.find_files(self.src_dir)
@@ -279,9 +299,14 @@ class RenderHandler(object):
             if ext == 'coffee':
                 has_coffee = True
                 excludes.add(f)
+            if ext == 'decaf':
+                has_decaf = True
+                excludes.add(f)
 
         if has_coffee:
             self._coffee_all()
+        if has_decaf:
+            self._decaf_all()
 
         for f in [f for f in all_files if f not in excludes]:
             self.render(f)
@@ -347,6 +372,8 @@ class RenderHandler(object):
         try:
             if ext == 'coffee':
                 self._coffee(src_path, dest_path)
+            elif ext == 'decaf':
+                self._decaf(src_path, dest_path)
 
             elif ext == 'less':
                 self._less(src_path, dest_path)
