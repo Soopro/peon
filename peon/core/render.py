@@ -276,8 +276,16 @@ class RenderHandler(object):
         return self.incl_dir_mark in path or path.startswith(self.incl_mark)
 
     def clean(self):
-        if self.src_dir != self.dest_dir:
-            shutil.rmtree(self.dest_dir.lstrip(os.path.sep))
+        if self.src_dir == self.dest_dir:
+            raise IOError('dest is src itself.')
+        for path in os.listdir(self.dest_dir):
+            _path = os.path.join(self.dest_dir, path)
+            if os.path.isfile(_path):
+                os.remove(_path)
+            elif os.path.isdir(_path):
+                shutil.rmtree(_path)
+            else:
+                print '<---- clean a unknow ??? ---->', _path
 
     def render_all(self):
         print '\n<--- Rendering: {}/**/* --->\n'.format(self.src_dir)
@@ -297,6 +305,9 @@ class RenderHandler(object):
 
         if has_coffee:
             self._coffee_all()
+            _lang_name = 'coffee'
+            self._print_message('Rendered: *.{} --> *.{}'.format(_lang_name,
+                                self.replacement.get(_lang_name)))
 
         for f in [f for f in all_files if f not in excludes]:
             self.render(f)

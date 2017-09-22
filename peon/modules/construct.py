@@ -166,7 +166,7 @@ def render(cfg):
     dest_dir = cfg.get('dest', DEFAULT_BUILD_DIR)
     skip_includes = cfg.get('skip_includes', [])
     render = RenderHandler(src_dir, dest_dir, skip_includes)
-    if cfg.get('clean') is True:
+    if cfg.get('clean', True):
         render.clean()
     render.render_all()
     print 'peon: Work work ...(render)'
