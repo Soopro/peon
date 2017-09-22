@@ -35,8 +35,8 @@ class RenderHandler(object):
         'sass': 'css',
         'scss': 'css',
     }
-    render_types = ['coffee', 'decaf', 'less', 'sass', 'scss',
-                    'html', 'htm', 'tpl', 'tmpl']
+    includable_types = ['coffee', 'decaf', 'less', 'sass', 'scss',
+                        'html', 'htm', 'tpl', 'tmpl']
 
     incl_mark = '_'  # current
     incl_parent_mark = '__'  # parent
@@ -127,23 +127,13 @@ class RenderHandler(object):
         except Exception as e:
             self._raise_exception(RenderingError(e, 'coffee ↑'), src_path)
 
-    def _decaf_all(self):
-        try:
-            subprocess.check_output([
-                'coffee', '-c', '-o', self.dest_dir, self.src_dir,
-                '-b', '--no-header'
-            ])
-        except Exception as e:
-            self._raise_exception(RenderingError(e, 'coffee all ↑'),
-                                  self.src_dir)
-
     def _decaf(self, src_path, dest_path):
         try:
-            subprocess.check_output(['coffee', '-c', '-o',
-                                     os.path.dirname(dest_path), src_path,
-                                     '-b', '--no-header'])
+            rel_dest_dir = os.path.dirname(dest_path)
+            subprocess.check_output(['coffee', '-c', '-b', '--no-header',
+                                     '-o', rel_dest_dir, src_path])
         except Exception as e:
-            self._raise_exception(RenderingError(e, 'coffee ↑'), src_path)
+            self._raise_exception(RenderingError(e, 'decaf ↑'), src_path)
 
     def _less(self, src_path, dest_path):
         try:
@@ -250,7 +240,7 @@ class RenderHandler(object):
         def add_files(files, dirpath):
             for f in files:
                 _, filename, ext = self.split_file_path(f)
-                if filename.startswith('.') or self.is_include_file(f, ext):
+                if filename.startswith('.') or self.is_inc_file(f, ext):
                     continue
                 if not file_ext or (ext in file_ext):
                     results.append(os.path.join(dirpath, f))
@@ -274,9 +264,15 @@ class RenderHandler(object):
     def is_tmpl_file(self, filename, ext):
         return self.tmpl_file_type == ext
 
-    def is_include_file(self, path, ext):
+    def is_inc_file(self, path, ext):
+        if not ext:
+            ext = self.base_file_type
+
         if self._in_skip_includes(ext.lower()):
             return False
+        elif ext not in self.includable_types:
+            return False
+
         return self.incl_dir_mark in path or path.startswith(self.incl_mark)
 
     def clean(self):
@@ -288,7 +284,6 @@ class RenderHandler(object):
 
         self.rendering_all = True
         has_coffee = False
-        has_decaf = False
         # lessc cli not support output to folder
 
         all_files = self.find_files(self.src_dir)
@@ -299,14 +294,9 @@ class RenderHandler(object):
             if ext == 'coffee':
                 has_coffee = True
                 excludes.add(f)
-            if ext == 'decaf':
-                has_decaf = True
-                excludes.add(f)
 
         if has_coffee:
             self._coffee_all()
-        if has_decaf:
-            self._decaf_all()
 
         for f in [f for f in all_files if f not in excludes]:
             self.render(f)
@@ -326,15 +316,10 @@ class RenderHandler(object):
         if not replace and os.path.isfile(dest_path):
             return
 
-        if self.is_include_file(src_path, ext):
-            if not ext:
-                ext = self.base_file_type
-
-            if ext not in self.render_types:
-                # no ext file will render every file matched path,
-                # such as `__init__` will render files form root dir.
-                # `_g_` will render all file from root dir and every sub dir.
-                return
+        if self.is_inc_file(src_path, ext):
+            # no ext file will render every file matched path,
+            # such as `__init__` will render files in root dir.
+            # `_g_` will render all file from root dir and every sub dir.
 
             if filename.startswith(self.incl_root_mark) or \
                filename == self.incl_init_mark:
@@ -350,6 +335,10 @@ class RenderHandler(object):
                 path_pairs = filedir.split(self.incl_dir_mark)
                 path = path_pairs[0]
                 recursive = False
+
+            if not ext:
+                # inc file with none ext will render as base_file_type.
+                ext = self.base_file_type
 
             files = self.find_files(path, ext, recursive)
 
@@ -406,7 +395,7 @@ class RenderHandler(object):
         dest_moved_path, _ = self.find_dest_path(move_to_path)
         _, moved_filename, moved_ext = self.split_file_path(move_to_path)
 
-        if self.is_include_file(move_to_path, moved_ext) or \
+        if self.is_inc_file(move_to_path, moved_ext) or \
            self.is_tmpl_file(moved_filename, moved_ext):
             try:
                 if os.path.isfile(dest_path):

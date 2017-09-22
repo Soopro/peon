@@ -6,7 +6,7 @@ do
     then
       echo 'Setup Peon with reuiqred packages'
       sudo pip install -r requirements.txt
-      sudo npm install -g coffee-script less uglify-js
+      sudo npm install -g coffeescript less uglify-js
   fi
 done
 
