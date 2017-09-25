@@ -40,15 +40,6 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
 
         self.incl_mark = include_mark
 
-    def _find_end_path(self, path):
-        if not path:
-            return None
-        tmp_path_list = path.rsplit(os.path.sep, 1)
-        if len(tmp_path_list) > 0:
-            return tmp_path_list[1]
-        else:
-            return None
-
     def on_created(self, event):
         self.render.render(event.src_path)
 
@@ -56,10 +47,7 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
         self.render.render(event.src_path)
 
     def on_moved(self, event):
-        end_src_path = self._find_end_path(event.src_path)
-        end_dest_path = self._find_end_path(event.dest_path)
-        if end_src_path != end_dest_path:
-            self.render.move(event.src_path, event.dest_path)
+        self.render.move(event.src_path, event.dest_path)
 
     def on_deleted(self, event):
         self.render.delete(event.src_path)
