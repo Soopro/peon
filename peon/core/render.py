@@ -101,12 +101,12 @@ class RenderHandler(object):
         tmp.close()
         return file_path
 
-    def _move_file(self, src_path, dest_path):
-        if os.path.isfile(dest_path):
-            os.remove(dest_path)
-        if os.path.isfile(src_path):
-            os.rename(src_path, dest_path)
-        return src_path
+    def _move_file(self, from_path, to_path):
+        if os.path.isfile(to_path):
+            os.remove(to_path)
+        if os.path.isfile(from_path):
+            os.rename(from_path, to_path)
+        return to_path
 
     def _in_skip_includes(self, file_ext):
         return any(x in self.skip_includes for x in ['*', file_ext])
