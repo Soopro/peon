@@ -414,7 +414,7 @@ class RenderHandler(object):
                 else:
                     return
             except Exception as e:
-                self._raise_exception(e, src_path, e)
+                self._raise_exception(e, src_path)
                 return
             self._print_message('Deleted: {}'.format(dest_path))
         else:
@@ -426,7 +426,7 @@ class RenderHandler(object):
                     self.render(move_to_path)
 
             except Exception as e:
-                self._raise_exception(e, src_path, e)
+                self._raise_exception(e, src_path)
                 return
             self._print_message('Moved: {} --> {}'.format(dest_path,
                                                           dest_moved_path))
@@ -441,7 +441,7 @@ class RenderHandler(object):
             else:
                 return
         except Exception as e:
-            self._raise_exception(e, src_path, e)
+            self._raise_exception(e, src_path)
             return
 
         self._print_message('Deleted: {}'.format(dest_path))
