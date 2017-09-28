@@ -73,13 +73,14 @@ class RenderHandler(object):
 
         self.rendering_all = False
 
-    def _raise_exception(self, err, src_path):
+    def _raise_exception(self, err, src_path, raise_up=True):
         sys.stdout.write('\a')
         print '--------------------'
         print '[{}Exception{}]: {}'.format(bpcolor.FAIL, bpcolor.ENDC, err)
         print '[src_path]: {}'.format(src_path)
         print '--------------------'
-        raise err
+        if raise_up:
+            raise err
 
     def _print_message(self, message):
         print '[{}] {}'.format(datetime.now().strftime('%H:%M:%S'), message)
@@ -414,7 +415,7 @@ class RenderHandler(object):
                 else:
                     return
             except Exception as e:
-                self._raise_exception(e, src_path)
+                self._raise_exception(e, src_path, False)
                 return
             self._print_message('Deleted: {}'.format(dest_path))
         else:
@@ -424,9 +425,8 @@ class RenderHandler(object):
                 else:
                     # render the moved file if not exists.
                     self.render(move_to_path)
-
             except Exception as e:
-                self._raise_exception(e, src_path)
+                self._raise_exception(e, src_path, False)
                 return
             self._print_message('Moved: {} --> {}'.format(dest_path,
                                                           dest_moved_path))
@@ -441,7 +441,7 @@ class RenderHandler(object):
             else:
                 return
         except Exception as e:
-            self._raise_exception(e, src_path)
+            self._raise_exception(e, src_path, False)
             return
 
         self._print_message('Deleted: {}'.format(dest_path))
