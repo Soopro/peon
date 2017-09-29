@@ -164,8 +164,11 @@ def rev(cfg):
 def render(cfg):
     src_dir = cfg.get('cwd', DEFAULT_SRC_DIR)
     dest_dir = cfg.get('dest', DEFAULT_BUILD_DIR)
+    render_aliases = cfg.get('render_aliases', [])
     skip_includes = cfg.get('skip_includes', [])
-    render = RenderHandler(src_dir, dest_dir, skip_includes)
+    render = RenderHandler(src_dir, dest_dir,
+                           aliases=render_aliases,
+                           skips=skip_includes)
     if cfg.get('clean', True):
         render.clean()
     render.render_all()

@@ -65,6 +65,7 @@ def watch():
 
     src_dir = peon_config.get('cwd', DEFAULT_SRC_DIR)
     dest_dir = peon_config.get('dest', DEFAULT_DEST_DIR)
+    render_aliases = peon_config.get('render_aliases', {})
     skip_includes = peon_config.get('skip_includes', [])
     clean_dest = peon_config.get('clean', True)
     server = peon_config.get('server', True)
@@ -74,8 +75,9 @@ def watch():
     if dest_dir == DEFAULT_SRC_DIR:
         dest_dir = DEFAULT_DEST_DIR
 
-    render = RenderHandler(src_dir, dest_dir, skip_includes)
-
+    render = RenderHandler(src_dir, dest_dir,
+                           aliases=render_aliases,
+                           skips=skip_includes)
     if clean_dest:
         render.clean()
         render.render_all()

@@ -28,13 +28,20 @@ class RenderingError(Exception):
 
 # handlers
 class RenderHandler(object):
-    replacement = {
+    rendered_ext = {
         'coffee': 'js',
         'decaf': 'js',  # `decaf` is coffeescript without header and wrapper.
         'less': 'css',
         'sass': 'css',
         'scss': 'css',
     }
+    render_aliases = {}
+
+    base_file_type = 'html'
+    tmpl_file_type = 'tmpl'
+
+    allow_tmpl_types = ('html', 'htm', 'tpl')
+
     includable_types = ['coffee', 'decaf', 'less', 'sass', 'scss',
                         'html', 'htm', 'tpl', 'tmpl']
 
@@ -45,9 +52,6 @@ class RenderHandler(object):
     incl_init_mark = '__init__'  # root and equals
     incl_dir_mark = '{}{}'.format(os.path.sep, incl_mark)  # dir
 
-    tmpl_file_type = 'tmpl'
-    base_file_type = 'html'
-
     incl_regex = re.compile(r'(\s*)(\{%\s*(?:include|import)\s+' +
                             r'["\']?\s*([\w\$\-\./\{\}\(\)]*)\s*["\']?' +
                             r'\s*[^%\}]*%\})',
@@ -55,13 +59,34 @@ class RenderHandler(object):
     tmpl_regex = re.compile(r'(\s*)(\{%\s*templates\s*%\})',
                             re.MULTILINE | re.DOTALL | re.IGNORECASE)
 
-    def __init__(self, src_dir='.', dest_dir='.', skips=None):
+    def __init__(self, src_dir='.', dest_dir='.', aliases={}, skips=None):
 
         self.root_dir = os.getcwd()
         self.src_dir = src_dir.strip(os.path.sep)
         self.dest_dir = dest_dir.strip(os.path.sep)
 
         self.dirs(self.dest_dir)
+
+        if isinstance(aliases, dict):
+            def _check_alias(obj):
+                _type = obj.get('type')
+                _ext = obj.get('ext')
+                return (isinstance(_ext, basestring) and
+                        isinstance(_type, basestring) and
+                        _type and _ext)
+
+            for k, v in aliases.iteritems():
+                if _check_alias(v):
+                    self.render_aliases[k] = {
+                        'type': v['type'],
+                        'ext': v['ext']
+                    }
+                    if v['type'] in self.includable_types:
+                        self.includable_types.append(k)
+                    _msg = '{}[{}->{}]'.format(v['type'], k, v['ext'])
+                else:
+                    _msg = 'invalid [{}]'.format(k)
+                print 'Render alias: {}'.format(_msg)
 
         if isinstance(skips, basestring):
             skips = [skips]
@@ -138,8 +163,10 @@ class RenderHandler(object):
 
     def _less(self, src_path, dest_path):
         try:
-            result = subprocess.check_output(['lessc', src_path])
-            self._write_file(dest_path, result)
+            subprocess.check_output(['lessc', src_path, dest_path])
+            # self._write_file(dest_path, result)
+            # seems no need write file anymore,
+            # the last time lessc can not output file? i forget.
         except Exception as e:
             self._raise_exception(RenderingError(e, 'less ↑'), src_path)
 
@@ -217,11 +244,15 @@ class RenderHandler(object):
             path = path.replace(self.src_dir, '', 1).lstrip(os.path.sep)
         filepath, ext = os.path.splitext(path)
         ext = ext[1:].lower()
-        comp_ext = self.replacement.get(ext, ext)
+        comp_ext = self.rendered_ext.get(ext, ext)
         compile_path = '{}{}{}'.format(self.dest_dir, os.path.sep, filepath)
         if comp_ext:
             compile_path = '{}.{}'.format(compile_path, comp_ext)
         return compile_path, comp_ext
+
+    def replace_dest_path_ext(self, path, replace_ext):
+        filepath, ext = os.path.splitext(path)
+        return '{}.{}'.format(filepath, replace_ext)
 
     def split_file_path(self, path):
         filepath, ext = os.path.splitext(path)
@@ -308,7 +339,7 @@ class RenderHandler(object):
             self._coffee_all()
             _lang_name = 'coffee'
             self._print_message('Rendered: *.{} --> *.{}'.format(_lang_name,
-                                self.replacement.get(_lang_name)))
+                                self.rendered_ext.get(_lang_name)))
 
         for f in [f for f in all_files if f not in excludes]:
             self.render(f)
@@ -317,16 +348,13 @@ class RenderHandler(object):
 
         print '\n<--- Rendered to: {}/**/* --->\n'.format(self.dest_dir)
 
-    def render(self, src_path, replace=True):
+    def render(self, src_path):
         if os.path.isdir(src_path):
             self.dirs(src_path)
             return
 
         filedir, filename, ext = self.split_file_path(src_path)
         dest_path, comp_ext = self.find_dest_path(src_path)
-
-        if not replace and os.path.isfile(dest_path):
-            return
 
         if self.is_inc_file(src_path, ext):
             # no ext file will render every file matched path,
@@ -362,7 +390,7 @@ class RenderHandler(object):
         elif self.is_tmpl_file(filename, ext):
             # when tmpl file chagned render all root files once
             root_files = self.find_files(self.src_dir,
-                                         ('html', 'htm', 'tpl'),
+                                         self.allow_tmpl_types,
                                          recursive=False)
             files = [rf for rf in root_files if not os.path.isdir(rf)]
             for f in files:
@@ -370,19 +398,28 @@ class RenderHandler(object):
             return
 
         print '--------------------'
+
+        if ext in self.render_aliases:
+            _render_type = self.render_aliases[ext]['type']
+            _render_ext = self.render_aliases[ext]['ext']
+            dest_path = self.replace_dest_path_ext(dest_path, _render_ext)
+        else:
+            _render_type = ext
+
         try:
-            if ext == 'coffee':
+            if _render_type == 'coffee':
                 self._coffee(src_path, dest_path)
-            elif ext == 'decaf':
+
+            elif _render_type == 'decaf':
                 self._decaf(src_path, dest_path)
 
-            elif ext == 'less':
+            elif _render_type == 'less':
                 self._less(src_path, dest_path)
 
-            elif ext in ('sass', 'scss'):
+            elif _render_type in ('sass', 'scss'):
                 self._sass(src_path, dest_path)
 
-            elif ext in ('html', 'tpl'):
+            elif _render_type in ('html', 'tpl'):
                 self._html(src_path, dest_path, ext)
 
             elif self.src_dir != self.dest_dir:
