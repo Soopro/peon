@@ -35,15 +35,15 @@ class RenderHandler(object):
         'sass': 'css',
         'scss': 'css',
     }
-    render_aliases = {}
+    render_aliases = {}  # custom render alias to built-in types.
 
-    base_file_type = 'html'
-    tmpl_file_type = 'tmpl'
+    """
+    file includes
+    """
+    incl_base_type = 'html'  # the ext when incl file with none ext.
 
-    allow_tmpl_types = ('html', 'htm', 'tpl')
-
-    includable_types = ['coffee', 'decaf', 'less', 'sass', 'scss',
-                        'html', 'htm', 'tpl', 'tmpl']
+    # file types able to includeable by other files with same exts.
+    includable_types = ['html', 'htm', 'tpl', 'less', 'sass', 'scss']
 
     incl_mark = '_'  # current
     incl_parent_mark = '__'  # parent
@@ -56,6 +56,14 @@ class RenderHandler(object):
                             r'["\']?\s*([\w\$\-\./\{\}\(\)]*)\s*["\']?' +
                             r'\s*[^%\}]*%\})',
                             re.MULTILINE | re.DOTALL | re.IGNORECASE)
+    """
+    file tmpls.
+    all *.tmpl file will aggregate together into html or tpl file.
+    """
+    tmpl_file_type = 'tmpl'
+
+    # file types allow to aggregate tmpl files. only 1 level in the src dir.
+    allow_tmpl_types = ('html', 'htm', 'tpl')
     tmpl_regex = re.compile(r'(\s*)(\{%\s*templates\s*%\})',
                             re.MULTILINE | re.DOTALL | re.IGNORECASE)
 
@@ -298,7 +306,7 @@ class RenderHandler(object):
 
     def is_inc_file(self, path, ext):
         if not ext:
-            ext = self.base_file_type
+            ext = self.incl_base_type
 
         if self._in_skip_includes(ext.lower()):
             return False
@@ -361,8 +369,8 @@ class RenderHandler(object):
             # such as `__init__` will render files in root dir.
             # `_g_` will render all file from root dir and every sub dir.
 
-            if filename.startswith(self.incl_root_mark) or \
-               filename == self.incl_init_mark:
+            if filename == self.incl_init_mark or \
+               filename.startswith(self.incl_root_mark):
                 path = None
                 recursive = False
             elif filename.startswith(self.incl_global_mark):
@@ -377,8 +385,8 @@ class RenderHandler(object):
                 recursive = False
 
             if not ext:
-                # inc file with none ext will render as base_file_type.
-                ext = self.base_file_type
+                # inc file with none ext will render as incl_base_type.
+                ext = self.incl_base_type
 
             files = self.find_files(path, ext, recursive)
 
