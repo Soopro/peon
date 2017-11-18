@@ -150,6 +150,17 @@ def remove_dir(path):
         raise e
 
 
+def clean_dir(dir_path):
+    for path in os.listdir(dir_path):
+        _path = os.path.join(dir_path, path)
+        if os.path.isfile(_path):
+            os.remove(_path)
+        elif os.path.isdir(_path):
+            shutil.rmtree(_path)
+        else:
+            print '<---- unknow path ??? ---->', _path
+
+
 def replace(pattern, replacement, content):
     if isinstance(pattern, (basestring)):
         pattern = re.escape(pattern)

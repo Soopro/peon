@@ -43,7 +43,6 @@ class PeonServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         return
 
 
-
 def simplehttp(port):
     httpd = SocketServer.TCPServer(('', port), PeonServerHandler, False)
     httpd.allow_reuse_address = True

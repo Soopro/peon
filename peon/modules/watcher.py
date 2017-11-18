@@ -56,8 +56,8 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
 # -------------
 # main
 # -------------
-def watch():
-    peon_config = load_config('watch')
+def watch(config_path=None):
+    peon_config = load_config('watch', config_path)
 
     print '------------'
     print 'Peon Wacther started'

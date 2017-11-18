@@ -8,7 +8,8 @@ import fnmatch
 
 from ..core import RenderHandler, MinifyHandler
 from ..utlis import (gen_md5, copy_file, safe_paths, grounded_paths,
-                     child_of_path, ensure_dir, remove_dir, remove_file)
+                     child_of_path, remove_file, ensure_dir, remove_dir,
+                     clean_dir)
 from ..helpers import load_config
 
 
@@ -218,8 +219,13 @@ def clean(paths):
             error = 'peon: Error -> Path [{}] is protected ...(clean)'
             raise Exception(error.format(path))
             continue
-        if os.path.isdir(path):
-            remove_dir(path)
+        elif not os.path.isdir(path):
+            error = 'peon: Error -> Path [{}] is not a dir ...(clean)'
+            raise Exception(error.format(path))
+            continue
+        else:
+            clean_dir(path)
+
     print 'peon: Work work ...(clean)'
 
 
@@ -284,14 +290,14 @@ COMMANDS = {
 }
 
 
-def construct(opts):
+def construct(opts, config_path=None):
     """
     Construct actions: `construct` as default, `init`, `build`, `release`
     """
     if opts.construct not in alias:
         opts.construct = 'construct'
 
-    cmd_cfg = load_config(opts.construct)
+    cmd_cfg = load_config(opts.construct, config_path)
     if not isinstance(cmd_cfg, list):
         cmd_cfg = [cmd_cfg]
 

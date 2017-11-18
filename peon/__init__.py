@@ -4,7 +4,7 @@ import argparse
 
 from .modules import (construct, packing, watch, server)
 
-__version_info__ = ('1', '3', '4')
+__version_info__ = ('1', '4', '1')
 __version__ = '.'.join(__version_info__)
 
 
@@ -18,6 +18,15 @@ def command_options():
                         action='store_const',
                         const=True,
                         help='Show current version.')
+
+    parser.add_argument('--config',
+                        dest='config_path',
+                        action='store',
+                        nargs='?',
+                        type=str,
+                        default=None,
+                        const=None,
+                        help='Define the config file path.')
 
     # Server
     parser.add_argument('-s', '--server',
@@ -70,10 +79,10 @@ def run():
     if opts.version:
         print 'Peon:', __version__
     elif opts.watcher:
-        watch()
+        watch(opts.config_path)
     elif opts.construct:
-        construct(opts)
+        construct(opts, opts.config_path)
     elif opts.zip:
-        packing()
+        packing(opts.config_path)
     else:
         server(opts)

@@ -88,8 +88,8 @@ def packzip(cfg):
 # -------------
 # main
 # -------------
-def packing():
-    cmd_cfg = load_config('packing')
+def packing(config_path=None):
+    cmd_cfg = load_config('packing', config_path)
 
     zip_cfg = cmd_cfg.get('zip')
     upload_cfg = cmd_cfg.get('upload')

@@ -4,13 +4,15 @@ from __future__ import absolute_import
 import json
 from collections import OrderedDict
 
-from .config import CONFIG_FILE_NAME
+from .config import DEFAULT_CONFIG_PATH
 from .utlis import BeautifyPrint as bpcolor
 
 
-def load_config(command):
+def load_config(command, config_path=None):
+    if not config_path:
+        config_path = DEFAULT_CONFIG_PATH
     try:
-        with open(CONFIG_FILE_NAME) as f:
+        with open(config_path) as f:
             config_data = json.load(f, object_pairs_hook=OrderedDict)
         config = config_data.get(command, {})
     except Exception as e:
