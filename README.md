@@ -147,12 +147,10 @@ The value of action alias could be **[ dict ]** or **[ list:dict ]**. Each actio
   * cwd: **[ str ]** from folder. default is 'dist' forlder.
   * src: **[ list:str ]** files name with relative path.
   * output: **[ str ]** output file name.
-  * beautify: **[ bool ]** not uglify output file. default is `False`.
-  * minify: **[ bool ]** minify when use `process_html`. default is `True`.
+  * mangle_js: **[ bool ]** uglifyjs to mangle js or not, default is `True`.
+  * beautify: **[ bool ]** minify output file. default is `False`.
   * prefix: **[ str ]** prefix of ng template name,
   for `inline_angular_templates` only. default is `''`.
-  * skip_includes: **[ bool ]** skip peon 'includes' files, default is `True`.
-  (file name starts with '_').
 
 `replace`: replace text.
   * cwd: **[ str ]** from folder. default is 'dist' folder.

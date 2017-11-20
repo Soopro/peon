@@ -49,11 +49,14 @@ class MinifyHandler(object):
     incl_dir_mark = '{}{}'.format(os.path.sep, incl_mark)
 
     minify_includes = False
+    mangle_js = False
+
     cwd_dir = 'dist'
 
-    def __init__(self, cwd, minify_includes=False):
+    def __init__(self, cwd, minify_includes=False, mangle_js=False):
         self.cwd_dir = cwd.strip(os.path.sep)
         self.minify_includes = minify_includes
+        self.mangle_js = mangle_js
 
     def _isfile(self, file_path):
         if os.path.isfile(file_path):
@@ -96,7 +99,7 @@ class MinifyHandler(object):
             return False
         return self.incl_dir_mark in path or path.startswith(self.incl_mark)
 
-    def _process_html(self, file_path, minify=True, beautify=False):
+    def _process_html(self, file_path, beautify=False):
         print "peon: Minify HTML process start"
 
         build_regex = self.build_regex
@@ -129,47 +132,45 @@ class MinifyHandler(object):
                 replacement = u'\n'.join(replist)
 
             elif comp_type == 'css':
-                if minify:
-                    css_series = []
-                    _text = re.sub(comment_regex, u'', text)
-                    for href in href_regex.findall(_text):
-                        if href.startswith(os.path.sep):
-                            _path = os.path.join(self.cwd_dir, href[1:])
-                        else:
-                            _path = os.path.join(curr_dir, href)
-
-                        css_series.append(self._read_file(_path))
-
-                    if beautify:
-                        css_source = u'\n'.join(css_series)
+                css_series = []
+                _text = re.sub(comment_regex, u'', text)
+                for href in href_regex.findall(_text):
+                    if href.startswith(os.path.sep):
+                        _path = os.path.join(self.cwd_dir, href[1:])
                     else:
-                        css_source = self._css(u'\n'.join(css_series))
+                        _path = os.path.join(curr_dir, href)
 
-                    ensure_dir(comp_file_path, True)
-                    self._output(comp_file_path, css_source)
+                    css_series.append(self._read_file(_path))
+
+                if beautify:
+                    css_source = u'\n'.join(css_series)
+                else:
+                    css_source = self._css(u'\n'.join(css_series))
+
+                ensure_dir(comp_file_path, True)
+                self._output(comp_file_path, css_source)
 
                 new_css_tpl = u'<link rel="stylesheet" href="{}">'
                 replacement = new_css_tpl.format(comp_file + comp_param)
 
             elif comp_type == 'js':
-                if minify:
-                    js_series = []
-                    _text = re.sub(comment_regex, u'', text)
-                    for src in src_regex.findall(_text):
-                        if src.startswith(os.path.sep):
-                            _path = os.path.join(self.cwd_dir, src[1:])
-                        else:
-                            _path = os.path.join(curr_dir, src)
-
-                        js_series.append(self._read_file(_path))
-
-                    if beautify:
-                        js_source = u'\n'.join(js_series)
+                js_series = []
+                _text = re.sub(comment_regex, u'', text)
+                for src in src_regex.findall(_text):
+                    if src.startswith(os.path.sep):
+                        _path = os.path.join(self.cwd_dir, src[1:])
                     else:
-                        js_source = self._uglifyjs(u'\n'.join(js_series))
+                        _path = os.path.join(curr_dir, src)
 
-                    ensure_dir(comp_file_path, True)
-                    self._output(comp_file_path, js_source)
+                    js_series.append(self._read_file(_path))
+
+                if beautify:
+                    js_source = u'\n'.join(js_series)
+                else:
+                    js_source = self._js(u'\n'.join(js_series))
+
+                ensure_dir(comp_file_path, True)
+                self._output(comp_file_path, js_source)
 
                 new_js_tpl = u'<script src="{}"></script>'
                 replacement = new_js_tpl.format(comp_file + comp_param)
@@ -190,7 +191,7 @@ class MinifyHandler(object):
                         _src_path = os.path.join(self.cwd_dir, attr[1:])
                     else:
                         _src_path = os.path.join(curr_dir, attr)
-                    if minify and self._isfile(_src_path) and \
+                    if self._isfile(_src_path) and \
                        _src_path != comp_file_path:
                         ensure_dir(comp_file_path, True)
                         shutil.copy2(_src_path, comp_file_path)
@@ -226,17 +227,18 @@ class MinifyHandler(object):
 
     def _uglifyjs(self, source):
         try:
-            # minifed = jsmin.jsmin(source)
             tmp_path = self._write_file(self.temp_js_file, source)
             minifed = subprocess.check_output(["uglifyjs", tmp_path, '-m'])
             os.remove(tmp_path)
         except Exception as e:
             print e
-            print "Make it sure uglifyjs is installed!"
+            print "Make it sure uglifyjs is work fine!"
             raise CompressError('js')
         return minifed
 
     def _js(self, source):
+        if self.mangle_js:
+            return self._uglifyjs(source)
         try:
             minifed = jsmin.jsmin(source)
         except Exception as e:
@@ -321,7 +323,7 @@ class MinifyHandler(object):
         if beautify:
             js_source = u'\n'.join(js_series)
         else:
-            js_source = self._uglifyjs(u'\n'.join(js_series))
+            js_source = self._js(u'\n'.join(js_series))
 
         self._output(output_path, js_source)
         print 'peon: JS minifed -> {}'.format(output_path)
@@ -338,10 +340,10 @@ class MinifyHandler(object):
             else:
                 raise CompressError('html not found')
 
-    def process_html(self, src_paths, minify=True, beautify=False):
+    def process_html(self, src_paths, beautify=False):
         for path in src_paths:
             if os.path.isfile(path):
-                html_source = self._process_html(path, minify, beautify)
+                html_source = self._process_html(path, beautify)
                 self._output(path, html_source)
                 print 'peon: HTML processed -> {}'.format(path)
             else:

@@ -249,7 +249,8 @@ def compress(rules):
     for rule in rules:
         cwd = safe_paths(rule.get('cwd', DEFAULT_DIST_DIR))
         minify_includes = rule.get('minify_includes', False)
-        minify = MinifyHandler(cwd, minify_includes)
+        mangle_js = rule.get('mangle_js', True)
+        minify = MinifyHandler(cwd, minify_includes, mangle_js)
         files = rule.get('src', [])
         minify_type = rule.get('type')
         minify_output = safe_paths(rule.get('output'))
@@ -264,8 +265,7 @@ def compress(rules):
         elif minify_type == 'js':
             minify.js(path_list, minify_output, minify_beautify)
         elif minify_type == 'process_html':
-            process_minify = rule.get('minify', True)
-            minify.process_html(path_list, process_minify, minify_beautify)
+            minify.process_html(path_list, minify_beautify)
         elif minify_type == 'inline_angular_templates':
             minify.concat_angular_template(path_list,
                                            minify_output,
