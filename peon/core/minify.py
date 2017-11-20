@@ -232,18 +232,30 @@ class MinifyHandler(object):
             os.remove(tmp_path)
         except Exception as e:
             print e
-            print "Make it sure uglifyjs is work fine!"
+            print "uglifyjs process failed!"
             raise CompressError('js')
         return minifed
 
-    def _js(self, source):
-        if self.mangle_js:
-            return self._uglifyjs(source)
+    def _jsmin(self, source):
         try:
             minifed = jsmin.jsmin(source)
         except Exception as e:
             print e
+            print "jsmin process failed!"
             raise CompressError('js')
+        return minifed
+
+    def _js(self, source):
+        if self.mangle_js is True:
+            minifed = self._uglifyjs(source)
+        elif self.mangle_js is False:
+            minifed = self._jsmin(source)
+        else:
+            try:
+                minifed = self._uglifyjs(source)
+            except Exception:
+                print "Failback to jsmin"
+                minifed = self._jsmin(source)
         return minifed
 
     def _html(self, source):
@@ -277,77 +289,97 @@ class MinifyHandler(object):
         return re.sub(self.tmpl_regex, tmpl_content, inject_source, 1)
 
     def css(self, src_paths, output, beautify=False):
-        css_series = []
-        for path in src_paths:
-            if os.path.isfile(path):
-                if self.is_include_file(path):
+        if output:
+            css_series = []
+            for path in src_paths:
+                if not os.path.isfile(path):
+                    raise CompressError('css not found')
+                elif self.is_include_file(path):
                     continue
-                if not output:
-                    output = os.path.basename(path)
                 css_series.append(self._read_file(path))
+            try:
+                output_path = os.path.join(self.cwd_dir, output)
+                ensure_dir(output_path, True)
+            except Exception as e:
+                print e
+                raise CompressError('css output path not found')
+
+            if beautify:
+                css_source = u'\n'.join(css_series)
             else:
-                raise CompressError('css not found')
-        try:
-            output_path = os.path.join(self.cwd_dir, output)
-            ensure_dir(output_path, True)
-        except Exception as e:
-            print e
-            raise CompressError('css output not found')
+                css_source = self._css(u'\n'.join(css_series))
 
-        if beautify:
-            css_source = u'\n'.join(css_series)
+            self._output(output_path, css_source)
+            print 'peon: CSS minifed -> {}'.format(output_path)
+
         else:
-            css_source = self._css(u'\n'.join(css_series))
-
-        self._output(output_path, css_source)
-        print 'peon: CSS minifed -> {}'.format(output_path)
+            for path in src_paths:
+                if not os.path.isfile(path):
+                    raise CompressError('css not found')
+                elif self.is_include_file(path):
+                    continue
+                css_content = self._read_file(path)
+                if beautify:
+                    css_source = css_content
+                else:
+                    css_source = self._css(css_content)
+                self._output(path, css_source)
 
     def js(self, src_paths, output, beautify=False):
-        js_series = []
-        for path in src_paths:
-            if os.path.isfile(path):
-                if self.is_include_file(path):
+        if output:
+            js_series = []
+            for path in src_paths:
+                if not os.path.isfile(path):
+                    raise CompressError('js not found')
+                elif self.is_include_file(path):
                     continue
-                if not output:
-                    output = os.path.basename(path)
                 js_series.append(self._read_file(path))
+            try:
+                output_path = os.path.join(self.cwd_dir, output)
+                ensure_dir(output_path, True)
+            except Exception as e:
+                print e
+                raise CompressError('js output path not found')
+
+            if beautify:
+                js_source = u'\n'.join(js_series)
             else:
-                raise CompressError('js not found')
-        try:
-            output_path = os.path.join(self.cwd_dir, output)
-            ensure_dir(output_path, True)
-        except Exception as e:
-            print e
-            raise CompressError('js output not found')
+                js_source = self._js(u'\n'.join(js_series))
 
-        if beautify:
-            js_source = u'\n'.join(js_series)
+            self._output(output_path, js_source)
+            print 'peon: JS minifed -> {}'.format(output_path)
+
         else:
-            js_source = self._js(u'\n'.join(js_series))
-
-        self._output(output_path, js_source)
-        print 'peon: JS minifed -> {}'.format(output_path)
+            for path in src_paths:
+                if not os.path.isfile(path):
+                    raise CompressError('js not found')
+                elif self.is_include_file(path):
+                    continue
+                js_content = self._read_file(path)
+                if beautify:
+                    js_source = js_content
+                else:
+                    js_source = self._js(js_content)
+                self._output(path, js_source)
 
     def html(self, src_paths):
         # html doesn't need concat files
         for path in src_paths:
-            if os.path.isfile(path):
-                if self.is_include_file(path):
-                    continue
-                html_source = self._html(self._read_file(path))
-                self._output(path, html_source)
-                print 'peon: HTML minifed -> {}'.format(path)
-            else:
+            if not os.path.isfile(path):
                 raise CompressError('html not found')
+            elif self.is_include_file(path):
+                continue
+            html_source = self._html(self._read_file(path))
+            self._output(path, html_source)
+            print 'peon: HTML minifed -> {}'.format(path)
 
     def process_html(self, src_paths, beautify=False):
         for path in src_paths:
-            if os.path.isfile(path):
-                html_source = self._process_html(path, beautify)
-                self._output(path, html_source)
-                print 'peon: HTML processed -> {}'.format(path)
-            else:
+            if not os.path.isfile(path):
                 raise CompressError('html not found')
+            html_source = self._process_html(path, beautify)
+            self._output(path, html_source)
+            print 'peon: HTML processed -> {}'.format(path)
 
     def concat_angular_template(self, src_paths, output,
                                 prefix='', beautify=False):
@@ -361,18 +393,18 @@ class MinifyHandler(object):
         tmpl_series = [u'<!-- Begin Templates -->']
 
         for path in src_paths:
-            if os.path.isfile(path):
-                if path == inject_path:
-                    continue
-                if self.is_include_file(path):
-                    continue
-                tmpl_id = path.replace(self.cwd_dir + os.path.sep, prefix, 1)
-                tmpl_content = self._make_ng_tpl(tmpl_id,
-                                                 self._read_file(path),
-                                                 beautify)
-                tmpl_series.append(tmpl_content)
-            else:
+            if not os.path.isfile(path):
                 raise CompressError('angular templates not found')
+            elif path == inject_path:
+                continue
+            elif self.is_include_file(path):
+                continue
+
+            tmpl_id = path.replace(self.cwd_dir + os.path.sep, prefix, 1)
+            tmpl_content = self._make_ng_tpl(tmpl_id,
+                                             self._read_file(path),
+                                             beautify)
+            tmpl_series.append(tmpl_content)
 
         tmpl_series.append(u'<!-- End Templates -->')
 
