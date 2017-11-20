@@ -147,7 +147,7 @@ The value of action alias could be **[ dict ]** or **[ list:dict ]**. Each actio
   * cwd: **[ str ]** from folder. default is 'dist' forlder.
   * src: **[ list:str ]** files name with relative path.
   * output: **[ str ]** output file name.
-  * beautify: **[ bool ]** minify output file. default is `True`.
+  * beautify: **[ bool ]** not uglify output file. default is `False`.
   * minify: **[ bool ]** minify when use `process_html`. default is `True`.
   * prefix: **[ str ]** prefix of ng template name,
   for `inline_angular_templates` only. default is `''`.
