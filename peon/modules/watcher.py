@@ -68,9 +68,8 @@ def watch(config_path=None):
     render_aliases = peon_config.get('render_aliases', {})
     skip_includes = peon_config.get('skip_includes', [])
     clean_dest = peon_config.get('clean', True)
-    server = peon_config.get('server', True)
+    server = peon_config.get('server')
     server_port = peon_config.get('port', '')
-    pyco_server = peon_config.get('pyco')
 
     if dest_dir == DEFAULT_SRC_DIR:
         dest_dir = DEFAULT_DEST_DIR
@@ -82,26 +81,24 @@ def watch(config_path=None):
         render.clean()
         render.render_all()
 
-    if server:
-        if pyco_server:
-            # args = ['python', '{}{}pyco.py'.format(pyco_server, os.path.sep)]
-            # pyco_progress = subprocess.Popen(args)
-            # live reload will be stop if chdir inside pyco,
-            # that's why switch to shell=True.
-            args = 'cd ' + pyco_server + ' && python pyco.py'
-            subprocess.Popen(args, shell=True)
+    if isinstance(server, basestring) and server:
+        # live reload will be stop when run pyco with parent path,
+        # ex. `python /pyco/pyco.py`.
+        # that's why switch to shell=True.
+        args = 'cd ' + server + ' && python pyco.py'
+        subprocess.Popen(args, shell=True)
+    elif server:
+        try:
+            port = str(server_port)
+        except Exception:
+            port = ''
+
+        if port:
+            args = ['peon', '-s', port, '--dir', dest_dir]
         else:
-            try:
-                port = str(server_port)
-            except Exception:
-                port = ''
+            args = ['peon', '-s', '--dir', dest_dir]
 
-            if port:
-                args = ['peon', '-s', port, '--dir', dest_dir]
-            else:
-                args = ['peon', '-s', '--dir', dest_dir]
-
-            subprocess.Popen(args)
+        subprocess.Popen(args)
 
     observer = Observer()
     watcher = WatchPatternsHandler(render_handler=render,
