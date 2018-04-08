@@ -134,6 +134,9 @@ The value of action alias could be **[ dict ]** or **[ list:dict ]**. Each actio
   * dest: **[ str ]** dest folder. default is 'build' folder.
   * skip_includes: **[ list:str ]** file exts which will not process 'includes' behavior. for example, you don't want **jinja2** template includes be render by peon.
   * clean: **[ bool ]** clean dest folder before rendering.
+  * render_aliases: **[ dict ]** render unknow files as given rules. the key is `<unknow_file_ext>`.
+    1. `type`: rendering as knew type, such as `less`, `coffee` ...
+    2. `ext`: rendering to any file ext as you wish.
 
 `compress`: **[ list:dict ]**, compress rendered files.
   * type: **[ str ]** type of compress.
@@ -316,6 +319,28 @@ The value of action alias could be **[ dict ]** or **[ list:dict ]**. Each actio
 ]
 ```
 
+How to use `render_aliases`?
+
+```
+"build": {
+  "clean": "build",
+  "render": {
+    "cwd": "src",
+    "dest": "build",
+    "render_aliases": {
+      "lwxss": {
+        "type": "less",
+        "ext": "wxss"
+      },
+      "wxml": {
+        "type": "html",
+        "ext": "wxml"
+      }
+    }
+  }
+}
+```
+
 
 =======================
 ### -z: Packing
@@ -393,10 +418,12 @@ action alis:
   * cwd: **[ str ]** the folder need to be watching.
   * dest: **[ str ]** the folder to output rendered.
   * clean: **[ bool ]** clean dest folder before watch.
-  * server: **[ bool ]** start http web server.
+  * server: **[ bool ]** or **[ str ]** start http web server. give a folder name as str, if you want start with pyco.
   * port: **[ str ]** the port when start http web server.
-  * pyco: **[ str ]** the pyco folder, than starts with pyco.
   * skip_includes: **[ list:str ]** file exts which will not process 'includes' behavior. for example, you don't want **jinja2** template
+  * render_aliases: **[ dict ]** render unknow files as given rules. the key is `<unknow_file_ext>`.
+    1. `type`: rendering as knew type, such as `less`, `coffee` ...
+    2. `ext`: rendering to any file ext as you wish.
 
 
 #### Watch config examples:
@@ -407,8 +434,17 @@ action alis:
   "dest": "pyco/themes/default",
   "clean": true,
   "server": false,
-  "pyco": "pyco",
-  "skip_includes": "html"
+  "skip_includes": "html",
+  "render_aliases": {
+    "lwxss": {
+      "type": "less",
+      "ext": "wxss"
+    },
+    "wxml": {
+      "type": "html",
+      "ext": "wxml"
+    }
+  }
 }
 ```
 
