@@ -85,7 +85,12 @@ def watch(config_path=None):
         # live reload will be stop when run pyco with parent path,
         # ex. `python /pyco/pyco.py`.
         # that's why switch to shell=True.
-        args = 'cd ' + server + ' && python pyco.py'
+        if server == 'pyco':
+            args = 'cd pyco && python pyco.py'
+        elif server == 'mittens':
+            args = 'cd mittens && peon -s'
+        else:
+            args = server  # cusotm server commands
         subprocess.Popen(args, shell=True)
     elif server:
         try:
