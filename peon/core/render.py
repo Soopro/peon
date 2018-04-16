@@ -156,16 +156,16 @@ class RenderHandler(object):
 
     def _coffee(self, src_path, dest_path):
         try:
-            subprocess.check_output(['coffee', '-c', '-o',
-                                     os.path.dirname(dest_path), src_path])
+            subprocess.check_output(['coffee', '-c',
+                                     '-o', dest_path, src_path])
         except Exception as e:
             self._raise_exception(RenderingError(e, 'coffee ↑'), src_path)
 
     def _decaf(self, src_path, dest_path):
         try:
-            rel_dest_dir = os.path.dirname(dest_path)
             subprocess.check_output(['coffee', '-c', '-b', '--no-header',
-                                     '-o', rel_dest_dir, src_path])
+                                     '-o', dest_path, src_path])
+
         except Exception as e:
             self._raise_exception(RenderingError(e, 'decaf ↑'), src_path)
 
