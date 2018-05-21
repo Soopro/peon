@@ -88,7 +88,7 @@ def watch(config_path=None):
         if server == 'pyco':
             args = 'cd pyco && python pyco.py'
         elif server == 'mittens':
-            args = 'cd mittens && peon -s'
+            args = 'cd mittens && peon -s {}'.format(server_port)
         else:
             args = server  # cusotm server commands
         subprocess.Popen(args, shell=True)
