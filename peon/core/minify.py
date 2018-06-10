@@ -32,18 +32,18 @@ class MinifyHandler(object):
     temp_file = '_minify_temp_.tmp'
     temp_js_file = '_minify_temp_.js'
 
-    tmpl_regex = re.compile('<\!--\s*ng\-templates\s*-->', re.IGNORECASE)
+    tmpl_regex = re.compile(r'<\!--\s*ng\-templates\s*-->', re.IGNORECASE)
 
-    build_regex = re.compile('(<\!--\s*build:\s*(\[?\s*[\w-]+\s*\]?)' +
-                             '\s+([\w\$\-\./\{\}\(\)]*)(\?.*?)*\s*-->' +
-                             '(.*?)<\!--\s*/build\s*-->)',
+    build_regex = re.compile(r'(<\!--\s*build:\s*(\[?\s*[\w-]+\s*\]?)' +
+                             r'\s+([\w\$\-\./\{\}\(\)]*)(\?.*?)*\s*-->' +
+                             r'(.*?)<\!--\s*/build\s*-->)',
                              re.MULTILINE | re.DOTALL | re.IGNORECASE)
 
-    attr_regex = re.compile('\[["\']?\s*([^"\']+)\s*["\']?\]', re.IGNORECASE)
-    src_regex = re.compile('src=["\']?\s*([^"\']+)\s*["\']?', re.IGNORECASE)
-    href_regex = re.compile('href=["\']?\s*([^"\']+)\s*["\']?', re.IGNORECASE)
+    attr_regex = re.compile(r'\[["\']?\s*([^"\']+)\s*["\']?\]', re.I)
+    src_regex = re.compile(r'src=["\']?\s*([^"\']+)\s*["\']?', re.I)
+    href_regex = re.compile(r'href=["\']?\s*([^"\']+)\s*["\']?', re.I)
 
-    comment_regex = re.compile('<\!--\s*(.*?)\s*-->', re.IGNORECASE)
+    comment_regex = re.compile(r'<\!--\s*(.*?)\s*-->', re.IGNORECASE)
 
     incl_mark = '_'
     incl_dir_mark = '{}{}'.format(os.path.sep, incl_mark)

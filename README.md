@@ -149,7 +149,7 @@ The value of action alias could be **[ dict ]** or **[ list:dict ]**. Each actio
     5. `inline_angular_templates`: concat all ng templates into one file.
   * cwd: **[ str ]** from folder. default is 'dist' forlder.
   * src: **[ list:str ]** files name with relative path.
-  * output: **[ str ]** output file name.
+  * output: **[ str ]** the file name when concat and output to one file.
   * mangle_js: **[ bool ]** uglifyjs to mangle js or not, default is `True`.
   * beautify: **[ bool ]** minify output file. default is `False`.
   * prefix: **[ str ]** prefix of ng template name,
