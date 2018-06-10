@@ -249,7 +249,7 @@ def compress(rules):
     for rule in rules:
         cwd = safe_paths(rule.get('cwd', DEFAULT_DIST_DIR))
         minify_includes = rule.get('minify_includes', False)
-        mangle_js = rule.get('mangle_js', True)
+        mangle_js = rule.get('mangle_js', False)
         minify = MinifyHandler(cwd, minify_includes, mangle_js)
         files = rule.get('src', [])
         minify_type = rule.get('type')
