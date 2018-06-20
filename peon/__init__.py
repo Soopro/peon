@@ -4,7 +4,7 @@ import argparse
 
 from .modules import (construct, packing, watch, server)
 
-__version_info__ = ('1', '4', '9')
+__version_info__ = ('1', '4', '11')
 __version__ = '.'.join(__version_info__)
 
 
@@ -30,12 +30,28 @@ def command_options():
 
     # Server
     parser.add_argument('-s', '--server',
+                        dest='server',
+                        action='store_const',
+                        const=True,
+                        help='Start dev server.')
+
+    parser.add_argument('--host',
+                        dest='host',
+                        action='store',
+                        nargs='?',
+                        type=str,
+                        default='',
+                        const=None,
+                        help='Start dev server at host.')
+
+    parser.add_argument('--port',
                         dest='port',
                         action='store',
                         nargs='?',
-                        type=int,
-                        const=9527,
-                        help='Start dev server at port.')
+                        type=str,
+                        default='9527',
+                        const='9527',
+                        help='Start dev server at host.')
 
     parser.add_argument('--dir',
                         dest='dir',
@@ -84,5 +100,5 @@ def run():
         construct(opts, opts.config_path)
     elif opts.zip:
         packing(opts.config_path)
-    else:
-        server(opts)
+    elif opts.server:
+        server(opts.host, opts.port, opts.dir)
