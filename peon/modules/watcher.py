@@ -1,13 +1,13 @@
 # coding=utf-8
 from __future__ import absolute_import
 
-import os
 import subprocess
 import time
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
 from ..core import RenderHandler
+from ..utlis import BeautifyPrint as bpcolor
 from ..helpers import load_config
 
 
@@ -69,8 +69,8 @@ def watch(config_path=None):
     skip_includes = peon_config.get('skip_includes', [])
     clean_dest = peon_config.get('clean', True)
     server = peon_config.get('server')
-    host = peon_config.get('host', '')
-    port = peon_config.get('port', '')
+    host = str(peon_config.get('host', ''))
+    port = str(peon_config.get('port', ''))
 
     if dest_dir == DEFAULT_SRC_DIR:
         dest_dir = DEFAULT_DEST_DIR
@@ -87,17 +87,18 @@ def watch(config_path=None):
         # ex. `python /pyco/pyco.py`.
         # that's why switch to shell=True.
         if server == 'pyco':
-            args = 'cd pyco && python pyco.py'
+            args = ['python', 'pyco.py']
+            if port or host:
+                msg = '*** You must setup `port` and `host` in pyco config.'
+                print '{}{}{}:'.format(bpcolor.FAIL, msg, bpcolor.ENDC)
+            subprocess.Popen(args, cwd='pyco')
         elif server == 'mittens':
-            args = 'cd mittens && peon -s {} --host {}'.format(port, host)
-        else:
-            args = server  # cusotm server commands
-        subprocess.Popen(args, shell=True)
+            # args = 'peon -s --port {} --host {}'.format(port, host)
+            args = ['peon', '-s', '--port', port, '--host', host]
+            subprocess.Popen(args, cwd='mittens')
     elif server:
-        port = str(port)
-        host = str(host)
-        args = ['peon', '-s', port, '--host', host, '--dir', dest_dir]
-        subprocess.Popen(args)
+        args = ['peon', '-s', '--port', port, '--host', host]
+        subprocess.Popen(args, cwd=dest_dir)
 
     observer = Observer()
     watcher = WatchPatternsHandler(render_handler=render,

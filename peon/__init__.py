@@ -4,7 +4,7 @@ import argparse
 
 from .modules import (construct, packing, watch, server)
 
-__version_info__ = ('1', '4', '11')
+__version_info__ = ('1', '5', '0')
 __version__ = '.'.join(__version_info__)
 
 
@@ -51,15 +51,7 @@ def command_options():
                         type=str,
                         default='9527',
                         const='9527',
-                        help='Start dev server at host.')
-
-    parser.add_argument('--dir',
-                        dest='dir',
-                        action='store',
-                        nargs='?',
-                        type=str,
-                        const=None,
-                        help='Define dev server operation dir.')
+                        help='Start dev server at port.')
 
     # Watcher
     parser.add_argument('-w', '--watcher',
@@ -86,12 +78,14 @@ def command_options():
                         help='Run packing zip file.')
 
     opts, unknown = parser.parse_known_args()
+    opts._print_help = parser.print_help
 
     return opts
 
 
 def run():
     opts = command_options()
+
     if opts.version:
         print 'Peon:', __version__
     elif opts.watcher:
@@ -101,4 +95,6 @@ def run():
     elif opts.zip:
         packing(opts.config_path)
     elif opts.server:
-        server(opts.host, opts.port, opts.dir)
+        server(opts.host, opts.port)
+    else:
+        opts._print_help()
