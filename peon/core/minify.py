@@ -55,8 +55,14 @@ class MinifyHandler(object):
 
     def __init__(self, cwd, minify_includes=False, mangle_js=False):
         self.cwd_dir = cwd.strip(os.path.sep)
+
         self.minify_includes = minify_includes
+        # includes file usually will combine to parent file,
+        # turn this option on will minify all files,
+        # even it is match with include pattern,
+
         self.mangle_js = mangle_js
+        # mangle js will convert variable name to letter as alias.
 
     def _isfile(self, file_path):
         if os.path.isfile(file_path):
@@ -96,6 +102,7 @@ class MinifyHandler(object):
 
     def is_include_file(self, path):
         if self.minify_includes:
+            # look includes file as normal
             return False
         return self.incl_dir_mark in path or path.startswith(self.incl_mark)
 
