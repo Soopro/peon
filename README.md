@@ -477,6 +477,7 @@ Start web server wich cli.
 
 `__init__` Init files, Render all files from root folder.
 
+`_<dir>` Dir is includes. Render all files is same folder beside the dir.
 
 =======================
 
