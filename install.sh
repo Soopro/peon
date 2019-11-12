@@ -5,9 +5,9 @@ do
   if [ $arg = "-p" -o $arg = "--packages" ]
     then
       echo 'Setup Peon with reuiqred packages'
-      sudo pip install -r requirements.txt
+      sudo pip3 install -r requirements.txt
       sudo npm install -g coffeescript less uglify-js
   fi
 done
 
-sudo python setup.py install
+sudo python3 setup.py install

@@ -1,5 +1,5 @@
 # coding=utf-8
-from __future__ import absolute_import
+
 import os
 import re
 import time
@@ -19,50 +19,50 @@ def gen_md5():
 def copy_tree(src, dest):
     try:
         shutil.copytree(src, dest)
-        print 'peon: Copied -> ' + src
+        print('peon: Copied -> ' + src)
     # eg. src and dest are the same file
     except shutil.Error as e:
-        print('peon: shutil Error -> %s' % e)
+        print(('peon: shutil Error -> %s' % e))
         raise e
     # eg. source or destination doesn't exist
     except IOError as e:
-        print('peon: IOError -> %s' % e.strerror)
+        print(('peon: IOError -> %s' % e.strerror))
         raise e
     # other errors
     except Exception as e:
-        print('peon: Error -> %s' % e)
+        print(('peon: Error -> %s' % e))
         raise e
 
 
 def copy_file(src, dest):
     try:
         shutil.copy2(src, dest)
-        print 'peon: Copied {} ---> {}'.format(src, dest)
+        print('peon: Copied {} ---> {}'.format(src, dest))
     # eg. src and dest are the same file
     except shutil.Error as e:
-        print('peon: shutil Error -> %s' % e)
+        print(('peon: shutil Error -> %s' % e))
         raise e
     # eg. source or destination doesn't exist
     except IOError as e:
-        print('peon: IOError -> %s' % e.strerror)
+        print(('peon: IOError -> %s' % e.strerror))
         raise e
     # other errors
     except Exception as e:
-        print('peon: Error -> %s' % e)
+        print(('peon: Error -> %s' % e))
         raise e
 
 
 def remove_file(path):
     try:
         os.remove(path)
-        print 'peon: Removed ---> ' + path
+        print('peon: Removed ---> ' + path)
     # eg. source or destination doesn't exist
     except IOError as e:
-        print('peon: IOError -> %s' % e.strerror)
+        print(('peon: IOError -> %s' % e.strerror))
         raise e
     # other errors
     except Exception as e:
-        print('peon: Error -> %s' % e)
+        print(('peon: Error -> %s' % e))
         raise e
 
 
@@ -81,7 +81,7 @@ def grounded_paths(cwd='.', *args):
         return None
     cwd_abs_dir = os.path.normpath(os.path.join(os.getcwd(), cwd))
     if len(args) == 1:
-        if isinstance(args[0], (basestring)):
+        if isinstance(args[0], (str)):
             path = os.path.normpath(args[0])
             _path = os.path.join(os.getcwd(), path)
             if cwd_abs_dir in os.path.normpath(_path):
@@ -105,12 +105,12 @@ def safe_paths(*args):
     if len(args) == 0:
         return None
     if len(args) == 1:
-        if isinstance(args[0], (basestring)):
+        if isinstance(args[0], (str)):
             return os.path.normpath(args[0]).strip(os.path.sep)
         return None
     p_list = []
     for path in args:
-        if isinstance(path, (basestring)):
+        if isinstance(path, (str)):
             path = os.path.normpath(path)
             p_list.append(path.strip(os.path.sep))
         else:
@@ -124,29 +124,29 @@ def ensure_dir(path, is_file=False):
         dirname = os.path.dirname(path)
         if dirname and not os.path.isdir(dirname):
             os.makedirs(dirname)
-            print('peon: Create dir -> %s' % dirname)
+            print(('peon: Create dir -> %s' % dirname))
     else:
         if not os.path.isdir(path):
             os.makedirs(path)
-            print('peon: Create dir -> %s' % path)
+            print(('peon: Create dir -> %s' % path))
 
 
 def remove_dir(path):
     try:
         dir_path = safe_paths(path)
         shutil.rmtree(dir_path)
-        print 'peon: Removed dir -> ' + dir_path
+        print('peon: Removed dir -> ' + dir_path)
     # eg. src and dest are the same file
     except shutil.Error as e:
-        print('peon: shutil Error -> %s' % e)
+        print(('peon: shutil Error -> %s' % e))
         raise e
     # eg. source or destination doesn't exist
     except IOError as e:
-        print('peon: IOError -> %s' % e.strerror)
+        print(('peon: IOError -> %s' % e.strerror))
         raise e
     # other errors
     except Exception as e:
-        print('peon: Error -> %s' % e)
+        print(('peon: Error -> %s' % e))
         raise e
 
 
@@ -158,11 +158,11 @@ def clean_dir(dir_path):
         elif os.path.isdir(_path):
             shutil.rmtree(_path)
         else:
-            print '<---- unknow path ??? ---->', _path
+            print('<---- unknow path ??? ---->', _path)
 
 
 def replace(pattern, replacement, content):
-    if isinstance(pattern, (basestring)):
+    if isinstance(pattern, (str)):
         pattern = re.escape(pattern)
     pattern = re.compile(pattern, re.IGNORECASE)
     content = re.sub(pattern, replacement, content)

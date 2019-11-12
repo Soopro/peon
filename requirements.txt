@@ -1,7 +1,6 @@
-watchdog >= 0.8.3
-requests >= 2.3.0
-libsass >= 0.13.2
-PyYAML >= 3.11
-htmlmin >= 0.1.6
-cssmin >= 0.2.0
-jsmin >= 2.1.2
+watchdog ~= 0.9
+requests ~= 2.22
+libsass ~= 0.19
+htmlmin ~= 0.1
+cssmin ~= 0.2
+jsmin ~= 2.1

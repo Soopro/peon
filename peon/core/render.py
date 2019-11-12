@@ -1,5 +1,5 @@
 # coding=utf-8
-from __future__ import absolute_import
+
 
 import os
 import shutil
@@ -79,11 +79,11 @@ class RenderHandler(object):
             def _check_alias(obj):
                 _type = obj.get('type')
                 _ext = obj.get('ext')
-                return (isinstance(_ext, basestring) and
-                        isinstance(_type, basestring) and
+                return (isinstance(_ext, str) and
+                        isinstance(_type, str) and
                         _type and _ext)
 
-            for k, v in aliases.iteritems():
+            for k, v in aliases.items():
                 if _check_alias(v):
                     self.render_aliases[k] = {
                         'type': v['type'],
@@ -94,33 +94,33 @@ class RenderHandler(object):
                     _msg = '{}[{}->{}]'.format(v['type'], k, v['ext'])
                 else:
                     _msg = 'invalid [{}]'.format(k)
-                print 'Render alias: {}'.format(_msg)
+                print('Render alias: {}'.format(_msg))
 
-        if isinstance(skips, basestring):
+        if isinstance(skips, str):
             skips = [skips]
         elif not isinstance(skips, list):
             skips = []
 
         self.skip_includes = [str(incl).lower() for incl in (skips or [])]
-        print 'Skiped include types: {}'.format(self.skip_includes)
+        print('Skiped include types: {}'.format(self.skip_includes))
 
         self.rendering_all = False
 
     def _raise_exception(self, err, src_path, raise_up=True):
         sys.stdout.write('\a')
-        print '--------------------'
-        print '[{}Exception{}]: {}'.format(bpcolor.FAIL, bpcolor.ENDC, err)
-        print '[src_path]: {}'.format(src_path)
-        print '--------------------'
+        print('--------------------')
+        print('[{}Exception{}]: {}'.format(bpcolor.FAIL, bpcolor.ENDC, err))
+        print('[src_path]: {}'.format(src_path))
+        print('--------------------')
         if raise_up:
             raise err
 
     def _print_message(self, message):
-        print '[{}] {}'.format(datetime.now().strftime('%H:%M:%S'), message)
+        print('[{}] {}'.format(datetime.now().strftime('%H:%M:%S'), message))
 
     def _read_file(self, file_path):
         file = open(file_path)
-        file_source = file.read().decode('utf-8')
+        file_source = file.read()
         file.close()
         return file_source
 
@@ -129,8 +129,8 @@ class RenderHandler(object):
             os.remove(file_path)
         self.dirs(os.path.dirname(file_path))
         tmp = open(file_path, 'w')
-        if isinstance(file_source, unicode):
-            file_source = file_source.encode('utf-8')
+        if isinstance(file_source, str):
+            file_source = file_source
         tmp.write(file_source)
         tmp.close()
         return file_path
@@ -217,12 +217,12 @@ class RenderHandler(object):
         regex_result = self.tmpl_regex.findall(content)
         tmpl_ext = self.tmpl_file_type
         for space, match in regex_result:
-            tmpl_series = [u'<!-- Begin Templates -->']
+            tmpl_series = ['<!-- Begin Templates -->']
             for path in self.find_files(self.src_dir, file_ext=tmpl_ext):
                 if os.path.isfile(path) and path != self_path:
                     _content = self._process_html_includes(path)
                     tmpl_series.append(_content)
-            tmpl_series.append(u'<!-- End Templates -->')
+            tmpl_series.append('<!-- End Templates -->')
             content = content.replace(match, '\n'.join(tmpl_series))
         return content
 
@@ -272,7 +272,7 @@ class RenderHandler(object):
     def find_files(self, path='.', file_ext=None, recursive=True):
         results = []
 
-        if file_ext and isinstance(file_ext, basestring):  # ext could ''
+        if file_ext and isinstance(file_ext, str):  # ext could ''
             file_ext = set([file_ext])
         elif isinstance(file_ext, list):
             file_ext = set(file_ext)
@@ -325,10 +325,10 @@ class RenderHandler(object):
             elif os.path.isdir(_path):
                 shutil.rmtree(_path)
             else:
-                print '<---- clean a unknow ??? ---->', _path
+                print('<---- clean a unknow ??? ---->', _path)
 
     def render_all(self):
-        print '\n<--- Rendering: {}/**/* --->\n'.format(self.src_dir)
+        print('\n<--- Rendering: {}/**/* --->\n'.format(self.src_dir))
 
         self.rendering_all = True
         has_coffee = False
@@ -354,7 +354,7 @@ class RenderHandler(object):
 
         self.rendering_all = False
 
-        print '\n<--- Rendered to: {}/**/* --->\n'.format(self.dest_dir)
+        print('\n<--- Rendered to: {}/**/* --->\n'.format(self.dest_dir))
 
     def render(self, src_path):
         if os.path.isdir(src_path):
@@ -405,7 +405,7 @@ class RenderHandler(object):
                 self.render(f)
             return
 
-        print '--------------------'
+        print('--------------------')
 
         if ext in self.render_aliases:
             _render_type = self.render_aliases[ext]['type']

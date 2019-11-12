@@ -1,5 +1,5 @@
 # coding=utf-8
-from __future__ import absolute_import
+
 
 import os
 import re
@@ -39,9 +39,9 @@ def _nested_files(nested, pattern, cwd_pattern):
             if f_level >= nested_level:
                 paths.append(f_path)
 
-    print 'peon: Nested files -> {}/ [{}][{}]'.format(nested_path,
+    print('peon: Nested files -> {}/ [{}][{}]'.format(nested_path,
                                                       nested_suffix,
-                                                      nested_level)
+                                                      nested_level))
     return paths
 
 
@@ -65,7 +65,7 @@ def _find_path_list(src, cwd):
 
         for path in paths:
             if not os.path.exists(path):
-                print 'peon: Failed -> ' + path + ' (not exist)'
+                print('peon: Failed -> ' + path + ' (not exist)')
                 continue
             if path not in path_list:
                 path_list.append(path)
@@ -117,7 +117,7 @@ def copy(rules):
                 copy_file(path, dest_path)
             else:
                 continue
-    print 'peon: Work work ...(copy)'
+    print('peon: Work work ...(copy)')
 
 
 def rev(cfg):
@@ -126,7 +126,7 @@ def rev(cfg):
     except Exception:
         find_str = '?md5=<rev>'
 
-    if isinstance(find_str, unicode):
+    if isinstance(find_str, str):
         find_str = find_str.encode('utf-8')
     rev_str = find_str.replace('<rev>', gen_md5())
 
@@ -143,10 +143,10 @@ def rev(cfg):
                 try:
                     line = line.replace(find_str, rev_str)
                 except Exception as e:
-                    print '---------->'
-                    print 'line:', line,
-                    print 'find:', find_str
-                    print 'rev:', rev_str
+                    print('---------->')
+                    print('line:', line, end=' ')
+                    print('find:', find_str)
+                    print('rev:', rev_str)
                     raise e
                 tmp.write(line)
 
@@ -154,12 +154,12 @@ def rev(cfg):
         if os.path.isfile(path):
             os.remove(path)
         os.rename(TEMP_FILE, path)
-        print 'peon: MD5ify -> ' + path
+        print('peon: MD5ify -> ' + path)
 
     if os.path.isfile(TEMP_FILE):
         os.remove(TEMP_FILE)
 
-    print 'peon: Work work ...(rev)'
+    print('peon: Work work ...(rev)')
 
 
 def render(cfg):
@@ -173,7 +173,7 @@ def render(cfg):
     if cfg.get('clean', True):
         render.clean()
     render.render_all()
-    print 'peon: Work work ...(render)'
+    print('peon: Work work ...(render)')
 
 
 def replace(cfg):
@@ -191,11 +191,11 @@ def replace(cfg):
                 pattern = _rule.get('from')
                 replace = _rule.get('to')
                 if pattern is None or replace is None:
-                    print 'peon: Failed -> replace is no pattern'
+                    print('peon: Failed -> replace is no pattern')
                     continue
-                if isinstance(pattern, unicode):
+                if isinstance(pattern, str):
                     pattern = pattern.encode('utf-8')
-                if isinstance(replace, unicode):
+                if isinstance(replace, str):
                     replace = replace.encode('utf-8')
                 line = line.replace(pattern, replace)
             tmp.write(line)
@@ -204,12 +204,12 @@ def replace(cfg):
         if os.path.isfile(path):
             os.remove(path)
         os.rename(TEMP_FILE, path)
-        print 'peon: Replaced --> ' + path
+        print('peon: Replaced --> ' + path)
 
     if os.path.isfile(TEMP_FILE):
         os.remove(TEMP_FILE)
 
-    print 'peon: Work work ...(replace)'
+    print('peon: Work work ...(replace)')
 
 
 def clean(paths):
@@ -226,7 +226,7 @@ def clean(paths):
         else:
             clean_dir(path)
 
-    print 'peon: Work work ...(clean)'
+    print('peon: Work work ...(clean)')
 
 
 def scrap(cfg):
@@ -236,13 +236,13 @@ def scrap(cfg):
     for path in path_list:
         if child_of_path(path, DEFAULT_SRC_DIR):
             error = 'peon: Path [{}] is protected ...(scrap)'
-            print error.format(path)
+            print(error.format(path))
             continue
         if os.path.isdir(path):
             remove_dir(path)
         elif os.path.isfile(path):
             remove_file(path)
-    print 'peon: Work work ...(scrap)'
+    print('peon: Work work ...(scrap)')
 
 
 def compress(rules):
@@ -272,7 +272,7 @@ def compress(rules):
                                            rule.get('prefix', ''),
                                            minify_beautify)
 
-    print 'peon: Work work ...(compress)'
+    print('peon: Work work ...(compress)')
 
 
 # -------------
@@ -302,9 +302,9 @@ def construct(opts, config_path=None):
         cmd_cfg = [cmd_cfg]
 
     for task in cmd_cfg:
-        for k, v in task.iteritems():
+        for k, v in task.items():
             cmd = COMMANDS.get(k)
             if cmd:
                 cmd(v)
 
-    print 'peon: finish construct ...'
+    print('peon: finish construct ...')

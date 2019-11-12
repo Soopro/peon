@@ -1,5 +1,5 @@
 # coding=utf-8
-from __future__ import absolute_import
+
 
 import json
 from collections import OrderedDict
@@ -16,11 +16,11 @@ def load_config(command, config_path=None):
             config_data = json.load(f, object_pairs_hook=OrderedDict)
         config = config_data.get(command, {})
     except Exception as e:
-        print '--------------------'
-        print '{}Config error{}:'.format(bpcolor.FAIL, bpcolor.ENDC)
+        print('--------------------')
+        print('{}Config error{}:'.format(bpcolor.FAIL, bpcolor.ENDC))
         raise e
 
-    print '--------------------------------------------'
-    print 'Peon: Ready to work.'
-    print '--------------------------------------------'
+    print('--------------------------------------------')
+    print('Peon: Ready to work.')
+    print('--------------------------------------------')
     return config

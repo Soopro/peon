@@ -1,13 +1,13 @@
 # coding=utf-8
-from __future__ import absolute_import
+
 
 import os
-import SimpleHTTPServer
-import SocketServer
+import http.server
+import socketserver
 
 
 # handlers
-class PeonServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+class PeonServerHandler(http.server.SimpleHTTPRequestHandler):
 
     REWRITE_ROOT = 'index'
     REWRITE_EXT = 'html'
@@ -39,21 +39,21 @@ class PeonServerHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         return path
 
     def render(self):
-        SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
+        http.server.SimpleHTTPRequestHandler.do_GET(self)
         return
 
 
 def simplehttp(host, port):
-    httpd = SocketServer.TCPServer((host, port), PeonServerHandler, False)
+    httpd = socketserver.TCPServer((host, port), PeonServerHandler, False)
     httpd.allow_reuse_address = True
     httpd.server_bind()
     httpd.server_activate()
 
-    print '------------'
-    print 'Peon server'
-    print 'Start SimpleHTTPServer at http://{}:{}/'.format(host, port)
-    print 'Press Ctl+C to stop the server'
-    print '------------'
+    print('------------')
+    print('Peon server')
+    print('Start SimpleHTTPServer at http://{}:{}/'.format(host, port))
+    print('Press Ctl+C to stop the server')
+    print('------------')
 
     try:
         httpd.serve_forever()

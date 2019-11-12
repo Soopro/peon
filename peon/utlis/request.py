@@ -1,5 +1,5 @@
 # coding=utf-8
-from __future__ import absolute_import
+
 
 import json
 import requests
@@ -15,12 +15,12 @@ def getData(url, params=None, headers=None, is_json=True):
                          headers=request_headers)
         r.raise_for_status()
     except requests.RequestException as e:
-        print '========== Requests =========='
-        print e
-        print '------------------------------'
+        print('========== Requests ==========')
+        print(e)
+        print('------------------------------')
         if r is not None:
-            print r.json()
-        print '=============================='
+            print(r.json())
+        print('==============================')
         raise e
 
     return r
@@ -38,12 +38,12 @@ def uploadData(url, data=None, params=None, headers=None, is_json=True):
                           headers=request_headers)
         r.raise_for_status()
     except requests.RequestException as e:
-        print '========== Requests =========='
-        print e
-        print '------------------------------'
+        print('========== Requests ==========')
+        print(e)
+        print('------------------------------')
         if r is not None:
-            print r.json()
-        print '=============================='
+            print(r.json())
+        print('==============================')
         raise e
     return r
 
@@ -65,12 +65,12 @@ def uploadFile(file_path, url,
                           timeout=timeout)
         r.raise_for_status()
     except requests.RequestException as e:
-        print '========== Requests =========='
-        print e
-        print '------------------------------'
+        print('========== Requests ==========')
+        print(e)
+        print('------------------------------')
         if r is not None:
-            print r.json()
-        print '=============================='
+            print(r.json())
+        print('==============================')
         raise e
 
     return r

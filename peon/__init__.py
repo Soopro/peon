@@ -1,10 +1,10 @@
 # coding=utf-8
-from __future__ import absolute_import
+
 import argparse
 
 from .modules import (construct, packing, watch, server)
 
-__version_info__ = ('1', '5', '1')
+__version_info__ = ('3', '0', '0')
 __version__ = '.'.join(__version_info__)
 
 
@@ -87,7 +87,7 @@ def run():
     opts = command_options()
 
     if opts.version:
-        print 'Peon:', __version__
+        print('Peon:', __version__)
     elif opts.watcher:
         watch(opts.config_path)
     elif opts.construct:

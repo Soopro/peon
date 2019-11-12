@@ -1,5 +1,5 @@
 # coding=utf-8
-from __future__ import absolute_import
+
 
 import os
 import time
@@ -13,7 +13,7 @@ DEFAULT_PATH = '.'
 
 
 def _get_filename(cwd=None):
-    if isinstance(cwd, (str, unicode)):
+    if isinstance(cwd, str):
         filename = cwd.strip(os.path.sep).rsplit(os.path.sep, 1)
     else:
         filename = os.getcwd().strip(os.path.sep).rsplit(os.path.sep, 1)
@@ -47,7 +47,7 @@ def upload(cfg):
     if delete:
         os.remove(file_path)
 
-    print 'peon: package is uploaded...', time.time() - start_time
+    print('peon: package is uploaded...', time.time() - start_time)
 
 
 def packzip(cfg):
@@ -82,7 +82,7 @@ def packzip(cfg):
         os.rename(filename, abs_file_path)
 
     os.chdir(start_dir)
-    print 'peon: files in the package ...'
+    print('peon: files in the package ...')
 
 
 # -------------
@@ -99,4 +99,4 @@ def packing(config_path=None):
     if upload_cfg:
         upload(upload_cfg)
 
-    print 'peon: Finish packing ...'
+    print('peon: Finish packing ...')

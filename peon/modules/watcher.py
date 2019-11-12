@@ -1,5 +1,5 @@
 # coding=utf-8
-from __future__ import absolute_import
+
 
 import subprocess
 import time
@@ -59,9 +59,9 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
 def watch(config_path=None):
     peon_config = load_config('watch', config_path)
 
-    print '------------'
-    print 'Peon Wacther started'
-    print '------------'
+    print('------------')
+    print('Peon Wacther started')
+    print('------------')
 
     src_dir = peon_config.get('cwd', DEFAULT_SRC_DIR)
     dest_dir = peon_config.get('dest', DEFAULT_DEST_DIR)
@@ -82,15 +82,15 @@ def watch(config_path=None):
         render.clean()
         render.render_all()
 
-    if isinstance(server, basestring) and server:
+    if isinstance(server, str) and server:
         # live reload will be stop when run pyco with parent path,
         # ex. `python /pyco/pyco.py`.
         # that's why switch to shell=True.
         if server == 'pyco':
-            args = ['python', 'pyco.py']
+            args = ['python3', 'pyco.py']
             if port or host:
                 msg = '*** You must setup `port` and `host` in pyco config.'
-                print '{}{}{}:'.format(bpcolor.FAIL, msg, bpcolor.ENDC)
+                print('{}{}{}:'.format(bpcolor.FAIL, msg, bpcolor.ENDC))
             subprocess.Popen(args, cwd='pyco')
         elif server == 'mittens':
             # args = 'peon -s --port {} --host {}'.format(port, host)
@@ -111,8 +111,8 @@ def watch(config_path=None):
             time.sleep(SLEEP_TIME)
     except KeyboardInterrupt:
         observer.stop()
-        print '------------'
-        print 'Peon Wacther stoped'
-        print '------------'
+        print('------------')
+        print('Peon Wacther stoped')
+        print('------------')
 
     observer.join()
