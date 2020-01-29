@@ -12,7 +12,7 @@ def now():
 
 
 def gen_md5():
-    md5 = hashlib.md5(str(now())).hexdigest()
+    md5 = hashlib.md5(str(now()).encode()).hexdigest()
     return md5[:10]
 
 
