@@ -126,8 +126,6 @@ def rev(cfg):
     except Exception:
         find_str = '?md5=<rev>'
 
-    if isinstance(find_str, str):
-        find_str = find_str.encode('utf-8')
     rev_str = find_str.replace('<rev>', gen_md5())
 
     cwd = safe_paths(cfg.get('cwd', DEFAULT_DIST_DIR))
@@ -193,10 +191,6 @@ def replace(cfg):
                 if pattern is None or replace is None:
                     print('peon: Failed -> replace is no pattern')
                     continue
-                if isinstance(pattern, str):
-                    pattern = pattern.encode('utf-8')
-                if isinstance(replace, str):
-                    replace = replace.encode('utf-8')
                 line = line.replace(pattern, replace)
             tmp.write(line)
         tmp.close()
