@@ -61,6 +61,7 @@ class RenderHandler(object):
     all *.tmpl file will aggregate together into html or tpl file.
     """
     tmpl_file_type = 'tmpl'
+    tmpl_file_x_template = 'x.tmpl'
 
     # file types allow to aggregate tmpl files. only 1 level in the src dir.
     allow_tmpl_types = ('html', 'htm', 'tpl')
@@ -216,12 +217,23 @@ class RenderHandler(object):
     def _aggregate_templates(self, content, self_path):
         regex_result = self.tmpl_regex.findall(content)
         tmpl_ext = self.tmpl_file_type
+        tmpl_x_template_ext = '.{}'.format(self.tmpl_file_x_template)
         for space, match in regex_result:
             tmpl_series = ['<!-- Begin Templates -->']
             for path in self.find_files(self.src_dir, file_ext=tmpl_ext):
                 if os.path.isfile(path) and path != self_path:
-                    _content = self._process_html_includes(path)
-                    tmpl_series.append(_content)
+                    tmpl_fname = os.path.basename(path)
+                    if tmpl_fname.endswith(tmpl_x_template_ext):
+                        tmpl_id = tmpl_fname.rsplit(tmpl_x_template_ext, 1)
+                        tmpl_content = ''.join([
+                            '<script type="text/x-template" ',
+                            'id="{}">\n'.format(tmpl_id),
+                            self._process_html_includes(path),
+                            '\n</script>'
+                        ])
+                    else:
+                        tmpl_content = self._process_html_includes(path)
+                    tmpl_series.append(tmpl_content)
             tmpl_series.append('<!-- End Templates -->')
             content = content.replace(match, '\n'.join(tmpl_series))
         return content
@@ -346,8 +358,8 @@ class RenderHandler(object):
         if has_coffee:
             self._coffee_all()
             _lang_name = 'coffee'
-            self._print_message('Rendered: *.{} --> *.{}'.format(_lang_name,
-                                self.rendered_ext.get(_lang_name)))
+            self._print_message('Rendered: *.{} --> *.{}'.format(
+                _lang_name, self.rendered_ext.get(_lang_name)))
 
         for f in [f for f in all_files if f not in excludes]:
             self.render(f)
