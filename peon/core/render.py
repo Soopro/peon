@@ -61,11 +61,10 @@ class RenderHandler(object):
     all *.tmpl file will aggregate together into html or tpl file.
     """
     tmpl_file_type = 'tmpl'
-    tmpl_file_x_template = 'x.tmpl'
 
     # file types allow to aggregate tmpl files. only 1 level in the src dir.
     allow_tmpl_types = ('html', 'htm', 'tpl')
-    tmpl_regex = re.compile(r'(\s*)(\{%\s*templates\s*%\})',
+    tmpl_regex = re.compile(r'(\s*)(\{%\s*(templates|x-templates)\s*%\})',
                             re.MULTILINE | re.DOTALL | re.IGNORECASE)
 
     def __init__(self, src_dir='.', dest_dir='.', aliases={}, skips=None):
@@ -216,15 +215,15 @@ class RenderHandler(object):
 
     def _aggregate_templates(self, content, self_path):
         regex_result = self.tmpl_regex.findall(content)
-        tmpl_ext = self.tmpl_file_type
-        tmpl_x_template_ext = '.{}'.format(self.tmpl_file_x_template)
-        for space, match in regex_result:
+        file_paths = self.find_files(self.src_dir,
+                                     file_ext=self.tmpl_file_type)
+        for _, match, tmpl_type in regex_result:
             tmpl_series = ['<!-- Begin Templates -->']
-            for path in self.find_files(self.src_dir, file_ext=tmpl_ext):
+            for path in file_paths:
                 if os.path.isfile(path) and path != self_path:
                     tmpl_fname = os.path.basename(path)
-                    if tmpl_fname.endswith(tmpl_x_template_ext):
-                        tmpl_id = tmpl_fname.rsplit(tmpl_x_template_ext, 1)
+                    if tmpl_type == 'x-templates':
+                        tmpl_id = tmpl_fname.split('.')[0]
                         tmpl_content = ''.join([
                             '<script type="text/x-template" ',
                             'id="{}">\n'.format(tmpl_id),
