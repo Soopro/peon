@@ -232,12 +232,12 @@ class MinifyHandler(object):
         return minifed
 
     def _uglifyjs(self, source):
+        tmp_path = self._write_file(self.temp_js_file, source)
         if self.mangle_js:
             cmd = ["uglifyjs", tmp_path, '-m']
         else:
             cmd = ["uglifyjs", tmp_path]
         try:
-            tmp_path = self._write_file(self.temp_js_file, source)
             minifed = subprocess.check_output(cmd)
             os.remove(tmp_path)
         except Exception as e:
