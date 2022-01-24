@@ -12,8 +12,7 @@ setup(
         'requests~=2.27',
         'libsass~=0.21',
         'htmlmin~=0.1',
-        'cssmin~=0.2',
-        'jsmin~=3.0'
+        'cssmin~=0.2'
     ],
     author='Redy',
     author_email='redy.ru@gmail.com',

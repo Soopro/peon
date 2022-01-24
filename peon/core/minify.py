@@ -7,7 +7,6 @@ import shutil
 import re
 import subprocess
 import htmlmin
-import jsmin
 import cssmin
 
 from ..utlis.colors import BeautifyPrint as bpcolor
@@ -233,9 +232,13 @@ class MinifyHandler(object):
         return minifed
 
     def _uglifyjs(self, source):
+        if self.mangle_js:
+            cmd = ["uglifyjs", tmp_path, '-m']
+        else:
+            cmd = ["uglifyjs", tmp_path]
         try:
             tmp_path = self._write_file(self.temp_js_file, source)
-            minifed = subprocess.check_output(["uglifyjs", tmp_path, '-m'])
+            minifed = subprocess.check_output(cmd)
             os.remove(tmp_path)
         except Exception as e:
             print(e)
@@ -243,27 +246,8 @@ class MinifyHandler(object):
             raise CompressError('js')
         return minifed
 
-    def _jsmin(self, source):
-        try:
-            minifed = jsmin.jsmin(source)
-        except Exception as e:
-            print(e)
-            print("jsmin process failed!")
-            raise CompressError('js')
-        return minifed
-
     def _js(self, source):
-        if self.mangle_js is True:
-            minifed = self._uglifyjs(source)
-        elif self.mangle_js is False:
-            minifed = self._jsmin(source)
-        else:
-            try:
-                minifed = self._uglifyjs(source)
-            except Exception:
-                print("Failback to jsmin")
-                minifed = self._jsmin(source)
-        return minifed
+        return self._uglifyjs(source)
 
     def _html(self, source):
         try:
