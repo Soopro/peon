@@ -63,6 +63,17 @@ or
 ```sudo python setup.py install``` then install all required packages, both python pakcage and nodejs package manually.
 
 
+** if the command line DOES NOT created. (it might happened on MacOS) **
+Plesse link to the `/usr/local/bin`
+
+`ln -s /<path>/bin/peon /usr/local/bin`
+
+output files record when setup  to find `<path>`.
+`python setup.py install --record files.txt`
+
+use `python3` or any current version of python to replace `python` if you have multiple python installed.
+
+
 ## Usage
 You have to place a 'peon.json' intro the project root folder first.
 * peon.json: Config peon's tasks, see the example.

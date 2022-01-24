@@ -1,0 +1,8 @@
+/usr/local/lib/python3.9/site-packages/peon-3.0.3-py3.9.egg
+/usr/local/opt/python@3.9/Frameworks/Python.framework/Versions/3.9/bin/peon
+/usr/local/opt/python@3.9/Frameworks/Python.framework/Versions/3.9/bin/cssmin
+/usr/local/opt/python@3.9/Frameworks/Python.framework/Versions/3.9/bin/htmlmin
+/usr/local/opt/python@3.9/Frameworks/Python.framework/Versions/3.9/bin/pysassc
+/usr/local/opt/python@3.9/Frameworks/Python.framework/Versions/3.9/bin/sassc
+/usr/local/opt/python@3.9/Frameworks/Python.framework/Versions/3.9/bin/watchmedo
+/usr/local/opt/python@3.9/Frameworks/Python.framework/Versions/3.9/bin/normalizer

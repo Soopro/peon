@@ -8,7 +8,7 @@ setup(
     version=peon.__version__,
     packages=find_packages(),
     install_requires=[
-        'watchdog~=2.1.6',
+        'watchdog~=2.1',
         'requests~=2.27',
         'libsass~=0.21',
         'htmlmin~=0.1',
@@ -24,5 +24,8 @@ setup(
         'console_scripts': [
             'peon = peon:run',
         ]
+        # `ln -s /<path>/bin/peon /usr/local/bin`
+        # for macos. if DOES NOT create the command line.
+        # `python setup.py install --record files.txt` to find <path>
     }
 )
