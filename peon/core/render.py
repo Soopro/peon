@@ -79,9 +79,9 @@ class RenderHandler(object):
             def _check_alias(obj):
                 _type = obj.get('type')
                 _ext = obj.get('ext')
-                return (isinstance(_ext, str) and
-                        isinstance(_type, str) and
-                        _type and _ext)
+                return (isinstance(_ext, str)
+                        and isinstance(_type, str)
+                        and _type and _ext)
 
             for k, v in aliases.items():
                 if _check_alias(v):
