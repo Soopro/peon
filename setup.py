@@ -8,12 +8,12 @@ setup(
     version=peon.__version__,
     packages=find_packages(),
     install_requires=[
-        'watchdog~=0.9',
-        'requests~=2.22',
-        'libsass~=0.19',
+        'watchdog~=2.1.6',
+        'requests~=2.27',
+        'libsass~=0.21',
         'htmlmin~=0.1',
         'cssmin~=0.2',
-        'jsmin~=2.1'
+        'jsmin~=3.0'
     ],
     author='Redy',
     author_email='redy.ru@gmail.com',
