@@ -142,10 +142,12 @@ def rev(cfg):
                     line = line.replace(find_str, rev_str)
                 except Exception as e:
                     print('---------->')
-                    print('line:', line, end=' ')
+                    print('line:', line)
                     print('find:', find_str)
                     print('rev:', rev_str)
                     raise e
+                if isinstance(line, bytes):
+                    line = line.decode()
                 tmp.write(line)
 
         file.close()
@@ -192,6 +194,8 @@ def replace(cfg):
                     print('peon: Failed -> replace is no pattern')
                     continue
                 line = line.replace(pattern, replace)
+            if isinstance(line, bytes):
+                line = line.decode()
             tmp.write(line)
         tmp.close()
         file.close()
@@ -243,28 +247,28 @@ def compress(rules):
     for rule in rules:
         cwd = safe_paths(rule.get('cwd', DEFAULT_DIST_DIR))
         minify_includes = rule.get('minify_includes', False)
-        mangle_js = rule.get('mangle_js', False)
-        minify = MinifyHandler(cwd, minify_includes, mangle_js)
-        files = rule.get('src', [])
         minify_type = rule.get('type')
-        minify_output = safe_paths(rule.get('output'))
-        minify_beautify = rule.get('beautify', False)
+        output = safe_paths(rule.get('output'))
+        beautify = rule.get('beautify', False)
+        mangle_js = rule.get('mangle_js', False)
+        # mangle js will convert variable name to letter as alias.
+        minify = MinifyHandler(cwd, minify_includes)
+        files = rule.get('src', [])
 
         path_list = _find_path_list(files, cwd)
 
         if minify_type == 'html':
             minify.html(path_list)
         elif minify_type == 'css':
-            minify.css(path_list, minify_output, minify_beautify)
+            minify.css(path_list, output, beautify)
         elif minify_type == 'js':
-            minify.js(path_list, minify_output, minify_beautify)
+            minify.js(path_list, output, beautify, mangle_js)
         elif minify_type == 'process_html':
-            minify.process_html(path_list, minify_beautify)
+            minify.process_html(path_list, beautify, mangle_js)
         elif minify_type == 'inline_angular_templates':
-            minify.concat_angular_template(path_list,
-                                           minify_output,
+            minify.concat_angular_template(path_list, output,
                                            rule.get('prefix', ''),
-                                           minify_beautify)
+                                           beautify)
 
     print('peon: Work work ...(compress)')
 

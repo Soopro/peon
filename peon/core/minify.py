@@ -30,9 +30,9 @@ class MinifyHandler(object):
 
     tmpl_regex = re.compile(r'<\!--\s*ng\-templates\s*-->', re.IGNORECASE)
 
-    build_regex = re.compile(r'(<\!--\s*build:\s*(\[?\s*[\w-]+\s*\]?)' +
-                             r'\s+([\w\$\-\./\{\}\(\)]*)(\?.*?)*\s*-->' +
-                             r'(.*?)<\!--\s*/build\s*-->)',
+    build_regex = re.compile(r'(<\!--\s*build:\s*(\[?\s*[\w-]+\s*\]?)'
+                             + r'\s+([\w\$\-\./\{\}\(\)]*)(\?.*?)*\s*-->'
+                             + r'(.*?)<\!--\s*/build\s*-->)',
                              re.MULTILINE | re.DOTALL | re.IGNORECASE)
 
     attr_regex = re.compile(r'\[["\']?\s*([^"\']+)\s*["\']?\]', re.I)
@@ -49,16 +49,13 @@ class MinifyHandler(object):
 
     cwd_dir = 'dist'
 
-    def __init__(self, cwd, minify_includes=False, mangle_js=False):
+    def __init__(self, cwd, minify_includes=False):
         self.cwd_dir = cwd.strip(os.path.sep)
 
         self.minify_includes = minify_includes
         # includes file usually will combine to parent file,
         # turn this option on will minify all files,
         # even it is match with include pattern,
-
-        self.mangle_js = mangle_js
-        # mangle js will convert variable name to letter as alias.
 
     def _isfile(self, file_path):
         if os.path.isfile(file_path):
@@ -83,8 +80,8 @@ class MinifyHandler(object):
             os.remove(self.temp_file)
         try:
             tmp = open(self.temp_file, 'w')
-            if isinstance(file_source, str):
-                file_source = file_source
+            if isinstance(file_source, bytes):
+                file_source = file_source.decode()
             tmp.write(file_source)
             tmp.close()
         except Exception as e:
@@ -102,7 +99,7 @@ class MinifyHandler(object):
             return False
         return self.incl_dir_mark in path or path.startswith(self.incl_mark)
 
-    def _process_html(self, file_path, beautify=False):
+    def _process_html(self, file_path, beautify=False, mangle_js=False):
         print("peon: Minify HTML process start")
 
         build_regex = self.build_regex
@@ -170,7 +167,7 @@ class MinifyHandler(object):
                 if beautify:
                     js_source = '\n'.join(js_series)
                 else:
-                    js_source = self._js('\n'.join(js_series))
+                    js_source = self._js('\n'.join(js_series), mangle_js)
 
                 ensure_dir(comp_file_path, True)
                 self._output(comp_file_path, js_source)
@@ -228,12 +225,12 @@ class MinifyHandler(object):
             raise CompressError('css')
         return minifed
 
-    def _uglifyjs(self, source):
+    def _js(self, source, mangle_js=False):
         tmp_path = self._write_file(self.temp_js_file, source)
-        if self.mangle_js:
-            cmd = ["uglifyjs", tmp_path, '-m']
+        if mangle_js:
+            cmd = ['uglifyjs', tmp_path, '-m']
         else:
-            cmd = ["uglifyjs", tmp_path]
+            cmd = ['uglifyjs', tmp_path]
         try:
             minifed = subprocess.check_output(cmd)
             os.remove(tmp_path)
@@ -242,9 +239,6 @@ class MinifyHandler(object):
             print("uglifyjs process failed!")
             raise CompressError('js')
         return minifed
-
-    def _js(self, source):
-        return self._uglifyjs(source)
 
     def _html(self, source):
         try:
@@ -313,7 +307,7 @@ class MinifyHandler(object):
                     css_source = self._css(css_content)
                 self._output(path, css_source)
 
-    def js(self, src_paths, output, beautify=False):
+    def js(self, src_paths, output, beautify=False, mangle_js=False):
         if output:
             js_series = []
             for path in src_paths:
@@ -332,7 +326,7 @@ class MinifyHandler(object):
             if beautify:
                 js_source = '\n'.join(js_series)
             else:
-                js_source = self._js('\n'.join(js_series))
+                js_source = self._js('\n'.join(js_series), mangle_js)
 
             self._output(output_path, js_source)
             print('peon: JS minifed -> {}'.format(output_path))
@@ -347,7 +341,7 @@ class MinifyHandler(object):
                 if beautify:
                     js_source = js_content
                 else:
-                    js_source = self._js(js_content)
+                    js_source = self._js(js_content, mangle_js)
                 self._output(path, js_source)
 
     def html(self, src_paths):
@@ -361,11 +355,11 @@ class MinifyHandler(object):
             self._output(path, html_source)
             print('peon: HTML minifed -> {}'.format(path))
 
-    def process_html(self, src_paths, beautify=False):
+    def process_html(self, src_paths, beautify=False, mangle_js=False):
         for path in src_paths:
             if not os.path.isfile(path):
                 raise CompressError('html not found')
-            html_source = self._process_html(path, beautify)
+            html_source = self._process_html(path, beautify, mangle_js)
             self._output(path, html_source)
             print('peon: HTML processed -> {}'.format(path))
 

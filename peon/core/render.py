@@ -125,8 +125,8 @@ class RenderHandler(object):
             os.remove(file_path)
         self.dirs(os.path.dirname(file_path))
         tmp = open(file_path, 'w')
-        if isinstance(file_source, str):
-            file_source = file_source
+        if isinstance(file_source, bytes):
+            file_source = file_source.decode()
         tmp.write(file_source)
         tmp.close()
         return file_path
