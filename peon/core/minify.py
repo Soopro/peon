@@ -45,7 +45,6 @@ class MinifyHandler(object):
     incl_dir_mark = '{}{}'.format(os.path.sep, incl_mark)
 
     minify_includes = False
-    mangle_js = False
 
     cwd_dir = 'dist'
 
@@ -227,6 +226,7 @@ class MinifyHandler(object):
 
     def _js(self, source, mangle_js=False):
         tmp_path = self._write_file(self.temp_js_file, source)
+        print('minfiy js mangle:', mangle_js)
         if mangle_js:
             cmd = ['uglifyjs', tmp_path, '-m']
         else:
@@ -236,7 +236,7 @@ class MinifyHandler(object):
             os.remove(tmp_path)
         except Exception as e:
             print(e)
-            print("uglifyjs process failed!")
+            print("minify js process failed!")
             raise CompressError('js')
         return minifed
 
