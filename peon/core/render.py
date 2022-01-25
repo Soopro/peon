@@ -1,6 +1,3 @@
-# coding=utf-8
-
-
 import os
 import shutil
 import re
@@ -52,9 +49,9 @@ class RenderHandler(object):
     incl_init_mark = '__init__'  # root and equals
     incl_dir_mark = '{}{}'.format(os.path.sep, incl_mark)  # dir
 
-    incl_regex = re.compile(r'(\s*)(\{%\s*(?:include|import)\s+' +
-                            r'["\']?\s*([\w\$\-\./\{\}\(\)]*)\s*["\']?' +
-                            r'\s*[^%\}]*%\})',
+    incl_regex = re.compile(r'(\s*)(\{%\s*(?:include|import)\s+'
+                            + r'["\']?\s*([\w\$\-\./\{\}\(\)]*)\s*["\']?'
+                            + r'\s*[^%\}]*%\})',
                             re.MULTILINE | re.DOTALL | re.IGNORECASE)
     """
     file tmpls.
@@ -69,7 +66,6 @@ class RenderHandler(object):
 
     def __init__(self, src_dir='.', dest_dir='.', aliases={}, skips=None):
 
-        self.root_dir = os.getcwd()
         self.src_dir = src_dir.strip(os.path.sep)
         self.dest_dir = dest_dir.strip(os.path.sep)
 
@@ -368,10 +364,6 @@ class RenderHandler(object):
         print('\n<--- Rendered to: {}/**/* --->\n'.format(self.dest_dir))
 
     def render(self, src_path):
-        if os.path.isdir(src_path):
-            self.dirs(src_path)
-            return
-
         filedir, filename, ext = self.split_file_path(src_path)
         dest_path, comp_ext = self.find_dest_path(src_path)
 
@@ -415,8 +407,6 @@ class RenderHandler(object):
             for f in files:
                 self.render(f)
             return
-
-        print('--------------------')
 
         if ext in self.render_aliases:
             _render_type = self.render_aliases[ext]['type']

@@ -1,8 +1,6 @@
-# coding=utf-8
-
-
 import subprocess
 import time
+import os
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
@@ -39,18 +37,29 @@ class WatchPatternsHandler(PatternMatchingEventHandler):
             raise Exception('Render is invalid.')
 
         self.incl_mark = include_mark
+        self.root_path = os.getcwd()
+
+    def _get_path(self, pathtext):
+        if pathtext.startswith(self.root_path):
+            return pathtext[len(self.root_path):].lstrip(os.path.sep)
+        return pathtext
 
     def on_created(self, event):
-        self.render.render(event.src_path)
+        src_path = self._get_path(event.src_path)
+        self.render.render(src_path)
 
     def on_modified(self, event):
-        self.render.render(event.src_path)
+        src_path = self._get_path(event.src_path)
+        self.render.render(src_path)
 
     def on_moved(self, event):
-        self.render.move(event.src_path, event.dest_path)
+        src_path = self._get_path(event.src_path)
+        dest_path = self._get_path(event.dest_path)
+        self.render.move(src_path, dest_path)
 
     def on_deleted(self, event):
-        self.render.delete(event.src_path)
+        src_path = self._get_path(event.src_path)
+        self.render.delete(src_path)
 
 
 # -------------
