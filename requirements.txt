@@ -1,4 +1,4 @@
-watchdog ~= 2.1.6
+watchdog ~= 2.1
 requests ~= 2.27
 libsass ~= 0.21
 htmlmin ~= 0.1
